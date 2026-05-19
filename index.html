@@ -832,46 +832,33 @@ svg{max-width:100%;height:auto}
   .exec-kpis{grid-template-columns:repeat(4,1fr)!important;gap:8pt!important}
 }
 
-/* ── NRV NORMALIZATION LAYER ── */
-.nrv-card{border:2px solid var(--brand-black);background:linear-gradient(180deg,#fafafa 0%,#fff 24%)}
-.nrv-eyebrow{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--brand-black);text-transform:uppercase;margin-bottom:4px}
-.nrv-desc{font-size:12px;color:var(--gray-700);line-height:1.55;margin-bottom:14px}
-.nrv-globals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px;background:#f8f8f8;border:1px solid var(--gray-200);border-radius:4px;margin-bottom:14px}
-.nrv-globals .fg{margin:0}
-.nrv-globals .flabel{font-size:10px}
-.nrv-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
-.nrv-tbl th{font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--gray-200);white-space:nowrap}
-.nrv-tbl th.r,.nrv-tbl td.r{text-align:right}
-.nrv-tbl td{padding:6px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
-.nrv-tbl select{width:100%;padding:4px 6px;border:1px solid var(--gray-200);border-radius:3px;font-size:11px;background:#fff;font-family:var(--body)}
-.nrv-tbl input[type=number]{width:64px;padding:4px 6px;border:1px solid var(--gray-200);border-radius:3px;font-size:11px;text-align:right;font-family:var(--mono)}
-.nrv-tbl tr.total-row td{background:#f4f4f4;font-weight:700;color:var(--brand-black);border-top:2px solid var(--brand-black)}
-.nrv-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 14px}
-.nrv-kpi .kpi{border:1px solid var(--gray-200);border-radius:4px;padding:14px;background:#fff}
-.nrv-kpi .kpi-label{font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px}
-.nrv-kpi .kpi-val{font-family:var(--head);font-size:26px;font-weight:700;color:var(--brand-black);line-height:1.1}
-.nrv-kpi .kpi-sub{font-size:10px;color:var(--muted);margin-top:4px}
-.nrv-kpi .kpi.warn{border-color:#EB5757;background:#fdf6f6}
-.nrv-kpi .kpi.warn .kpi-val{color:#c8330e}
-.nrv-sens{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.nrv-sens .sens-cell{border:1px solid var(--gray-200);border-radius:4px;padding:10px;background:#fff;text-align:center}
-.nrv-sens .sens-cell .lbl{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
-.nrv-sens .sens-cell .val{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--brand-black);margin-top:2px}
-.nrv-sens .sens-cell.mid{background:var(--brand-black);color:#fff}
-.nrv-sens .sens-cell.mid .lbl{color:#A8F931}
-.nrv-sens .sens-cell.mid .val{color:#fff}
-.nrv-compare{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:12px;background:var(--brand-black);color:#fff;border-radius:4px}
-.nrv-compare .cmp-cell .cmp-lbl{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.6px;color:#A8F931;text-transform:uppercase}
-.nrv-compare .cmp-cell .cmp-val{font-family:var(--head);font-size:22px;font-weight:700;color:#fff;line-height:1.1;margin-top:2px}
-.nrv-compare .cmp-cell .cmp-sub{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px}
-.nrv-flag{padding:10px 12px;background:#fdf0f0;border:1px solid rgba(235,87,87,.3);border-left:3px solid #EB5757;border-radius:3px;font-size:12px;color:#7a1010;line-height:1.55;margin-bottom:12px}
-.nrv-flag strong{color:#5a0a0a}
-.nrv-cite{font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px;padding-top:10px;border-top:1px dashed var(--gray-200)}
-.nrv-cite b{color:var(--gray-700);font-weight:600}
+/* ── NRV DECAY-DISCIPLINE TOOLBAR ── */
+.nrv-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:10px 14px;margin-bottom:14px;background:var(--brand-black);color:#fff;border-radius:4px}
+.nrv-bar-lbl{display:flex;align-items:center;gap:10px;font-size:11px;color:rgba(255,255,255,.78);line-height:1.45}
+.nrv-bar-lbl .badge{background:var(--brand-green);color:#000;font-family:var(--mono);font-size:10px;font-weight:700;padding:3px 8px;border-radius:3px;letter-spacing:.5px}
+.nrv-bar-controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.nrv-ctl{display:flex;align-items:center;gap:6px}
+.nrv-ctl label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.nrv-ctl input[type=range]{width:80px;accent-color:var(--brand-green)}
+.nrv-ctl select{padding:3px 6px;border:1px solid rgba(255,255,255,.2);border-radius:3px;background:rgba(255,255,255,.08);color:#fff;font-size:11px;font-family:var(--body)}
+.nrv-ctl-v{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--brand-green);min-width:38px;text-align:right}
+.nrv-bcr-flag{padding:10px 12px;margin-bottom:14px;background:#fdf0f0;border:1px solid rgba(235,87,87,.3);border-left:3px solid #EB5757;border-radius:3px;font-size:12px;color:#7a1010;line-height:1.55}
+.nrv-bcr-flag strong{color:#5a0a0a}
+/* per-scenario decay controls inside detail table */
+.vtbl .nrv-mini{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.vtbl .nrv-mini select{padding:2px 4px;border:1px solid var(--gray-200);border-radius:3px;font-size:10px;background:#fff;font-family:var(--body);max-width:130px}
+.vtbl .nrv-mini input[type=number]{width:48px;padding:2px 4px;border:1px solid var(--gray-200);border-radius:3px;font-size:10px;text-align:right;font-family:var(--mono)}
+.vtbl .nrv-mini-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.nrv-sens-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.nrv-sens-row .sens-cell{border:1px solid var(--gray-200);border-radius:4px;padding:10px;background:#fff;text-align:center}
+.nrv-sens-row .sens-cell .lbl{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+.nrv-sens-row .sens-cell .val{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--brand-black);margin-top:2px}
+.nrv-sens-row .sens-cell.mid{background:var(--brand-black);color:#fff}
+.nrv-sens-row .sens-cell.mid .lbl{color:var(--brand-green)}
+.nrv-sens-row .sens-cell.mid .val{color:#fff}
 @media (max-width:760px){
-  .nrv-globals{grid-template-columns:1fr 1fr}
-  .nrv-kpi{grid-template-columns:1fr 1fr}
-  .nrv-compare{grid-template-columns:1fr}
+  .nrv-bar{flex-direction:column;align-items:flex-start}
+  .nrv-bar-controls{gap:10px}
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
@@ -1122,8 +1109,48 @@ svg{max-width:100%;height:auto}
     <div><strong>Framing Guide</strong> &#8212; Lead the conversation with Hard Labor and Hard Cost scenarios &#8212; they require no demand-side assumptions and finance teams credit them at 100%. Revenue uplift and working capital are real but variable; position them as upside that builds the strategic case, not the anchor. Soft productivity follows only after the hard case is agreed.</div>
   </div>
 
+  <!-- NRV decay-discipline toolbar — drives the ROI math below -->
+  <div class="nrv-bar" id="nrv-bar">
+    <div class="nrv-bar-lbl">
+      <span class="badge b-green">NRV</span>
+      <span>Decay discipline applied to every number below &mdash; 5-yr ramp &times; accessibility &times; (1&minus;h) + Decay_Avoided</span>
+    </div>
+    <div class="nrv-bar-controls">
+      <div class="nrv-ctl">
+        <label>WACC</label>
+        <input type="range" min="0.04" max="0.18" step="0.005" value="0.10" id="nrv-wacc" oninput="renderROI()">
+        <span class="nrv-ctl-v" id="nrv-wacc-v">10.0%</span>
+      </div>
+      <div class="nrv-ctl">
+        <label>Baseline g</label>
+        <input type="range" min="0" max="0.08" step="0.005" value="0.035" id="nrv-g" oninput="renderROI()">
+        <span class="nrv-ctl-v" id="nrv-g-v">3.5%</span>
+      </div>
+      <div class="nrv-ctl">
+        <label>Finance</label>
+        <input type="range" min="0.04" max="0.18" step="0.005" value="0.10" id="nrv-fin" oninput="renderROI()">
+        <span class="nrv-ctl-v" id="nrv-fin-v">10.0%</span>
+      </div>
+      <div class="nrv-ctl">
+        <label>Decay_Avoided</label>
+        <select id="nrv-decay" onchange="renderROI()">
+          <option value="1" selected>On</option>
+          <option value="0">Off</option>
+        </select>
+      </div>
+      <div class="nrv-ctl">
+        <label>NRV layer</label>
+        <select id="nrv-on" onchange="renderROI()">
+          <option value="1" selected>On (normalized)</option>
+          <option value="0">Off (raw ramp)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
   <div class="kpi-grid" id="kpi-grid"></div>
   <div class="kpi-secondary-row" id="kpi-secondary"></div>
+  <div id="nrv-bcr-flag-host"></div>
 
   <!-- Delay + Missed Value side by side -->
   <div class="delay-section">
@@ -1163,92 +1190,14 @@ svg{max-width:100%;height:auto}
   </div>
   <!-- Financial model -->
   <div class="fin-grid" id="fin-grid"></div>
-
-  <!-- == NRV NORMALIZATION LAYER == -->
-  <div class="card nrv-card" id="nrv-card">
-    <div class="nrv-eyebrow">Value Engineering Layer</div>
-    <div class="card-title" style="display:flex;align-items:center;gap:10px">
-      NRV &mdash; Net Realization Value
-      <span class="badge b-green">NORMALIZED ROI</span>
-    </div>
-    <div class="nrv-desc">
-      All technology value decays. The headline ROI above uses the standard 3-year ramp; the NRV layer normalizes it against three forces every CFO will challenge:
-      <b>adoption friction</b> (a 5-year ramp profile tied to delivery mechanism),
-      <b>market commoditization</b> (an accessibility tier that compresses competitive alpha as the technology becomes easier to replicate), and
-      <b>double-count risk</b> (a covariance haircut on drivers that share a labor pool or asset base).
-      Decay_Avoided captures status-quo growth at 3.5%/yr. NPV is shown at WACC sensitivity 8/10/12 and the return metric is MIRR, not IRR.
-    </div>
-
-    <!-- Global controls -->
-    <div class="nrv-globals">
-      <div class="fg">
-        <label class="flabel">WACC (base)</label>
-        <div class="srow"><input type="range" min="0.04" max="0.18" step="0.005" value="0.10" id="nrv-wacc" oninput="renderNRV()"><div class="sval" id="nrv-wacc-v">10.0%</div></div>
-      </div>
-      <div class="fg">
-        <label class="flabel">Baseline degradation g</label>
-        <div class="srow"><input type="range" min="0" max="0.08" step="0.005" value="0.035" id="nrv-g" oninput="renderNRV()"><div class="sval" id="nrv-g-v">3.5%</div></div>
-      </div>
-      <div class="fg">
-        <label class="flabel">Finance rate (MIRR)</label>
-        <div class="srow"><input type="range" min="0.04" max="0.18" step="0.005" value="0.10" id="nrv-fin" oninput="renderNRV()"><div class="sval" id="nrv-fin-v">10.0%</div></div>
-      </div>
-      <div class="fg">
-        <label class="flabel">Apply Decay_Avoided</label>
-        <select id="nrv-decay" onchange="renderNRV()" style="padding:6px;border:1px solid var(--gray-200);border-radius:3px;font-size:12px;background:#fff">
-          <option value="1" selected>Yes &mdash; include status-quo growth</option>
-          <option value="0">No &mdash; flat baseline</option>
-        </select>
-      </div>
-    </div>
-
-    <div id="nrv-flag-bcr"></div>
-
-    <!-- Per-scenario decay assignment table -->
-    <div class="card-label" style="margin-top:4px">Per-Scenario Decay Profile <span style="font-weight:400;color:var(--muted);font-size:11px;margin-left:6px">Pick the slower mechanism when mixed. Document a process moat to override Commodity tier.</span></div>
-    <div style="overflow-x:auto">
-      <table class="nrv-tbl" id="nrv-tbl">
-        <thead><tr>
-          <th>Scenario</th>
-          <th>Ramp Profile</th>
-          <th>Accessibility Tier</th>
-          <th class="r">Haircut h</th>
-          <th class="r">Y1</th><th class="r">Y2</th><th class="r">Y3</th><th class="r">Y4</th><th class="r">Y5</th>
-        </tr></thead>
-        <tbody id="nrv-tbody"></tbody>
-        <tfoot id="nrv-tfoot"></tfoot>
-      </table>
-    </div>
-
-    <!-- NRV KPIs -->
-    <div class="nrv-kpi" id="nrv-kpi"></div>
-
-    <!-- WACC sensitivity -->
-    <div class="card-label">WACC Sensitivity</div>
-    <div class="nrv-sens" id="nrv-sens"></div>
-
-    <!-- Raw vs NRV comparison -->
-    <div class="nrv-compare" id="nrv-compare"></div>
-
-    <!-- Citations -->
-    <div class="nrv-cite">
-      <b>Source basis &mdash;</b>
-      Ramp curves: Gartner Supply Chain Technology Adoption (2022); Prosci Change Management Benchmarking (2023); Cascio, <i>Managing Human Resources</i> (DC turnover 35&ndash;50%).
-      Post-peak decay: Ma S., NBER WP 29350, <i>Technological Obsolescence</i> (2021) &mdash; 4&ndash;7%/yr relative value erosion.
-      Accessibility tiers: Barnett (Stanford GSB), <i>Red Queen Among Organizations</i>; GS1 US RFID Adoption Survey (2023); IDC MarketScape WMS (2023).
-      Baseline degradation: BLS Employment Cost Index Q4 2023; McKinsey, <i>Future of Work in America</i> (2019).
-      WACC: Damodaran NYU Stern, U.S. distribution/logistics WACC 8.5&ndash;11.5%.
-      MIRR over IRR: Brigham &amp; Ehrhardt, <i>Financial Management</i> (16th ed.).
-      Full SOP shipped alongside this tool as <span style="font-family:var(--mono)">NRV_SOP.docx</span>.
-    </div>
-  </div>
+  <div id="nrv-sens-host"></div>
 
   <!-- Detail table -->
   <div class="card card-table">
     <div class="card-title" style="padding:16px 16px 0">Value by Scenario &#8212; Full Detail</div>
     <div class="vtbl-wrap">
     <table class="vtbl">
-      <thead><tr><th>Scenario</th><th class="r">Full Annual</th><th class="r">Yr 1</th><th class="r">Yr 2</th><th class="r">Yr 3+</th><th>Type</th></tr></thead>
+      <thead><tr><th>Scenario</th><th class="r">Raw Annual</th><th class="r">Yr 1</th><th class="r">Yr 2</th><th class="r">Yr 3</th><th class="r">Yr 4</th><th class="r">Yr 5</th><th>NRV Decay Profile</th></tr></thead>
       <tbody id="vtbl-body"></tbody>
       <tfoot id="vtbl-foot"></tfoot>
     </table>
@@ -2185,115 +2134,10 @@ function computeNRV(opts) {
   };
 }
 
-function renderNRV() {
-  const card = document.getElementById('nrv-card');
-  if (!card) return;
-  const active = SCENARIOS.filter(s => state.selectedIds.has(s.id));
-  if (!active.length) {
-    document.getElementById('nrv-kpi').innerHTML = '<div class="muted" style="grid-column:1/-1">No scenarios selected.</div>';
-    document.getElementById('nrv-tbody').innerHTML = '';
-    document.getElementById('nrv-tfoot').innerHTML = '';
-    document.getElementById('nrv-sens').innerHTML = '';
-    document.getElementById('nrv-compare').innerHTML = '';
-    document.getElementById('nrv-flag-bcr').innerHTML = '';
-    return;
-  }
-
-  const wacc = +document.getElementById('nrv-wacc').value;
-  const g    = +document.getElementById('nrv-g').value;
-  const fin  = +document.getElementById('nrv-fin').value;
-  const useDecay = document.getElementById('nrv-decay').value === '1';
-
-  document.getElementById('nrv-wacc-v').textContent = (wacc*100).toFixed(1)+'%';
-  document.getElementById('nrv-g-v').textContent    = (g*100).toFixed(1)+'%';
-  document.getElementById('nrv-fin-v').textContent  = (fin*100).toFixed(1)+'%';
-
-  const r = computeNRV({ wacc, g, fin, useDecay });
-
-  // ── Per-scenario assignment table ──
-  const profOpts = Object.entries(NRV_RAMPS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
-  const accOpts  = Object.entries(NRV_ACCESS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
-
-  const bodyRows = r.perDriver.map(d => {
-    const cfg = d.cfg;
-    const short = d.sc.name.length > 30 ? d.sc.name.substring(0,28)+'…' : d.sc.name;
-    return `<tr>
-      <td><div style="font-size:12px;font-weight:600;color:var(--brand-black)">${short}</div>
-          <div style="font-family:var(--mono);font-size:9px;color:var(--muted)">${d.sc.id} · raw ${fmt(d.ann)}</div></td>
-      <td><select onchange="nrvSet('${d.sc.id}','profile',this.value)">${profOpts.replace(`value="${cfg.profile}"`,`value="${cfg.profile}" selected`)}</select></td>
-      <td><select onchange="nrvSet('${d.sc.id}','access',this.value)">${accOpts.replace(`value="${cfg.access}"`,`value="${cfg.access}" selected`)}</select></td>
-      <td class="r"><input type="number" min="0" max="0.95" step="0.05" value="${cfg.h}" onchange="nrvSet('${d.sc.id}','h',this.value)"></td>
-      ${d.byYear.map(v=>`<td class="r mono" style="font-size:11px;color:var(--gray-700)">${fmt(Math.round(v))}</td>`).join('')}
-    </tr>`;
-  }).join('');
-  document.getElementById('nrv-tbody').innerHTML = bodyRows;
-
-  const decayRow = useDecay ? `<tr><td colspan="4" style="color:var(--muted);font-size:11px;font-style:italic">+ Decay_Avoided (status-quo growth at ${(g*100).toFixed(1)}%/yr)</td>${r.decayAvoidedByYear.map(v=>`<td class="r mono" style="font-size:11px;color:var(--muted)">${fmt(Math.round(v))}</td>`).join('')}</tr>` : '';
-  const tcoRow = `<tr><td colspan="4" style="color:var(--muted);font-size:11px;font-style:italic">&minus; TCO</td>${r.tcoByYear.slice(1).map(v=>`<td class="r mono" style="font-size:11px;color:var(--red)">(${fmt(v)})</td>`).join('')}</tr>`;
-  const totals = [0,1,2,3,4].map(i => r.grossByYear[i] + r.decayAvoidedByYear[i] - r.tcoByYear[i+1]);
-  const totalRow = `<tr class="total-row"><td colspan="4">Net Cash Flow (Yr 0: <span style="color:var(--red)">(${fmt(r.tcoByYear[0])})</span>)</td>${totals.map(v=>`<td class="r mono">${v>=0?fmt(Math.round(v)):'<span style=\"color:var(--red)\">('+fmt(Math.abs(Math.round(v)))+')</span>'}</td>`).join('')}</tr>`;
-  document.getElementById('nrv-tfoot').innerHTML = decayRow + tcoRow + totalRow;
-
-  // ── KPI hero strip ──
-  const bcrWarn = (r.bcr !== null && r.bcr > 10);
-  const mirrTxt = r.mirr === null ? '—' : (r.mirr*100).toFixed(1) + '%';
-  const bcrTxt  = r.bcr  === null ? '—' : r.bcr.toFixed(1) + 'x';
-  const roiTxt  = r.roiPct === null ? '—' : r.roiPct + '%';
-  const pbTxt   = r.paybackMo === null ? 'Beyond 5 yr' : r.paybackMo.toFixed(1) + ' mo';
-
-  document.getElementById('nrv-kpi').innerHTML = `
-    <div class="kpi"><div class="kpi-label">NRV (NPV @ ${(wacc*100).toFixed(0)}%)</div>
-      <div class="kpi-val">${fmt(r.npv)}</div>
-      <div class="kpi-sub">Normalized 5-yr net present value</div></div>
-    <div class="kpi"><div class="kpi-label">MIRR</div>
-      <div class="kpi-val">${mirrTxt}</div>
-      <div class="kpi-sub">Reinvested at WACC · CFO-grade</div></div>
-    <div class="kpi ${bcrWarn?'warn':''}"><div class="kpi-label">Benefit : Cost</div>
-      <div class="kpi-val">${bcrTxt}</div>
-      <div class="kpi-sub">${bcrWarn?'⚠ Above 10x — review':'Undiscounted, 5-yr'}</div></div>
-    <div class="kpi"><div class="kpi-label">Discounted Payback</div>
-      <div class="kpi-val">${pbTxt}</div>
-      <div class="kpi-sub">Disc. cumulative NCF crosses 0</div></div>`;
-
-  // BCR cap flag
-  document.getElementById('nrv-flag-bcr').innerHTML = bcrWarn
-    ? `<div class="nrv-flag"><strong>⚠ BCR above 10x.</strong> Per SOP this requires mandatory review before the model leaves your hands. Audit covariance haircuts and challenge the top three drivers at &minus;20% before exporting to a CFO.</div>`
-    : '';
-
-  // ── WACC sensitivity ──
-  const sensRates = [0.08, wacc, 0.12];
-  const sensLabels = ['Low (8%)', 'Base ('+(wacc*100).toFixed(0)+'%)', 'High (12%)'];
-  const sensCells = sensRates.map((sw, i) => {
-    const sr = computeNRV({ wacc: sw, g, fin, useDecay });
-    return `<div class="sens-cell${i===1?' mid':''}">
-      <div class="lbl">${sensLabels[i]}</div>
-      <div class="val">${fmt(sr.npv)}</div>
-    </div>`;
-  }).join('');
-  document.getElementById('nrv-sens').innerHTML = sensCells;
-
-  // ── Raw vs NRV comparison ──
-  const b = state.benefits || {};
-  const c = state.costs || {};
-  const rawY3 = b.totY3 || 0;
-  const rawNpv = Math.round(
-    ((b.totY1||0) - (c.yr1||0)) / 1.10 +
-    ((b.totY2||0) - (c.yr2||0)) / 1.21 +
-    (rawY3 - (c.yr2||0)) / 1.331 +
-    (rawY3 - (c.yr2||0)) / 1.4641 +
-    (rawY3 - (c.yr2||0)) / 1.6105
-  );
-  const reduction = rawNpv > 0 ? Math.round(((rawNpv - r.npv) / rawNpv) * 100) : 0;
-  document.getElementById('nrv-compare').innerHTML = `
-    <div class="cmp-cell"><div class="cmp-lbl">Headline 5-yr NPV</div><div class="cmp-val">${fmt(rawNpv)}</div><div class="cmp-sub">3-yr ramp, no commoditization, no decay</div></div>
-    <div class="cmp-cell"><div class="cmp-lbl">NRV-Normalized NPV</div><div class="cmp-val">${fmt(r.npv)}</div><div class="cmp-sub">5-yr decay + accessibility + haircut + Decay_Avoided</div></div>
-    <div class="cmp-cell"><div class="cmp-lbl">Normalization Effect</div><div class="cmp-val">${reduction>=0?'−':'+'}${Math.abs(reduction)}%</div><div class="cmp-sub">${reduction>=0?'NRV is more conservative':'NRV is higher — Decay_Avoided dominates'}</div></div>`;
-}
-
 function nrvSet(scId, field, val) {
   if (!nrvOverrides[scId]) nrvOverrides[scId] = {};
   nrvOverrides[scId][field] = val;
-  renderNRV();
+  renderROI();
 }
 
 // ── SCENARIOS ──
@@ -4432,37 +4276,116 @@ function renderROI() {
   const active = SCENARIOS.filter(s=>state.selectedIds.has(s.id));
   if(!active.length) { document.getElementById('kpi-grid').innerHTML='<div class="muted">No scenarios selected.</div>'; return; }
 
-  let totAnnual=0, totY1=0, totY2=0, totY3=0;
+  // ── NRV toolbar state (drives the math) ──
+  const _waccEl = document.getElementById('nrv-wacc');
+  const wacc    = _waccEl ? +_waccEl.value : 0.10;
+  const gRate   = +(document.getElementById('nrv-g')?.value ?? 0.035);
+  const finRate = +(document.getElementById('nrv-fin')?.value ?? 0.10);
+  const useDecay = (document.getElementById('nrv-decay')?.value ?? '1') === '1';
+  const nrvOn    = (document.getElementById('nrv-on')?.value ?? '1') === '1';
+  const _setSv = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  _setSv('nrv-wacc-v', (wacc*100).toFixed(1)+'%');
+  _setSv('nrv-g-v',    (gRate*100).toFixed(1)+'%');
+  _setSv('nrv-fin-v',  (finRate*100).toFixed(1)+'%');
+
+  let totAnnual=0;
+  // byYear arrays index 0..4 represent years 1..5
+  const grossByYear = [0,0,0,0,0];
   const rows = active.map(sc => {
     const ann = Math.max(0, calcSc(sc));
-    const r = RAMP[sc.rampType];
-    const y1=ann*r.y1, y2=ann*r.y2, y3=ann*r.y3;
-    totAnnual+=ann; totY1+=y1; totY2+=y2; totY3+=y3;
-    return {sc, ann, y1, y2, y3};
+    let byYear;
+    let cfg = null;
+    if (nrvOn) {
+      cfg = nrvCfg(sc);
+      const rp = NRV_RAMPS[cfg.profile].y;
+      const ax = NRV_ACCESS[cfg.access].y;
+      byYear = rp.map((r,i) => ann * r * ax[i] * (1 - cfg.h));
+    } else {
+      // Raw ramp (Y1/Y2 from RAMP, Y3-Y5 flat at Y3)
+      const r = RAMP[sc.rampType];
+      byYear = [ann*r.y1, ann*r.y2, ann*r.y3, ann*r.y3, ann*r.y3];
+    }
+    totAnnual += ann;
+    byYear.forEach((v,i)=> grossByYear[i] += v);
+    return { sc, ann, cfg, byYear, y1:byYear[0], y2:byYear[1], y3:byYear[2], y4:byYear[3], y5:byYear[4] };
   });
-  state.benefits = {totAnnual, totY1, totY2, totY3, rows};
+  const totY1 = grossByYear[0], totY2 = grossByYear[1], totY3 = grossByYear[2];
+  const totY4 = grossByYear[3], totY5 = grossByYear[4];
+  const peakAnnual = Math.max(...grossByYear);
+  state.benefits = {totAnnual, totY1, totY2, totY3, totY4, totY5, peakAnnual, rows};
+
+  // Decay_Avoided(t) at baseline growth g
+  const decayAvoided = [0,0,0,0,0];
+  if (nrvOn && useDecay && gRate > 0 && totAnnual > 0) {
+    let cum = 0;
+    for (let k = 1; k <= 5; k++) {
+      cum += totAnnual * (Math.pow(1+gRate, k) - 1);
+      decayAvoided[k-1] = cum;
+    }
+  }
+  state.benefits.decayAvoided = decayAvoided;
 
   const c = state.costs;
-  const yr0net = -(c.yr0||0);
-  const yr1net = totY1-(c.yr1||0);
-  const yr2net = totY2-(c.yr2||0);
-  const yr3net = totY3-(c.yr2||0);
-  const payback = totAnnual>0 ? Math.round((c.yr0/(totAnnual/12))*10)/10 : 99;
-  const npv5 = Math.round((yr1net/1.1)+(yr2net/1.21)+(yr3net/1.331)+(yr3net/1.464)+(yr3net/1.611));
-  const irr = estimateIRR([yr0net, yr1net, yr2net, yr3net, yr3net]);
-  const roi3 = c.yr0>0 ? Math.round(((totY1+totY2+totY3-(c.yr0+c.yr1+c.yr2+c.yr2))/(c.yr0+c.yr1+c.yr2+c.yr2))*100) : 0;
+  // Net cash flow per year (t=0..5). Year 0 = upfront; Y1 = totY1 + decay - yr1; Y2-5 = grossByYear + decay - yr2.
+  const tcoBy = [c.yr0||0, c.yr1||0, c.yr2||0, c.yr2||0, c.yr2||0, c.yr2||0];
+  const ncf = [
+    -(tcoBy[0]),
+    totY1 + decayAvoided[0] - tcoBy[1],
+    totY2 + decayAvoided[1] - tcoBy[2],
+    totY3 + decayAvoided[2] - tcoBy[3],
+    totY4 + decayAvoided[3] - tcoBy[4],
+    totY5 + decayAvoided[4] - tcoBy[5],
+  ];
+  state.benefits.ncf = ncf;
+
+  // NPV at WACC, all 5 years
+  let npv5 = 0;
+  ncf.forEach((v,t)=>{ npv5 += v / Math.pow(1+wacc, t); });
+  npv5 = Math.round(npv5);
+
+  // Discounted payback (months)
+  let _cum = 0, payback = null;
+  for (let t=0; t<=5; t++) {
+    const disc = ncf[t] / Math.pow(1+wacc, t);
+    const prev = _cum; _cum += disc;
+    if (prev < 0 && _cum >= 0) { payback = Math.round((t - 1 + (-prev/(_cum-prev))) * 12 * 10) / 10; break; }
+  }
+
+  // MIRR (preferred) and IRR (kept for reference)
+  let fvPos=0, pvNeg=0;
+  ncf.forEach((v,t)=>{
+    if (v>0) fvPos += v * Math.pow(1+wacc, 5-t);
+    else if (v<0) pvNeg += -v / Math.pow(1+finRate, t);
+  });
+  const mirr = (fvPos>0 && pvNeg>0) ? (Math.pow(fvPos/pvNeg, 1/5) - 1) : null;
+  const irr = estimateIRR(ncf);
+
+  // BCR (undiscounted) and 5-yr Net ROI
+  const totBen  = grossByYear.reduce((a,v)=>a+v,0) + decayAvoided.reduce((a,v)=>a+v,0);
+  const totCost = tcoBy.reduce((a,v)=>a+v,0);
+  const bcr  = totCost>0 ? totBen/totCost : null;
+  const roi5 = totCost>0 ? Math.round(((totBen - totCost)/totCost)*100) : 0;
+  const bcrWarn = bcr !== null && bcr > 10;
+
+  // BCR cap flag
+  const flagEl = document.getElementById('nrv-bcr-flag-host');
+  if (flagEl) flagEl.innerHTML = bcrWarn
+    ? `<div class="nrv-bcr-flag"><strong>⚠ BCR above 10x (${bcr.toFixed(1)}x).</strong> Per the NRV SOP this requires mandatory review before the model leaves your hands. Audit covariance haircuts and challenge top-3 drivers at &minus;20% before exporting.</div>`
+    : '';
 
   // KPIs — 4 primary heroes + 4 secondary supporting
+  const pbTxt = payback === null ? 'Beyond 5 yr' : payback.toFixed(1)+' mo';
+  const peakLbl = nrvOn ? `Peak NRV (Yr ${grossByYear.indexOf(peakAnnual)+1})` : 'Year 3 steady state';
   document.getElementById('kpi-grid').innerHTML = `
-    <div class="kpi kgreen hero-kpi"><div class="kpi-label">Full Annual Benefit</div><div class="kpi-val">${fmt(totAnnual)}</div><div class="kpi-sub">Year 3 steady state</div></div>
-    <div class="kpi kblue hero-kpi"><div class="kpi-label">Payback Period</div><div class="kpi-val">${payback}<span style="font-size:15px;font-weight:400"> mo</span></div><div class="kpi-sub">months to recover investment</div></div>
-    <div class="kpi kamber hero-kpi"><div class="kpi-label">5-Year NPV</div><div class="kpi-val">${fmt(npv5)}</div><div class="kpi-sub">discounted at 10%</div></div>
-    <div class="kpi kgold hero-kpi"><div class="kpi-label">3-Year Net ROI</div><div class="kpi-val">${roi3}<span style="font-size:15px">%</span></div><div class="kpi-sub">benefit less total cost · conservative ramps</div></div>`;
+    <div class="kpi kgreen hero-kpi"><div class="kpi-label">${nrvOn?'NRV Peak Annual':'Full Annual Benefit'}</div><div class="kpi-val">${fmt(Math.round(peakAnnual))}</div><div class="kpi-sub">${peakLbl}${nrvOn?' · decay-adjusted':''}</div></div>
+    <div class="kpi kblue hero-kpi"><div class="kpi-label">Payback Period</div><div class="kpi-val">${payback===null?'>5 yr':payback}${payback!==null?'<span style="font-size:15px;font-weight:400"> mo</span>':''}</div><div class="kpi-sub">${nrvOn?'discounted at '+(wacc*100).toFixed(0)+'% WACC':'months to recover investment'}</div></div>
+    <div class="kpi kamber hero-kpi"><div class="kpi-label">${nrvOn?'NRV (5-yr NPV)':'5-Year NPV'}</div><div class="kpi-val">${fmt(npv5)}</div><div class="kpi-sub">discounted at ${(wacc*100).toFixed(0)}%${nrvOn?' · normalized':''}</div></div>
+    <div class="kpi kgold hero-kpi"><div class="kpi-label">5-Year Net ROI</div><div class="kpi-val">${roi5}<span style="font-size:15px">%</span></div><div class="kpi-sub">${nrvOn?'NRV-normalized · decay applied':'benefit less total cost'}</div></div>`;
   document.getElementById('kpi-secondary').innerHTML = `
-    <div class="kpi-sec"><div class="ks-label">Year 1 Ramped Value</div><div class="ks-val">${fmt(totY1)}</div></div>
-    <div class="kpi-sec"><div class="ks-label">Year 2 Ramped Value</div><div class="ks-val">${fmt(totY2)}</div></div>
-    <div class="kpi-sec"><div class="ks-label">Benefit : Cost (Yr 3)</div><div class="ks-val">${(c.yr2>0&&isFinite(totY3/c.yr2))?(totY3/c.yr2).toFixed(1)+'x':'—'}</div></div>
-    <div class="kpi-sec"><div class="ks-label">Monthly at Full Run</div><div class="ks-val">${fmt(Math.round(totAnnual/12))}</div></div>`;
+    <div class="kpi-sec"><div class="ks-label">Year 1 Ramped Value</div><div class="ks-val">${fmt(Math.round(totY1))}</div></div>
+    <div class="kpi-sec"><div class="ks-label">Year 2 Ramped Value</div><div class="ks-val">${fmt(Math.round(totY2))}</div></div>
+    <div class="kpi-sec"><div class="ks-label">Benefit : Cost (5-yr)</div><div class="ks-val ${bcrWarn?'warn':''}">${bcr===null?'—':bcr.toFixed(1)+'x'}</div></div>
+    <div class="kpi-sec"><div class="ks-label">Monthly at Peak</div><div class="ks-val">${fmt(Math.round(peakAnnual/12))}</div></div>`;
 
   // Delay slider
   syncDelay();
@@ -4568,19 +4491,13 @@ function renderROI() {
       `<svg viewBox="0 0 ${CHART_W} ${totalH}" width="100%" style="display:block;overflow:visible">${svgRows}</svg>`;
   })();
 
-  // ── SVG Line Chart: Cumulative Net Cash Position ──
+  // ── SVG Line Chart: Cumulative Net Cash Position (NRV cashflow) ──
   (function() {
     const W=540, H=200, PL=70, PR=20, PT=16, PB=40;
     const iW=W-PL-PR, iH=H-PT-PB;
-    // Cumulative cash: year 0 = -invest, then accumulate
-    const cumPoints = [
-      {yr:0,  cum: yr0net},
-      {yr:1,  cum: yr0net + yr1net},
-      {yr:2,  cum: yr0net + yr1net + yr2net},
-      {yr:3,  cum: yr0net + yr1net + yr2net + yr3net},
-      {yr:4,  cum: yr0net + yr1net + yr2net + yr3net + yr3net},
-      {yr:5,  cum: yr0net + yr1net + yr2net + yr3net + yr3net + yr3net},
-    ];
+    // Cumulative cash: year 0 = -invest, then accumulate NRV ncf
+    let _cumAcc = 0;
+    const cumPoints = ncf.map((v,i)=>{ _cumAcc += v; return {yr:i, cum:_cumAcc}; });
     const allVals = cumPoints.map(p=>p.cum);
     const minV = Math.min(...allVals), maxV = Math.max(...allVals);
     const range = maxV - minV || 1;
@@ -4655,19 +4572,15 @@ function renderROI() {
     </svg>`;
   })();
 
-  // ── SVG Ramp Chart: Cumulative Benefits vs Costs ──
+  // ── SVG Ramp Chart: Cumulative Benefits vs Costs (NRV-aware) ──
   (function() {
     const W=540, H=200, PL=70, PR=20, PT=16, PB=40;
     const iW=W-PL-PR, iH=H-PT-PB;
-    // Benefits curve (cumulative)
-    const bYears = [
-      {yr:0, b:0,        cost: c.yr0||0},
-      {yr:1, b:totY1,    cost: (c.yr0||0)+(c.yr1||0)},
-      {yr:2, b:totY1+totY2, cost:(c.yr0||0)+(c.yr1||0)+(c.yr2||0)},
-      {yr:3, b:totY1+totY2+totY3, cost:(c.yr0||0)+(c.yr1||0)+(c.yr2||0)*2},
-      {yr:4, b:totY1+totY2+totY3*2, cost:(c.yr0||0)+(c.yr1||0)+(c.yr2||0)*3},
-      {yr:5, b:totY1+totY2+totY3*3, cost:(c.yr0||0)+(c.yr1||0)+(c.yr2||0)*4},
-    ];
+    // Benefits curve (cumulative NRV gross + Decay_Avoided), costs cumulative TCO
+    const bArr = grossByYear.map((v,i)=>v + decayAvoided[i]);
+    let _bc=0, _cc=tcoBy[0];
+    const bYears = [{yr:0, b:0, cost:tcoBy[0]}];
+    for (let i=0;i<5;i++){ _bc += bArr[i]; _cc += tcoBy[i+1]; bYears.push({yr:i+1, b:_bc, cost:_cc}); }
     const maxV = Math.max(...bYears.map(p=>Math.max(p.b,p.cost))) || 1;
     const toX = yr => PL + (yr/5)*iW;
     const toY = v => PT + iH*(1 - v/maxV);
@@ -4705,36 +4618,69 @@ function renderROI() {
     </svg>`;
   })();
 
-  // Financial metrics grid
+  // Financial metrics grid — NRV-aware (MIRR primary, IRR shown for reference)
+  const mirrTxt = mirr === null ? '—' : (mirr*100).toFixed(1)+'%';
   document.getElementById('fin-grid').innerHTML = `
-    <div class="fin-card accent-green"><div class="fin-label">NPV (5-Year @ 10%)</div><div class="fin-val">${fmt(npv5)}</div><div class="fin-sub">Net present value of cash flows</div></div>
-    <div class="fin-card accent-blue"><div class="fin-label">IRR</div><div class="fin-val">${irr}%</div><div class="fin-sub">Modeled unlevered IRR (illustrative, pre-tax)</div></div>
-    <div class="fin-card accent-amber"><div class="fin-label">Benefit-to-Cost (Yr 3)</div><div class="fin-val">${(c.yr2>0&&isFinite(totY3/c.yr2))?(totY3/c.yr2).toFixed(1)+'x':'—'}</div><div class="fin-sub">Full realization ÷ annual operating cost</div></div>
-    <div class="fin-card" style="border-top:3px solid var(--red)"><div class="fin-label">Monthly Value at Risk</div><div class="fin-val" style="color:var(--red)">${fmt(Math.round(totY1/12))}</div><div class="fin-sub">Foregone per month of delay</div></div>`;
+    <div class="fin-card accent-green"><div class="fin-label">${nrvOn?'NRV (NPV @ '+(wacc*100).toFixed(0)+'%)':'NPV (5-Year @ '+(wacc*100).toFixed(0)+'%)'}</div><div class="fin-val">${fmt(npv5)}</div><div class="fin-sub">${nrvOn?'5-yr decay-adjusted · WACC sensitivity 8/10/12':'Net present value of cash flows'}</div></div>
+    <div class="fin-card accent-blue"><div class="fin-label">${nrvOn?'MIRR':'IRR'}</div><div class="fin-val">${nrvOn?mirrTxt:(irr+'%')}</div><div class="fin-sub">${nrvOn?'Reinvested at WACC · CFO-grade (IRR '+irr+'%)':'Modeled unlevered IRR (illustrative, pre-tax)'}</div></div>
+    <div class="fin-card accent-amber ${bcrWarn?'warn':''}"><div class="fin-label">Benefit : Cost (5-yr)</div><div class="fin-val" style="${bcrWarn?'color:#c8330e':''}">${bcr===null?'—':bcr.toFixed(1)+'x'}</div><div class="fin-sub">${bcrWarn?'⚠ Above 10x — mandatory SOP review':'Undiscounted total benefit ÷ total cost'}</div></div>
+    <div class="fin-card" style="border-top:3px solid var(--red)"><div class="fin-label">Monthly Value at Risk</div><div class="fin-val" style="color:var(--red)">${fmt(Math.round(totY1/12))}</div><div class="fin-sub">Foregone per month of delay (Yr 1 ramped)</div></div>`;
+
+  // WACC sensitivity — slim strip beneath the fin-grid
+  const _sensCalc = (sw)=>{
+    let n=0; ncf.forEach((v,t)=>{ n += v/Math.pow(1+sw,t); }); return Math.round(n);
+  };
+  const sensHost = document.getElementById('nrv-sens-host');
+  if (sensHost) {
+    if (nrvOn) {
+      sensHost.innerHTML = `<div class="nrv-sens-row">
+        <div class="sens-cell"><div class="lbl">NPV @ 8%</div><div class="val">${fmt(_sensCalc(0.08))}</div></div>
+        <div class="sens-cell mid"><div class="lbl">NPV @ ${(wacc*100).toFixed(0)}% (base)</div><div class="val">${fmt(npv5)}</div></div>
+        <div class="sens-cell"><div class="lbl">NPV @ 12%</div><div class="val">${fmt(_sensCalc(0.12))}</div></div>
+      </div>`;
+    } else sensHost.innerHTML = '';
+  }
 
   // Detail table — expandable rows with mini analytics panel
   const _totAnnForPct = totAnnual || 1;
+  const _profOpts = Object.entries(NRV_RAMPS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+  const _accOpts  = Object.entries(NRV_ACCESS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
   document.getElementById('vtbl-body').innerHTML = rows.map(r=>{
     const rInfo = RAMP[r.sc.rampType];
     const pct = Math.round((r.ann / _totAnnForPct) * 100);
     const monthly = Math.round(r.ann / 12);
     const monthlyY1 = Math.round(r.y1 / 12);
     const shortName = r.sc.name.length>30 ? r.sc.name.substring(0,28)+'…' : r.sc.name;
-    const barCls = ['hard_labor','hard_cost'].includes(r.sc.rampType)?'':(r.sc.rampType==='revenue'?'rev':'soft');
-    // Ramp sparkline: 3 bars showing y1/y2/y3 as % of ann
-    const sparkW1 = r.ann>0?Math.round((r.y1/r.ann)*100):0;
-    const sparkW2 = r.ann>0?Math.round((r.y2/r.ann)*100):0;
+    const cfg = r.cfg || { profile:'behavior', access:'configured', h:0 };
+    const profSel = nrvOn
+      ? _profOpts.replace(`value="${cfg.profile}"`,`value="${cfg.profile}" selected`)
+      : _profOpts;
+    const accSel  = nrvOn
+      ? _accOpts.replace(`value="${cfg.access}"`,`value="${cfg.access}" selected`)
+      : _accOpts;
+    const decayCtl = nrvOn
+      ? `<div class="nrv-mini" onclick="event.stopPropagation()">
+          <span class="nrv-mini-lbl">profile</span>
+          <select onchange="nrvSet('${r.sc.id}','profile',this.value)">${profSel}</select>
+          <span class="nrv-mini-lbl">tier</span>
+          <select onchange="nrvSet('${r.sc.id}','access',this.value)">${accSel}</select>
+          <span class="nrv-mini-lbl">h</span>
+          <input type="number" min="0" max="0.95" step="0.05" value="${cfg.h}" onchange="nrvSet('${r.sc.id}','h',this.value)">
+        </div>`
+      : '';
     return `
     <tr class="sc-data-row" onclick="toggleScExpand('${r.sc.id}')">
-      <td style="max-width:180px"><div style="font-size:12px;font-weight:600;color:var(--brand-black);line-height:1.4">${shortName}</div><div style="font-family:var(--mono);font-size:9px;color:var(--muted)">${r.sc.id}</div></td>
+      <td style="max-width:220px"><div style="font-size:12px;font-weight:600;color:var(--brand-black);line-height:1.4">${shortName}</div><div style="font-family:var(--mono);font-size:9px;color:var(--muted)">${r.sc.id}</div></td>
       <td class="r mono" style="font-weight:700;color:var(--brand-black)">${fmt(r.ann)}</td>
-      <td class="r mono" style="color:var(--gray-700)">${fmt(r.y1)}</td>
-      <td class="r mono" style="color:var(--gray-700)">${fmt(r.y2)}</td>
-      <td class="r mono" style="color:var(--gray-700)">${fmt(r.y3)}</td>
-      <td><span class="ramp-tag" style="background:${rampColors[r.sc.rampType]?.bg||'#f0f0f0'};color:${rampColors[r.sc.rampType]?.fg||'#555'}">${rInfo.label}</span></td>
+      <td class="r mono" style="color:var(--gray-700)">${fmt(Math.round(r.y1))}</td>
+      <td class="r mono" style="color:var(--gray-700)">${fmt(Math.round(r.y2))}</td>
+      <td class="r mono" style="color:var(--gray-700)">${fmt(Math.round(r.y3))}</td>
+      <td class="r mono" style="color:var(--gray-700)">${fmt(Math.round(r.y4))}</td>
+      <td class="r mono" style="color:var(--gray-700)">${fmt(Math.round(r.y5))}</td>
+      <td><span class="ramp-tag" style="background:${rampColors[r.sc.rampType]?.bg||'#f0f0f0'};color:${rampColors[r.sc.rampType]?.fg||'#555'}">${rInfo.label}</span>${decayCtl}</td>
     </tr>
     <tr class="sc-expand-panel" id="scexp-${r.sc.id}">
-      <td colspan="6" style="padding:0!important;border-bottom:2px solid var(--gray-200)">
+      <td colspan="8" style="padding:0!important;border-bottom:2px solid var(--gray-200)">
         <div class="sc-snapshot">
           <!-- LEFT: SVG donut arc -->
           <div class="sc-snapshot-donut">
@@ -4779,10 +4725,12 @@ function renderROI() {
       </td>
     </tr>`;
   }).join('');
-  document.getElementById('vtbl-foot').innerHTML=`<tr class="total-row"><td><strong>TOTAL</strong></td><td class="r mono"><strong>${fmt(totAnnual)}</strong></td><td class="r mono"><strong>${fmt(totY1)}</strong></td><td class="r mono"><strong>${fmt(totY2)}</strong></td><td class="r mono"><strong>${fmt(totY3)}</strong></td><td></td></tr>`;
-
-  // ── NRV Normalization Layer (decay-aware ROI) ──
-  try { renderNRV(); } catch(e) { console.warn('NRV render error', e); }
+  const decayFootRow = (nrvOn && useDecay)
+    ? `<tr><td colspan="2" style="font-style:italic;color:var(--muted);font-size:11px">+ Decay_Avoided (status-quo growth at ${(gRate*100).toFixed(1)}%/yr)</td>${decayAvoided.map(v=>`<td class="r mono" style="color:var(--muted);font-size:11px">${fmt(Math.round(v))}</td>`).join('')}<td></td></tr>`
+    : '';
+  document.getElementById('vtbl-foot').innerHTML =
+    decayFootRow +
+    `<tr class="total-row"><td><strong>TOTAL</strong></td><td class="r mono"><strong>${fmt(totAnnual)}</strong></td><td class="r mono"><strong>${fmt(Math.round(totY1 + decayAvoided[0]))}</strong></td><td class="r mono"><strong>${fmt(Math.round(totY2 + decayAvoided[1]))}</strong></td><td class="r mono"><strong>${fmt(Math.round(totY3 + decayAvoided[2]))}</strong></td><td class="r mono"><strong>${fmt(Math.round(totY4 + decayAvoided[3]))}</strong></td><td class="r mono"><strong>${fmt(Math.round(totY5 + decayAvoided[4]))}</strong></td><td></td></tr>`;
 }
 
 function syncDelay() {
@@ -4877,10 +4825,18 @@ function renderExec() {
   const totY2 = state.benefits.totY2||0;
   const totY3 = state.benefits.totY3||0;
   const payback = c.yr0>0&&totAnnual>0 ? Math.round(c.yr0/(totAnnual/12)) : '—';
-  const yr1net = totY1-(c.yr1||0);
-  const yr2net = totY2-(c.yr2||0);
-  const yr3net = totY3-(c.yr2||0);
-  const npv5 = Math.round((yr1net/1.1)+(yr2net/1.21)+(yr3net/1.331)+(yr3net/1.464)+(yr3net/1.611));
+  // NRV-aware NPV from the same cashflow renderROI built
+  const wacc = +(document.getElementById('nrv-wacc')?.value ?? 0.10);
+  const ncf  = state.benefits.ncf;
+  let npv5;
+  if (Array.isArray(ncf) && ncf.length === 6) {
+    let _n = 0; ncf.forEach((v,t)=>{ _n += v/Math.pow(1+wacc,t); }); npv5 = Math.round(_n);
+  } else {
+    const yr1net = totY1-(c.yr1||0);
+    const yr2net = totY2-(c.yr2||0);
+    const yr3net = totY3-(c.yr2||0);
+    npv5 = Math.round((yr1net/1.1)+(yr2net/1.21)+(yr3net/1.331)+(yr3net/1.464)+(yr3net/1.611));
+  }
 
   document.getElementById('exec-heading').textContent = title + ' — ' + co;
   document.getElementById('exec-sub').textContent = `Prepared by ${seller} · Parties & Partners: ${partners} · Discovery KPIs: ${document.getElementById('i-pain')?.value||'—'}`;

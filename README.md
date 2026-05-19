@@ -13,25 +13,24 @@ A discovery-to-ROI workflow:
 5. **ROI & Value Case** — headline NPV / IRR / payback **plus the NRV normalization layer**
 6. **Full Analysis** — printable investment appraisal + branded deck export
 
-## NRV — Net Realization Value (normalized ROI)
+## NRV — Net Realization Value (built into the ROI math)
 
-The headline numbers in Step 5 use a 3-year ramp. They answer the question "what is the steady-state value of the deal?" — fine for early discovery, but they don't survive a CFO challenge because they don't price in the three forces acting on every technology dollar:
+NRV is not a separate section; it is the math layer Step 5 already runs on. Every headline number — Peak Annual Benefit, Payback, 5-yr NPV, 5-yr Net ROI, MIRR, BCR — already prices in the three forces acting on every technology dollar:
 
-1. **Adoption friction** — no solution delivers 100% in Year 1
-2. **Market commoditization** — alpha compresses as competitors reach parity
-3. **Covariance / double-counting** — drivers that share a labor pool
+1. **Adoption friction** — 5-year ramp profile by delivery mechanism (Hardware / Software / Human Behavior / Compliance), including post-peak decay in Y4–Y5
+2. **Market commoditization** — accessibility tier (Commodity / Configured / Infrastructure) compresses competitive alpha as the technology becomes easier to replicate
+3. **Covariance / double-counting** — per-driver haircut h on shared labor pools or asset bases
 
-The **NRV layer**, surfaced as a card in Step 5, re-runs the model with:
+It also adds:
 
-- **5-year ramp profiles** (Hardware, Software, Human Behavior, Compliance) — including post-peak decay in Years 4–5
-- **Accessibility tier** (Commodity / Configured / Infrastructure) — alpha compression by tier
-- **Covariance haircut h** per driver — default 0, you justify the floor
 - **Decay_Avoided** — status-quo grows at g = 3.5%/yr by default (BLS ECI + McKinsey)
-- **WACC sensitivity** at 8 / base / 12%
-- **MIRR**, not IRR — reinvestment at WACC, no multiple-IRR artifacts
-- **BCR cap at 10x** — anything higher is flagged for review before export
+- **WACC sensitivity** at 8 / base / 12% — shown beneath the financial model
+- **MIRR**, not IRR — reinvestment at WACC, no multiple-IRR artifacts (IRR shown for reference)
+- **BCR cap at 10x** — anything higher is flagged for mandatory review before export
 
-The "Normalization Effect" comparison cell shows how much the headline NPV moves when the decay discipline is applied. That delta is the conservatism the CFO will demand anyway; better to surface it ourselves.
+The decay-discipline toolbar at the top of Step 5 exposes the global knobs (WACC, baseline g, finance rate, Decay_Avoided on/off, NRV layer on/off). Per-scenario profile / accessibility tier / haircut h live inline in the detail table for each scenario.
+
+Toggle "NRV layer: Off" in the toolbar to fall back to the old 3-yr ramp math for an apples-to-apples comparison.
 
 Full methodology and citations: see `NRV_SOP.docx`.
 
