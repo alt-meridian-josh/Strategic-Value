@@ -5362,31 +5362,12 @@ function renderROI() {
 
   // Detail table — expandable rows with mini analytics panel
   const _totAnnForPct = totAnnual || 1;
-  const _profOpts = Object.entries(NRV_RAMPS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
-  const _accOpts  = Object.entries(NRV_ACCESS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
   document.getElementById('vtbl-body').innerHTML = rows.map(r=>{
     const rInfo = RAMP[r.sc.rampType];
     const pct = Math.round((r.ann / _totAnnForPct) * 100);
     const monthly = Math.round(r.ann / 12);
     const monthlyY1 = Math.round(r.y1 / 12);
     const shortName = r.sc.name.length>30 ? r.sc.name.substring(0,28)+'…' : r.sc.name;
-    const cfg = r.cfg || { profile:'behavior', access:'configured', h:0 };
-    const profSel = nrvOn
-      ? _profOpts.replace(`value="${cfg.profile}"`,`value="${cfg.profile}" selected`)
-      : _profOpts;
-    const accSel  = nrvOn
-      ? _accOpts.replace(`value="${cfg.access}"`,`value="${cfg.access}" selected`)
-      : _accOpts;
-    const decayCtl = nrvOn
-      ? `<div class="nrv-mini" onclick="event.stopPropagation()">
-          <span class="nrv-mini-lbl">profile</span>
-          <select onchange="nrvSet('${r.sc.id}','profile',this.value)">${profSel}</select>
-          <span class="nrv-mini-lbl">tier</span>
-          <select onchange="nrvSet('${r.sc.id}','access',this.value)">${accSel}</select>
-          <span class="nrv-mini-lbl">h</span>
-          <input type="number" min="0" max="0.95" step="0.05" value="${cfg.h}" onchange="nrvSet('${r.sc.id}','h',this.value)">
-        </div>`
-      : '';
     return `
     <tr class="sc-data-row" onclick="toggleScExpand('${r.sc.id}')">
       <td style="max-width:220px"><div style="font-size:12px;font-weight:600;color:var(--brand-black);line-height:1.4">${shortName}</div><div style="font-family:var(--mono);font-size:9px;color:var(--muted)">${r.sc.id}</div></td>
@@ -5396,7 +5377,7 @@ function renderROI() {
       <td class="r mono" style="color:var(--gray-700)">${fmt(Math.round(r.y3))}</td>
       <td class="r mono" style="color:var(--gray-700)">${fmt(Math.round(r.y4))}</td>
       <td class="r mono" style="color:var(--gray-700)">${fmt(Math.round(r.y5))}</td>
-      <td><span class="ramp-tag" style="background:${rampColors[r.sc.rampType]?.bg||'#f0f0f0'};color:${rampColors[r.sc.rampType]?.fg||'#555'}">${rInfo.label}</span>${decayCtl}</td>
+      <td><span class="ramp-tag" style="background:${rampColors[r.sc.rampType]?.bg||'#f0f0f0'};color:${rampColors[r.sc.rampType]?.fg||'#555'}">${rInfo.label}</span></td>
     </tr>
     <tr class="sc-expand-panel" id="scexp-${r.sc.id}">
       <td colspan="8" style="padding:0!important;border-bottom:2px solid var(--gray-200)">
