@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
   <meta name="color-scheme" content="light only">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zebra RFID Value Accelerator v3.0</title>
+<title>Zebra Value Accelerator v3.0</title>
 <!-- ZEBRA BRAND FONTS — Licensed OTF assets loaded from assets/fonts/
      ZebraSans   = Zebra Sans (Regular, Bold, BoldItalic, Italic, Condensed ExtraBold)
      ZebraMono   = Zebra Mono (Medium, ExtraBold)
@@ -884,7 +884,7 @@ svg{max-width:100%;height:auto}
     </span>
     <div style="width:1px;height:20px;background:rgba(255,255,255,.2);margin:0 4px"></div>
     <div>
-      <div class="brand-name">RFID Value Accelerator</div>
+      <div class="brand-name">Zebra Value Accelerator</div>
       <div class="brand-sub">Zebra Technologies</div>
     </div>
   </div>
@@ -1873,7 +1873,7 @@ svg{max-width:100%;height:auto}
 const BRAND = {
   // ── IDENTITY ──────────────────────────────────────────────
   company:      "Zebra Technologies",
-  product:      "RFID Value Accelerator",
+  product:      "Zebra Value Accelerator",
   tagline:      "Capture Your Edge.",
 
   // ── COLORS — confirmed from Zebra Web Brand Guidelines (Figma) ──
@@ -1992,12 +1992,18 @@ document.addEventListener('DOMContentLoaded', applyBrand);
 
 // ── RAMP (50% Y1 / 85% Y2 / 100% Y3 as conservative standard) ──
 const RAMP = {
-  hard_labor:  { y1:.50, y2:.85, y3:1.00, label:"Hard Labor",  cls:"bf-hl" },
-  hard_cost:   { y1:.50, y2:.85, y3:1.00, label:"Hard Cost",   cls:"bf-hc" },
-  revenue:     { y1:.30, y2:.70, y3:1.00, label:"Revenue",     cls:"bf-rv" },
-  soft:        { y1:.25, y2:.65, y3:1.00, label:"Soft Prod.",  cls:"bf-sf" },
-  working_cap: { y1:.20, y2:.60, y3:1.00, label:"Working Cap.",cls:"bf-wc" },
-  strategic:   { y1:.00, y2:.20, y3:.60,  label:"Strategic",   cls:"bf-sf" },
+  hard_labor:  { y:[0.50,0.85,1.00,0.97,0.90], label:"Hard Labor",   cls:"bf-hl" },
+  hard_cost:   { y:[0.50,0.85,1.00,0.97,0.90], label:"Hard Cost",    cls:"bf-hc" },
+  revenue:     { y:[0.30,0.70,1.00,0.93,0.82], label:"Revenue",      cls:"bf-rv" },
+  soft:        { y:[0.25,0.65,1.00,0.88,0.74], label:"Soft Prod.",   cls:"bf-sf" },
+  working_cap: { y:[0.20,0.60,1.00,0.94,0.85], label:"Working Cap.", cls:"bf-wc" },
+  strategic:   { y:[0.00,0.20,0.60,0.52,0.44], label:"Strategic",    cls:"bf-sf" },
+};
+
+const ACCESS_TIER = {
+  commodity:      [0.90, 0.75, 0.60, 0.50, 0.45],
+  configured:     [0.95, 0.90, 0.82, 0.78, 0.75],
+  infrastructure: [1.00, 0.98, 0.96, 0.93, 0.90],
 };
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -2147,7 +2153,7 @@ const SCENARIOS = [
   { id:"RET-01", name:"Inventory Accuracy — Cycle Count Labor",
     theme:"Labor & Human Capacity", verticalKey:"retail",
     facilityKeys:["Store / Branch"], techKeys:["RFID Core","Handheld RFID","Fixed RFID Infrastructure"],
-    themeKeys:["Labor & Human Capacity"], evidence:"Strong", annualBenefit:312000, rampType:"hard_labor",
+    themeKeys:["Labor & Human Capacity"], evidence:"Strong", annualBenefit:312000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Cut cycle-count labor 75–90% — from 3 min/item to 12 sec with handheld RFID",
     evidenceIds:["EV-RET-LABOR-01","EV-RET-ACC-01"],
     challenge:"When the customer questions headcount reduction: these are hours recovered and redirected to growth or higher-value tasks — not necessarily elimination. Finance counts schedulable labor hours at 100% credit.",
@@ -2163,7 +2169,7 @@ const SCENARIOS = [
   { id:"RET-02", name:"On-Shelf Availability — Stockout Recovery",
     theme:"Revenue / Margin", verticalKey:"retail",
     facilityKeys:["Store / Branch"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Revenue / Margin","Operational Efficiency"], evidence:"Strong", annualBenefit:500000, rampType:"revenue",
+    themeKeys:["Revenue / Margin","Operational Efficiency"], evidence:"Strong", annualBenefit:500000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Recover 50% of stockout losses through RFID-triggered automated replenishment alerts",
     evidenceIds:["EV-RET-OSA-01"],
     challenge:"When revenue uplift is questioned: ECR benchmarks a 5% out-of-stock rate globally. We use the customer's own gross margin — the only variable we ask them to confirm is their current OOS frequency.",
@@ -2178,7 +2184,7 @@ const SCENARIOS = [
   { id:"RET-03", name:"Shrink Reduction — Loss Prevention",
     theme:"Direct Cost & Spend", verticalKey:"retail",
     facilityKeys:["Store / Branch"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Direct Cost & Spend"], evidence:"Strong", annualBenefit:350000, rampType:"hard_cost",
+    themeKeys:["Direct Cost & Spend"], evidence:"Strong", annualBenefit:350000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Item-level visibility deters internal theft and sharpens LP exception reporting — 20–40% shrink reduction",
     evidenceIds:["EV-RET-SHRINK-01"],
     challenge:"When shrink attribution is challenged: NRF documents 1.4% average. The customer's actual shrink rate is already a line item in their P&L — we use their own number, not a benchmark.",
@@ -2192,7 +2198,7 @@ const SCENARIOS = [
   { id:"RET-04", name:"Markdown Reduction — Better Sell-Through",
     theme:"Revenue / Margin", verticalKey:"retail",
     facilityKeys:["Store / Branch"], techKeys:["RFID Core"],
-    themeKeys:["Revenue / Margin","Operational Efficiency"], evidence:"Medium-Strong", annualBenefit:150000, rampType:"revenue",
+    themeKeys:["Revenue / Margin","Operational Efficiency"], evidence:"Medium-Strong", annualBenefit:150000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Accurate inventory eliminates phantom overstock — 10% markdown reduction in apparel",
     evidenceIds:["EV-RET-MARKDOWN-01"],
     challenge:"When markdown savings are seen as aspirational: Accenture tracked this across 8 retailers. We model only 10% — their study showed up to 20%. Size and color accuracy is the mechanism, not demand forecasting.",
@@ -2206,7 +2212,7 @@ const SCENARIOS = [
   { id:"RET-05", name:"Receiving Accuracy & Vendor Compliance",
     theme:"Labor & Human Capacity", verticalKey:"retail",
     facilityKeys:["Store / Branch","Warehouse / DC"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Labor & Human Capacity"], evidence:"Medium-Strong", annualBenefit:96000, rampType:"hard_labor",
+    themeKeys:["Labor & Human Capacity"], evidence:"Medium-Strong", annualBenefit:96000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Inbound accuracy 85% → 99%+ — eliminate manual scan-each and cut receiving labor 40%",
     evidenceIds:["EV-RET-RECV-01"],
     challenge:"When receiving labor seems minor: this is hard labor hours at a real rate, plus vendor chargeback avoidance which is a direct P&L line. Both are independently verifiable from AP records.",
@@ -2222,7 +2228,7 @@ const SCENARIOS = [
   { id:"RET-06", name:"Associate Productivity — Recovered Hours",
     theme:"Labor & Human Capacity", verticalKey:"retail",
     facilityKeys:["Store / Branch"], techKeys:["RFID Core","Handheld RFID"],
-    themeKeys:["Labor & Human Capacity"], evidence:"Medium-Strong", annualBenefit:187200, rampType:"soft",
+    themeKeys:["Labor & Human Capacity"], evidence:"Medium-Strong", annualBenefit:187200, rampType:"soft", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Recover 2–5 hrs/week per associate — redirect from inventory search to customer-facing work",
     evidenceIds:["EV-RET-LABOR-01"],
     challenge:"When soft productivity savings are questioned: these hours are real but not automatically cashable. Position as capacity to absorb growth or improve NPS without adding headcount — not a direct cost reduction.",
@@ -2238,7 +2244,7 @@ const SCENARIOS = [
   { id:"RET-07", name:"Omnichannel Fulfillment — BOPIS Accuracy",
     theme:"Revenue / Margin", verticalKey:"retail",
     facilityKeys:["Store / Branch"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Revenue / Margin","Operational Efficiency"], evidence:"Strong", annualBenefit:162000, rampType:"working_cap",
+    themeKeys:["Revenue / Margin","Operational Efficiency"], evidence:"Strong", annualBenefit:162000, rampType:"working_cap", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Reduce BOPIS cancellations 60% and improve pick accuracy to 99%+ — protect omnichannel margin",
     evidenceIds:["EV-RET-OMNI-01","EV-RET-ACC-01"],
     challenge:"When omnichannel performance is seen as a systems issue: the root cause of order cancellation is inventory inaccuracy. RFID is the data layer that fixes the signal your OMS relies on — not an OMS replacement.",
@@ -2254,7 +2260,7 @@ const SCENARIOS = [
   { id:"RET-08", name:"Safety Stock Reduction — Carrying Cost",
     theme:"Working Capital", verticalKey:"retail",
     facilityKeys:["Store / Branch","Warehouse / DC"], techKeys:["RFID Core"],
-    themeKeys:["Working Capital","Operational Efficiency"], evidence:"Medium-Strong", annualBenefit:100000, rampType:"working_cap",
+    themeKeys:["Working Capital","Operational Efficiency"], evidence:"Medium-Strong", annualBenefit:100000, rampType:"working_cap", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"5–15% safety stock reduction without stockout risk — enabled by perpetual accurate inventory",
     evidenceIds:["EV-RET-SAFETY-01","EV-RET-ACC-01"],
     challenge:"When inventory reduction risks service levels: RFID accuracy is precisely why you can carry less — you always know exactly what is available. The reduction is driven by data confidence, not optimism.",
@@ -2269,7 +2275,7 @@ const SCENARIOS = [
   { id:"WH-01", name:"Cycle Count Labor — Perpetual DC Accuracy",
     theme:"Labor & Human Capacity", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Labor & Human Capacity"], evidence:"Strong", annualBenefit:480000, rampType:"hard_labor",
+    themeKeys:["Labor & Human Capacity"], evidence:"Strong", annualBenefit:480000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"DC cycle-count labor down 75–85% — 3 min/position to 20 sec per pallet position",
     evidenceIds:["EV-WH-LABOR-01"],
     challenge:"When headcount reduction is the objection: hours recovered from manual counting redeploy to value-add tasks or absorb volume growth without additional FTE. Finance counts schedulable hours at 100%.",
@@ -2285,7 +2291,7 @@ const SCENARIOS = [
   { id:"WH-02", name:"Receiving Throughput & Dock-to-Stock",
     theme:"Labor & Human Capacity", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Labor & Human Capacity","Operational Efficiency"], evidence:"Strong", annualBenefit:210000, rampType:"hard_labor",
+    themeKeys:["Labor & Human Capacity","Operational Efficiency"], evidence:"Strong", annualBenefit:210000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Inbound throughput up 30–50% — eliminate manual scan-each confirmation at dock doors",
     evidenceIds:["EV-WH-RECV-01"],
     challenge:"When receiving speed is dismissed: dock-to-stock time directly affects same-day SLA compliance. Missed SLAs convert directly to chargeback exposure — a verifiable P&L line.",
@@ -2300,7 +2306,7 @@ const SCENARIOS = [
   { id:"WH-03", name:"Pick Accuracy & Returns Reduction",
     theme:"Operational Efficiency", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], techKeys:["RFID Core","Handheld RFID"],
-    themeKeys:["Operational Efficiency","Direct Cost & Spend"], evidence:"Medium-Strong", annualBenefit:160000, rampType:"hard_cost",
+    themeKeys:["Operational Efficiency","Direct Cost & Spend"], evidence:"Medium-Strong", annualBenefit:160000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Pick errors from 0.5% to under 0.1% — prevent thousands of costly re-picks and returns annually",
     evidenceIds:["EV-WH-PICK-01"],
     challenge:"When per-error costs seem small: at 2M annual orders and 0.5% error rate that is 10,000 errors at $20+ each — compounding with return shipping, customer service, and chargeback exposure.",
@@ -2316,7 +2322,7 @@ const SCENARIOS = [
   { id:"HC-01", name:"Equipment Rental Reduction & Asset Utilization",
     theme:"Direct Cost & Spend", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], techKeys:["RFID Core","RTLS / Location"],
-    themeKeys:["Direct Cost & Spend","Labor & Human Capacity"], evidence:"Strong", annualBenefit:325000, rampType:"hard_cost",
+    themeKeys:["Direct Cost & Spend","Labor & Human Capacity"], evidence:"Strong", annualBenefit:325000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"15–25% equipment rental reduction + 40–70% nursing search time elimination",
     evidenceIds:["EV-HC-ASSET-01"],
     challenge:"When asset tracking is dismissed as a cost-reduction play: GE Healthcare and ECRI documented 15–25% rental reduction. The mechanism is visibility into owned assets sitting idle — not purchasing fewer assets.",
@@ -2333,7 +2339,7 @@ const SCENARIOS = [
   { id:"HC-02", name:"Surgical Instrument Tracking — OR Throughput",
     theme:"Operational Efficiency", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], techKeys:["RFID Core"],
-    themeKeys:["Operational Efficiency","Regulatory & Compliance"], evidence:"Strong", annualBenefit:280000, rampType:"hard_cost",
+    themeKeys:["Operational Efficiency","Regulatory & Compliance"], evidence:"Strong", annualBenefit:280000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"25–35% reduction in lost/late instruments — protect OR throughput at $100–180/minute of delay",
     evidenceIds:["EV-HC-SURG-01"],
     challenge:"When OR delays are framed as a clinical management issue: Auburn University and AORN documented 25–35% instrument delay reduction with RFID tracking. The data separates the technology problem from the management problem.",
@@ -2350,7 +2356,7 @@ const SCENARIOS = [
   { id:"GOV-01", name:"Audit Readiness — Property NFR & CAP Reduction",
     theme:"Regulatory & Compliance", verticalKey:"government",
     facilityKeys:["Government Facility","Depot / MRO"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Regulatory & Compliance"], evidence:"Strong", annualBenefit:1200000, rampType:"hard_cost",
+    themeKeys:["Regulatory & Compliance"], evidence:"Strong", annualBenefit:1200000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"7 consecutive audit disclaimers. RFID closes the asset existence-and-completeness gap — NDAA 2028 mandate.",
     evidenceIds:["EV-FED-AUDIT-01"],
     challenge:"When RFID's connection to audit findings is questioned: GAO-25-107427 names asset accountability as the primary driver of DoD's disclaimer opinion. NDAA 2028 mandates a clean opinion — RFID is the data foundation required to get there.",
@@ -2367,7 +2373,7 @@ const SCENARIOS = [
   { id:"MTL-01", name:"Tool & Asset Loss Reduction",
     theme:"Direct Cost & Spend", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory","Depot / MRO","Warehouse / DC"], techKeys:["RFID Core"],
-    themeKeys:["Direct Cost & Spend","Labor & Human Capacity"], evidence:"Medium-Strong", annualBenefit:220000, rampType:"hard_cost",
+    themeKeys:["Direct Cost & Spend","Labor & Human Capacity"], evidence:"Medium-Strong", annualBenefit:220000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manufacturing plants lose 15–20% of tool value annually — RFID cuts that loss 60–80% within the first year",
     evidenceIds:["EV-MTL-TOOL-01"],
     challenge:"When tool loss is accepted as a cost of doing business: Aberdeen Group documented 15–20% annual tool value loss across manufacturing. The first-year ROI on tracking is typically 6–12 months based on replacement cost alone.",
@@ -2382,7 +2388,7 @@ const SCENARIOS = [
   { id:"CAR-01", name:"Trailer Utilization & Yard Visibility",
     theme:"Operational Efficiency", verticalKey:"carriers",
     facilityKeys:["Terminal / Port","Warehouse / DC"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Operational Efficiency","Revenue / Margin"], evidence:"Medium-Strong", annualBenefit:380000, rampType:"revenue",
+    themeKeys:["Operational Efficiency","Revenue / Margin"], evidence:"Medium-Strong", annualBenefit:380000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"10–20% trailer utilization improvement — eliminate manual yard checks and convert idle assets into revenue capacity",
     evidenceIds:["EV-TL-ASSET-01"],
     challenge:"When trailer utilization upside is questioned: ATA documents 10–20% improvement. We model 10%. The mechanism is eliminating ghost trailers — assets that appear available but can't be located in the yard.",
@@ -2398,7 +2404,7 @@ const SCENARIOS = [
   { id:"TL-01", name:"Detention & Dwell Cost Reduction",
     theme:"Direct Cost & Spend", verticalKey:"carriers",
     facilityKeys:["Terminal / Port","Warehouse / DC","Depot / MRO"], techKeys:["RFID Core"],
-    themeKeys:["Direct Cost & Spend","Operational Efficiency"], evidence:"Medium-Strong", annualBenefit:290000, rampType:"hard_cost",
+    themeKeys:["Direct Cost & Spend","Operational Efficiency"], evidence:"Medium-Strong", annualBenefit:290000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Carriers experience detention on 20–35% of loads — RFID dock visibility cuts excess dwell 30–50%",
     evidenceIds:["EV-TL-DWELL-01"],
     challenge:"When detention costs seem like a shipper problem: detention directly erodes driver productivity and asset yield. Reducing it improves on-time performance which protects rate and relationship with shipper accounts.",
@@ -2416,7 +2422,7 @@ const SCENARIOS = [
   { id:"WH-04", name:"SLA Compliance — 3PL Chargeback Reduction",
     theme:"Revenue / Margin", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], themeKeys:["Revenue / Margin","Direct Cost & Spend"],
-    annualBenefit:210000, rampType:"hard_cost",
+    annualBenefit:210000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"3PLs average 2–5% SLA miss rate — RFID reduces chargebacks 60–80% through real-time load verification",
     evidenceIds:["EV-WH-SLA-01"],
     challenge:"Chargebacks are a direct P&L line item — pull from AP or the customer's contract summary to anchor the number.",
@@ -2430,7 +2436,7 @@ const SCENARIOS = [
   { id:"WH-05", name:"Safety Stock Reduction — Carrying Cost Savings",
     theme:"Working Capital", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], themeKeys:["Working Capital","Operational Efficiency"],
-    annualBenefit:175000, rampType:"working_cap",
+    annualBenefit:175000, rampType:"working_cap", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID accuracy enables 10–20% safety stock reduction without increasing stockout risk",
     evidenceIds:["EV-WH-SAFETY-01"],
     challenge:"Model as working capital release + annual carrying cost — both are creditable to finance.",
@@ -2445,7 +2451,7 @@ const SCENARIOS = [
   { id:"WH-06", name:"Cross-Dock & Outbound Verification Labor",
     theme:"Labor & Human Capacity", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], themeKeys:["Labor & Human Capacity"],
-    annualBenefit:165000, rampType:"hard_labor",
+    annualBenefit:165000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Eliminate manual scan-each at outbound — 30–50% dock labor reduction with RFID tunnel/gate reads",
     evidenceIds:["EV-WH-XDOCK-01"],
     challenge:"This is a pure labor math argument — hours × rate × reduction %. Easy to verify from time-and-motion studies.",
@@ -2461,7 +2467,7 @@ const SCENARIOS = [
   { id:"HC-03", name:"Patient Flow — ED Length of Stay Reduction",
     theme:"Operational Efficiency", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], themeKeys:["Operational Efficiency","Revenue / Margin"],
-    annualBenefit:420000, rampType:"revenue",
+    annualBenefit:420000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RTLS bed tracking reduces ED LOS 10–20% — each hour recovered has direct margin and capacity value",
     evidenceIds:["EV-HC-FLOW-01"],
     challenge:"LOS reduction is both a margin and a capacity argument — recovering throughput avoids capital expansion. CFOs respond to both angles.",
@@ -2476,7 +2482,7 @@ const SCENARIOS = [
   { id:"HC-04", name:"Medication Tracking — Dispensing Error Reduction",
     theme:"Regulatory & Compliance", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], themeKeys:["Regulatory & Compliance","Direct Cost & Spend"],
-    annualBenefit:280000, rampType:"hard_cost",
+    annualBenefit:280000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Medication errors affect 1–3% of admissions — RFID chain-of-custody reduces dispensing errors 20–30%",
     evidenceIds:["EV-HC-MED-01"],
     challenge:"Frame as risk cost + labor cost. Each error event carries investigation, reporting, and potential liability cost beyond the medication itself.",
@@ -2491,7 +2497,7 @@ const SCENARIOS = [
   { id:"HC-05", name:"Joint Commission Audit — Compliance Labor Reduction",
     theme:"Regulatory & Compliance", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:195000, rampType:"hard_labor",
+    annualBenefit:195000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manual Joint Commission prep is 8–15% of clinical support labor — RFID reduces audit prep 40–65%",
     evidenceIds:["EV-HC-COMP-01"],
     challenge:"This is a pure labor cost recovery with a compliance risk kicker. Anchor to actual hours spent in last audit cycle.",
@@ -2505,7 +2511,7 @@ const SCENARIOS = [
   { id:"HC-06", name:"Supply Stockout & Expiry Reduction",
     theme:"Direct Cost & Spend", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], themeKeys:["Direct Cost & Spend","Working Capital"],
-    annualBenefit:160000, rampType:"hard_cost",
+    annualBenefit:160000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Supply stockouts at 2–5% of PAR locations weekly — RFID reduces stockouts 20–30% and expired write-offs 15–20%",
     evidenceIds:["EV-HC-SUPPLY-01"],
     challenge:"Pull from supply chain or materials management — expired write-offs are already a tracked line item.",
@@ -2520,7 +2526,7 @@ const SCENARIOS = [
   { id:"HC-07", name:"Controlled Substance Diversion Prevention",
     theme:"Direct Cost & Spend", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], themeKeys:["Direct Cost & Spend","Regulatory & Compliance"],
-    annualBenefit:230000, rampType:"hard_cost",
+    annualBenefit:230000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Controlled substance diversion drives write-offs and DEA investigations — RFID chain-of-custody reduces loss 15–30%",
     evidenceIds:["EV-HC-DIVERSION-01"],
     challenge:"This is a risk argument as much as a cost argument — DEA investigation costs and potential liability dwarf the medication value.",
@@ -2536,7 +2542,7 @@ const SCENARIOS = [
   { id:"GOV-02", name:"Annual Physical Inventory Labor Reduction",
     theme:"Labor & Human Capacity", verticalKey:"government",
     facilityKeys:["Government Facility","Depot / MRO"], themeKeys:["Labor & Human Capacity"],
-    annualBenefit:480000, rampType:"hard_labor",
+    annualBenefit:480000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Federal agencies must certify annual physical inventories by Sep 30 — RFID reduces count time 75–85% vs. manual",
     evidenceIds:["EV-FED-INVENTORY-01"],
     challenge:"Annual inventory is mandated — the labor cost is non-discretionary. RFID doesn't eliminate the requirement; it fulfills it at a fraction of the labor cost.",
@@ -2551,7 +2557,7 @@ const SCENARIOS = [
   { id:"GOV-03", name:"Ghost Asset Elimination — Procurement Avoidance",
     theme:"Operational Efficiency", verticalKey:"government",
     facilityKeys:["Government Facility","Depot / MRO"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:650000, rampType:"hard_cost",
+    annualBenefit:650000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Ghost assets and unrecorded inventory cause agencies to procure items they already own — RFID closes the gap",
     evidenceIds:["EV-FED-GHOST-01"],
     challenge:"Procurement avoidance is a hard dollar save — pull from budget vs. actuals and connect to specific equipment categories.",
@@ -2565,7 +2571,7 @@ const SCENARIOS = [
   { id:"GOV-04", name:"Property Accountability Staff Overhead Reduction",
     theme:"Labor & Human Capacity", verticalKey:"government",
     facilityKeys:["Government Facility","Depot / MRO"], themeKeys:["Labor & Human Capacity"],
-    annualBenefit:320000, rampType:"hard_labor",
+    annualBenefit:320000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"PBOs and ECOs spend significant time on manual reconciliation and APSR data entry — RFID automates location capture",
     evidenceIds:["EV-FED-STAFF-01"],
     challenge:"This labor is already funded — the question is how it's being used. RFID redirects it from reconciliation to mission-critical property management.",
@@ -2580,7 +2586,7 @@ const SCENARIOS = [
   { id:"GOV-05", name:"Sensitive Item Loss Prevention",
     theme:"Direct Cost & Spend", verticalKey:"government",
     facilityKeys:["Government Facility","Depot / MRO"], themeKeys:["Direct Cost & Spend","Regulatory & Compliance"],
-    annualBenefit:900000, rampType:"hard_cost",
+    annualBenefit:900000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Loss of controlled items triggers FLIPL and security investigations — RFID provides continuous custody chain",
     evidenceIds:["EV-FED-SENSITIVE-01"],
     challenge:"The cost of a FLIPL investigation far exceeds the replacement value of the lost item — that's the number to anchor to.",
@@ -2597,7 +2603,7 @@ const SCENARIOS = [
   { id:"MTL-02", name:"WIP Inventory — Cycle Time & Carrying Cost Reduction",
     theme:"Working Capital", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory"], themeKeys:["Working Capital","Operational Efficiency"],
-    annualBenefit:380000, rampType:"working_cap",
+    annualBenefit:380000, rampType:"working_cap", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID eliminates lost work orders between stations — 10–25% cycle time reduction, 15–30% WIP reduction",
     evidenceIds:["EV-MTL-WIP-01"],
     challenge:"WIP reduction is a working capital argument — model as one-time release plus annual carrying cost. Both are creditable.",
@@ -2611,7 +2617,7 @@ const SCENARIOS = [
   { id:"MTL-03", name:"Compliance & Traceability Documentation Labor",
     theme:"Regulatory & Compliance", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:290000, rampType:"hard_labor",
+    annualBenefit:290000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"FDA, ITAR, AS9100 compliance costs 3–8% of revenue — RFID automated traceability cuts documentation labor 40–70%",
     evidenceIds:["EV-MTL-TRACE-01"],
     challenge:"Regulatory compliance labor is non-discretionary — the question is the cost of fulfilling it manually vs. automatically.",
@@ -2625,7 +2631,7 @@ const SCENARIOS = [
   { id:"MTL-04", name:"Recall Scope Reduction — Targeted Traceability",
     theme:"Direct Cost & Spend", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory"], themeKeys:["Direct Cost & Spend","Regulatory & Compliance"],
-    annualBenefit:500000, rampType:"hard_cost",
+    annualBenefit:500000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Without RFID, recall scope is the full lot — serialization limits exposure to specific units, reducing recall cost 60–90%",
     evidenceIds:["EV-MTL-RECALL-01"],
     challenge:"Frame as risk-adjusted expected value — even a low probability of recall with a large scope creates a quantifiable expected cost that RFID reduces.",
@@ -2639,7 +2645,7 @@ const SCENARIOS = [
   { id:"MTL-05", name:"MRO Inventory Optimization — Carrying Cost Reduction",
     theme:"Working Capital", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Working Capital","Direct Cost & Spend"],
-    annualBenefit:245000, rampType:"working_cap",
+    annualBenefit:245000, rampType:"working_cap", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"MRO carrying costs 20–30% of value — RFID reduces excess MRO 10–25% and emergency procurement 30–50%",
     evidenceIds:["EV-MTL-MRO-01"],
     challenge:"Pull MRO inventory value and carrying cost rate from finance — these are already tracked. Emergency procurement is usually visible in AP.",
@@ -2655,7 +2661,7 @@ const SCENARIOS = [
   { id:"MTL-06", name:"Finished Goods Shipment Accuracy — Chargeback Reduction",
     theme:"Direct Cost & Spend", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory","Warehouse / DC"], themeKeys:["Direct Cost & Spend","Operational Efficiency"],
-    annualBenefit:180000, rampType:"hard_cost",
+    annualBenefit:180000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manual finished goods tracking yields 0.5–2% shipment errors — RFID reduces to under 0.1%",
     evidenceIds:["EV-MTL-SHIP-01"],
     challenge:"Chargeback data is in AP — anchor the baseline from actual records, not benchmarks.",
@@ -2670,7 +2676,7 @@ const SCENARIOS = [
   { id:"MTL-07", name:"Asset & Fixture Tracking — Utilization & Procurement Avoidance",
     theme:"Operational Efficiency", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:165000, rampType:"hard_cost",
+    annualBenefit:165000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Reusable fixtures and production assets are over-procured when unlocatable — RFID prevents phantom replacements",
     evidenceIds:["EV-MTL-FIXTURE-01"],
     challenge:"This is procurement avoidance — pull from capex or asset replacement budgets to anchor.",
@@ -2686,7 +2692,7 @@ const SCENARIOS = [
   { id:"CAR-02", name:"OS&D Claim Reduction — Load Verification Accuracy",
     theme:"Direct Cost & Spend", verticalKey:"carriers",
     facilityKeys:["Terminal / Port","Warehouse / DC"], themeKeys:["Direct Cost & Spend","Operational Efficiency"],
-    annualBenefit:210000, rampType:"hard_cost",
+    annualBenefit:210000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manual load verification yields 0.3–0.8% OS&D rate — RFID reduces to under 0.05% before shipment departs",
     evidenceIds:["EV-CAR-OSD-01"],
     challenge:"OS&D claims are tracked in claims management — pull actual data, not benchmarks.",
@@ -2701,7 +2707,7 @@ const SCENARIOS = [
   { id:"CAR-03", name:"Hub Sortation Labor — Barcode to RFID Throughput",
     theme:"Labor & Human Capacity", verticalKey:"carriers",
     facilityKeys:["Terminal / Port"], themeKeys:["Labor & Human Capacity","Operational Efficiency"],
-    annualBenefit:320000, rampType:"hard_labor",
+    annualBenefit:320000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID read-while-moving eliminates manual divert lanes — hub labor efficiency improves 20–35%",
     evidenceIds:["EV-CAR-SORT-01"],
     challenge:"This is an operations efficiency argument — model hours eliminated at the divert lanes plus reduction in manual scan events.",
@@ -2717,7 +2723,7 @@ const SCENARIOS = [
   { id:"CAR-04", name:"Misroute Reduction — Package Recovery Cost Avoidance",
     theme:"Operational Efficiency", verticalKey:"carriers",
     facilityKeys:["Terminal / Port"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:195000, rampType:"hard_cost",
+    annualBenefit:195000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Misroute rate 0.5–1.5% at $8–25 per incident — RFID real-time location enables recovery before departure",
     evidenceIds:["EV-CAR-MISROUTE-01"],
     challenge:"Pull misroute data from operations — this is a tracked KPI at most carriers.",
@@ -2732,7 +2738,7 @@ const SCENARIOS = [
   { id:"CAR-05", name:"Trailer Search Time & Yard Labor Elimination",
     theme:"Labor & Human Capacity", verticalKey:"carriers",
     facilityKeys:["Terminal / Port","Warehouse / DC"], themeKeys:["Labor & Human Capacity","Operational Efficiency"],
-    annualBenefit:145000, rampType:"hard_labor",
+    annualBenefit:145000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Without RFID, yard jockeys spend 15–30% of shift time locating trailers — RFID reduces search time 80–90%",
     evidenceIds:["EV-CAR-YARD-01"],
     challenge:"Time-and-motion study data is the best anchor — ask how much of yard jockey shift time is pure search.",
@@ -2750,7 +2756,7 @@ const SCENARIOS = [
   { id:"AVN-01", name:"Baggage Mishandling Reduction — Claims & Re-delivery",
     theme:"Direct Cost & Spend", verticalKey:"aviation",
     facilityKeys:["Terminal / Port","Warehouse / DC"], themeKeys:["Direct Cost & Spend","Operational Efficiency"],
-    annualBenefit:480000, rampType:"hard_cost",
+    annualBenefit:480000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"IATA: 4.35 mishandled bags per 1K passengers — RFID 99%+ read rate reduces mishandling 20–25%",
     evidenceIds:["EV-AVN-BAGGAGE-01"],
     challenge:"Delta reported 25% mishandling reduction at enterprise scale — use as a Tier 1 reference alongside IATA data.",
@@ -2765,7 +2771,7 @@ const SCENARIOS = [
   { id:"AVN-02", name:"MRO Tool Control — Search Time & FOD Risk Reduction",
     theme:"Labor & Human Capacity", verticalKey:"aviation",
     facilityKeys:["Terminal / Port","Depot / MRO"], themeKeys:["Labor & Human Capacity","Direct Cost & Spend"],
-    annualBenefit:310000, rampType:"hard_labor",
+    annualBenefit:310000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Missing tools halt maintenance and create FOD risk — Airbus reports 90% reduction in missing tool incidents",
     evidenceIds:["EV-AVN-MRO-01"],
     challenge:"FOD risk has both a cost and a safety/regulatory angle — both resonate with MRO leadership.",
@@ -2780,7 +2786,7 @@ const SCENARIOS = [
   { id:"AVN-03", name:"MRO Turnaround Time — Aircraft Utilization Improvement",
     theme:"Revenue / Margin", verticalKey:"aviation",
     facilityKeys:["Terminal / Port","Depot / MRO"], themeKeys:["Revenue / Margin","Operational Efficiency"],
-    annualBenefit:520000, rampType:"revenue",
+    annualBenefit:520000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID part and tool visibility reduces MRO turnaround 10–15% — each hour of AOG reduction has direct revenue impact",
     evidenceIds:["EV-AVN-TAT-01"],
     challenge:"AOG cost varies significantly — get the customer's actual aircraft lease or lost revenue rate. Even conservative estimates yield large values.",
@@ -2795,7 +2801,7 @@ const SCENARIOS = [
   { id:"AVN-04", name:"Component Traceability — Compliance Labor & Grounding Risk",
     theme:"Regulatory & Compliance", verticalKey:"aviation",
     facilityKeys:["Terminal / Port","Depot / MRO"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:275000, rampType:"hard_labor",
+    annualBenefit:275000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"FAA/EASA require full lifecycle traceability — manual documentation is 40–60% of maintenance admin labor",
     evidenceIds:["EV-AVN-TRACE-01"],
     challenge:"Regulatory compliance labor is mandatory — frame as fulfilling an existing obligation at lower cost with lower error risk.",
@@ -2811,7 +2817,7 @@ const SCENARIOS = [
   { id:"AVN-05", name:"Safety Equipment Inspection Labor Reduction",
     theme:"Labor & Human Capacity", verticalKey:"aviation",
     facilityKeys:["Terminal / Port","Depot / MRO"], themeKeys:["Labor & Human Capacity","Regulatory & Compliance"],
-    annualBenefit:185000, rampType:"hard_labor",
+    annualBenefit:185000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manual safety equipment checks take 4–8 hrs per aircraft — RFID reduces to under 30 min",
     evidenceIds:["EV-AVN-SAFETY-01"],
     challenge:"Time-and-motion data is available for most carriers — anchor to actual current inspection duration and fleet size.",
@@ -2827,7 +2833,7 @@ const SCENARIOS = [
   { id:"AVN-06", name:"Boarding Time Reduction — Passenger Throughput",
     theme:"Operational Efficiency", verticalKey:"aviation",
     facilityKeys:["Terminal / Port"], themeKeys:["Operational Efficiency","Revenue / Margin"],
-    annualBenefit:220000, rampType:"revenue",
+    annualBenefit:220000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Airport RFID pilots show 20% boarding time reduction — fewer missed connections, reduced voucher spend",
     evidenceIds:["EV-AVN-BOARD-01"],
     challenge:"This argument leads with cost avoidance (vouchers, rebooking) and builds to throughput capacity unlock.",
@@ -2842,7 +2848,7 @@ const SCENARIOS = [
   { id:"HOS-01", name:"Linen Lifecycle — Loss Reduction & Laundry Efficiency",
     theme:"Direct Cost & Spend", verticalKey:"hospitality",
     facilityKeys:["Store / Branch"], themeKeys:["Direct Cost & Spend","Operational Efficiency"],
-    annualBenefit:195000, rampType:"hard_cost",
+    annualBenefit:195000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Hotels lose 10–25% of linen annually — RFID tracking reduces linen loss 15–20% and over-processing 10–15%",
     evidenceIds:["EV-HOS-LINEN-01"],
     challenge:"Annual linen replacement cost is a clear P&L line — pull from housekeeping or purchasing budget.",
@@ -2857,7 +2863,7 @@ const SCENARIOS = [
   { id:"HOS-02", name:"F&B Inventory — Counting Labor & Shrink Control",
     theme:"Labor & Human Capacity", verticalKey:"hospitality",
     facilityKeys:["Store / Branch"], themeKeys:["Labor & Human Capacity","Direct Cost & Spend"],
-    annualBenefit:145000, rampType:"hard_labor",
+    annualBenefit:145000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"F&B shrink 4–8% in high-value categories — RFID reduces counting labor 40–70% and shrink 15–25%",
     evidenceIds:["EV-HOS-FB-01"],
     challenge:"High-value category shrink (proteins, alcohol) is immediately quantifiable from purchasing vs. sales reconciliation.",
@@ -2875,7 +2881,7 @@ const SCENARIOS = [
   { id:"DC-01", name:"Physical Audit Acceleration — CMDB Accuracy",
     theme:"Operational Efficiency", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Operational Efficiency","Labor & Human Capacity"],
-    annualBenefit:280000, rampType:"hard_labor",
+    annualBenefit:280000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manual data center audits: 2–5 days per 1,000 assets at 85–95% match — RFID cuts audit time 75–85%",
     evidenceIds:["EV-DC-AUDIT-01"],
     challenge:"CMDB accuracy is a business continuity issue — frame as labor cost plus risk reduction from asset configuration errors.",
@@ -2891,7 +2897,7 @@ const SCENARIOS = [
   { id:"DC-02", name:"Stranded Asset Recovery — Capital Deferral",
     theme:"Operational Efficiency", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:350000, rampType:"hard_cost",
+    annualBenefit:350000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"5–15% of data center assets are stranded — RFID sweeps identify orphaned assets for redeployment before new procurement",
     evidenceIds:["EV-DC-STRANDED-01"],
     challenge:"This is a capex avoidance argument — model as % of annual IT procurement budget deferred by reutilization.",
@@ -2907,7 +2913,7 @@ const SCENARIOS = [
   { id:"IE-01", name:"Tool, Vehicle & Equipment Tracking — Search & Loss",
     theme:"Direct Cost & Spend", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO","Warehouse / DC"], themeKeys:["Direct Cost & Spend","Labor & Human Capacity"],
-    annualBenefit:380000, rampType:"hard_cost",
+    annualBenefit:380000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Energy/construction projects lose 20–30% of tool value annually — RFID cuts loss 30–50% and search time 65–80%",
     evidenceIds:["EV-IE-TOOL-01"],
     challenge:"Tool loss is already tracked in project accounting — pull replacement cost data and rental overages from AP.",
@@ -2923,7 +2929,7 @@ const SCENARIOS = [
   { id:"IE-02", name:"PPE Compliance & Safety Audit Automation",
     theme:"Regulatory & Compliance", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:220000, rampType:"hard_cost",
+    annualBenefit:220000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"OSHA PPE violations average $5K–$15K per citation — RFID automated zone access validation reduces fines 20–50%",
     evidenceIds:["EV-IE-PPE-01"],
     challenge:"OSHA violation history is public record — anchor to actual citation history and HSE audit labor.",
@@ -2939,7 +2945,7 @@ const SCENARIOS = [
   { id:"IE-03", name:"MRO Spare Parts — Carrying Cost & NPT Reduction",
     theme:"Working Capital", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Working Capital","Direct Cost & Spend"],
-    annualBenefit:420000, rampType:"working_cap",
+    annualBenefit:420000, rampType:"working_cap", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Critical spare stockouts cause NPT at $50K–$500K/hr offshore — RFID reduces excess inventory and emergency buys",
     evidenceIds:["EV-IE-MRO-01"],
     challenge:"NPT cost is the big number — anchor to actual NPT events and their duration before building the MRO efficiency case.",
@@ -2957,7 +2963,7 @@ const SCENARIOS = [
   { id:"FS-01", name:"Food Waste Reduction — FEFO Management",
     theme:"Direct Cost & Spend", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC","Store / Branch"], themeKeys:["Direct Cost & Spend","Operational Efficiency"],
-    annualBenefit:240000, rampType:"hard_cost",
+    annualBenefit:240000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Food service operators lose 4–10% of food purchased to pre-consumer waste — RFID FEFO reduces this 20–30%",
     evidenceIds:["EV-FS-WASTE-01"],
     challenge:"Food waste is tracked in most food service operations — pull from purchasing vs. sales reconciliation or waste logs.",
@@ -2971,7 +2977,7 @@ const SCENARIOS = [
   { id:"FS-02", name:"Food Recall Traceability — Scope & Response Time",
     theme:"Regulatory & Compliance", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC"], themeKeys:["Regulatory & Compliance","Direct Cost & Spend"],
-    annualBenefit:500000, rampType:"hard_cost",
+    annualBenefit:500000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Average food recall costs $10–30M — RFID lot-level traceability reduces scope 60–85% and response time 80–90%",
     evidenceIds:["EV-FS-RECALL-01"],
     challenge:"FSMA Section 204 compliance deadline creates regulatory urgency on top of the cost argument.",
@@ -2985,7 +2991,7 @@ const SCENARIOS = [
   { id:"FS-03", name:"Cold Chain Compliance — Spoilage & HACCP Documentation",
     theme:"Regulatory & Compliance", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC"], themeKeys:["Regulatory & Compliance","Direct Cost & Spend"],
-    annualBenefit:185000, rampType:"hard_cost",
+    annualBenefit:185000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manual temp logs: 60–75% HACCP compliance — RFID automated logging reaches 99%+ with real-time excursion alerts",
     evidenceIds:["EV-FS-COLD-01"],
     challenge:"Spoilage from temperature excursions is a direct cost — pull from QA rejection logs. HACCP audit labor is separately recoverable.",
@@ -3005,7 +3011,7 @@ const SCENARIOS = [
   { id:"RET-09", name:"RFID Data Foundation for Retail AI & Analytics",
     theme:"Strategic / AI / Data", verticalKey:"retail",
     facilityKeys:["Store / Branch"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:120000, rampType:"strategic",
+    annualBenefit:120000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Item-level RFID data enables demand forecasting, automated replenishment, planogram compliance, and customer analytics",
     evidenceIds:["EV-RET-AI-01"],
     challenge:"Position as the data infrastructure investment that unlocks AI ROI — the sensor layer existing analytics platforms need but can't buy.",
@@ -3020,7 +3026,7 @@ const SCENARIOS = [
   { id:"WH-07", name:"RFID Data Foundation for Warehouse AI & Automation",
     theme:"Strategic / AI / Data", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:140000, rampType:"strategic",
+    annualBenefit:140000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time location data enables AMR navigation, dynamic slotting, predictive labor scheduling, and AI-driven demand flow",
     evidenceIds:["EV-WH-AI-01"],
     challenge:"Frame as infrastructure that unlocks automation ROI — AMR and WMS investments underperform without real-time location data.",
@@ -3035,7 +3041,7 @@ const SCENARIOS = [
   { id:"HC-08", name:"RFID Data Foundation for Healthcare AI & Predictive Ops",
     theme:"Strategic / AI / Data", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:160000, rampType:"strategic",
+    annualBenefit:160000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time asset, patient, and supply data creates the sensor layer for LOS prediction, demand forecasting, and automated compliance",
     evidenceIds:["EV-HC-AI-01"],
     challenge:"Healthcare AI initiatives consistently fail on data quality — RFID is the real-time sensor infrastructure that makes predictive ops viable.",
@@ -3050,7 +3056,7 @@ const SCENARIOS = [
   { id:"GOV-06", name:"Excess & Redundant Procurement Reduction",
     theme:"Operational Efficiency", verticalKey:"government",
     facilityKeys:["Government Facility","Depot / MRO"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:750000, rampType:"hard_cost",
+    annualBenefit:750000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Without asset visibility, agencies procure items already in inventory — DoD GAO-05-277 documented $400M+ in duplicate procurement",
     evidenceIds:["EV-FED-EXCESS-01"],
     challenge:"Procurement avoidance requires asset visibility data to defend — RFID creates the evidence trail for reutilization program participation.",
@@ -3066,7 +3072,7 @@ const SCENARIOS = [
   { id:"MTL-08", name:"RFID Data Foundation for Manufacturing AI & Digital Twin",
     theme:"Strategic / AI / Data", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:180000, rampType:"strategic",
+    annualBenefit:180000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time item, WIP, and asset location data enables digital twin modeling, AI-driven scheduling, and predictive quality",
     evidenceIds:["EV-MTL-AI-01"],
     challenge:"Digital twin and Industry 4.0 investments stall without real-time physical data — RFID is the sensor layer that makes them viable.",
@@ -3081,7 +3087,7 @@ const SCENARIOS = [
   { id:"HOS-03", name:"Guest Experience & Cashless Revenue — RFID Wristbands",
     theme:"Revenue / Margin", verticalKey:"hospitality",
     facilityKeys:["Store / Branch"], themeKeys:["Revenue / Margin","Operational Efficiency"],
-    annualBenefit:320000, rampType:"revenue",
+    annualBenefit:320000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID/NFC wristbands increase per-capita ancillary spend 10–20% and improve entry throughput 20–30%",
     evidenceIds:["EV-HOS-GUEST-01"],
     challenge:"Theme parks and resorts have documented this at scale — frame as friction reduction that unlocks spend already intended by guests.",
@@ -3095,7 +3101,7 @@ const SCENARIOS = [
   { id:"HOS-04", name:"Event & Venue Asset Management — Loss & Overtime",
     theme:"Direct Cost & Spend", verticalKey:"hospitality",
     facilityKeys:["Store / Branch"], themeKeys:["Direct Cost & Spend","Labor & Human Capacity"],
-    annualBenefit:155000, rampType:"hard_cost",
+    annualBenefit:155000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"AV and event assets experience 20–35% annual loss — RFID kit tracking cuts loss 25–35% and setup overtime 20–30%",
     evidenceIds:["EV-HOS-ASSET-01"],
     challenge:"Event asset loss is tracked in venue ops — pull from annual equipment replacement and overtime budgets.",
@@ -3110,7 +3116,7 @@ const SCENARIOS = [
   { id:"HOS-05", name:"Security & Access Control — Unauthorized Entry Reduction",
     theme:"Regulatory & Compliance", verticalKey:"hospitality",
     facilityKeys:["Store / Branch"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:120000, rampType:"hard_cost",
+    annualBenefit:120000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"2–5% unauthorized entry rates — RFID anti-passback reduces violations 20–30% and improves security labor efficiency",
     evidenceIds:["EV-HOS-SECURITY-01"],
     challenge:"Unauthorized entry has both revenue leakage and liability dimensions — frame both.",
@@ -3126,7 +3132,7 @@ const SCENARIOS = [
   { id:"HOS-06", name:"Hospitality AI & Guest Personalization Data Foundation",
     theme:"Strategic / AI / Data", verticalKey:"hospitality",
     facilityKeys:["Store / Branch"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:100000, rampType:"strategic",
+    annualBenefit:100000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time linen, F&B, and guest journey data enables predictive demand, personalized offers, and automated inventory management",
     evidenceIds:["EV-HOS-AI-01"],
     challenge:"Hospitality AI platforms need real-time operational data — RFID creates the sensor layer that makes personalization and predictive ops viable.",
@@ -3141,7 +3147,7 @@ const SCENARIOS = [
   { id:"DC-03", name:"Stranded Asset Recovery — Capital Deferral & Capacity",
     theme:"Operational Efficiency", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:350000, rampType:"hard_cost",
+    annualBenefit:350000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"5–15% of data center assets are stranded — RFID sweeps identify orphaned assets for redeployment before new procurement",
     evidenceIds:["EV-DC-STRANDED-01"],
     challenge:"Stranded asset recovery is pure capex avoidance — model as % of annual IT procurement budget.",
@@ -3155,7 +3161,7 @@ const SCENARIOS = [
   { id:"DC-04", name:"Compliance Audit Burden — SOC2, PCI, ISO 27001",
     theme:"Regulatory & Compliance", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:195000, rampType:"hard_labor",
+    annualBenefit:195000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Audit evidence prep takes 40–120 hrs per cycle — RFID digital chain-of-custody cuts prep labor 30–60%",
     evidenceIds:["EV-DC-COMP-01"],
     challenge:"Compliance labor is non-discretionary — the question is whether it's fulfilled manually or automatically.",
@@ -3171,7 +3177,7 @@ const SCENARIOS = [
   { id:"DC-05", name:"Asset Loss & Data Security Risk Reduction",
     theme:"Direct Cost & Spend", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Direct Cost & Spend","Regulatory & Compliance"],
-    annualBenefit:280000, rampType:"hard_cost",
+    annualBenefit:280000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Missing storage devices are the #2 source of physical data breach — RFID chain-of-custody reduces loss 20–40%",
     evidenceIds:["EV-DC-LOSS-01"],
     challenge:"Average cost per missing storage device: $100K–$1M including notification, investigation, and regulatory exposure. Anchor to breach cost calculator.",
@@ -3186,7 +3192,7 @@ const SCENARIOS = [
   { id:"DC-06", name:"Incident Response — Asset Locate Time & MTTR Reduction",
     theme:"Operational Efficiency", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Operational Efficiency","Labor & Human Capacity"],
-    annualBenefit:140000, rampType:"soft",
+    annualBenefit:140000, rampType:"soft", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Locating hardware during incidents extends MTTR — RFID last-seen zone data reduces locate time 20–40%",
     evidenceIds:["EV-DC-INCIDENT-01"],
     challenge:"MTTR reduction has a direct SLA and business continuity value — connect to downtime cost or SLA penalty exposure.",
@@ -3201,7 +3207,7 @@ const SCENARIOS = [
   { id:"DC-07", name:"RFID Data Foundation for DCIM & Capacity Planning",
     theme:"Strategic / AI / Data", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:120000, rampType:"strategic",
+    annualBenefit:120000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time asset location and utilization data enables accurate capacity heatmaps, automated CMDB sync, and procurement deferral analytics",
     evidenceIds:["EV-DC-AI-01"],
     challenge:"DCIM platforms are only as good as their real-time data — RFID is the physical layer that makes capacity planning accurate.",
@@ -3216,7 +3222,7 @@ const SCENARIOS = [
   { id:"CAR-06", name:"Last-Mile Visibility — WISMO Contact Deflection",
     theme:"Operational Efficiency", verticalKey:"carriers",
     facilityKeys:["Terminal / Port"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:175000, rampType:"hard_cost",
+    annualBenefit:175000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID real-time last-mile location reduces WISMO contacts 15–30% — at $3–8 per deflected contact",
     evidenceIds:["EV-CAR-LASTMILE-01"],
     challenge:"WISMO contact volume and cost are tracked in customer service — pull from CRM or contact center data.",
@@ -3230,7 +3236,7 @@ const SCENARIOS = [
   { id:"CAR-07", name:"Regulated Mail & High-Value Parcel Compliance",
     theme:"Regulatory & Compliance", verticalKey:"carriers",
     facilityKeys:["Terminal / Port"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:145000, rampType:"hard_labor",
+    annualBenefit:145000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID reduces compliance documentation labor 40–60% for regulated mail and responds to regulatory inquiries in minutes vs. days",
     evidenceIds:["EV-CAR-POSTAL-01"],
     challenge:"Regulated mail compliance is mandatory — frame as fulfilling an existing obligation at lower labor cost with faster response.",
@@ -3245,7 +3251,7 @@ const SCENARIOS = [
   { id:"CAR-08", name:"RFID Data Foundation for Carrier AI & Network Optimization",
     theme:"Strategic / AI / Data", verticalKey:"carriers",
     facilityKeys:["Terminal / Port"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:130000, rampType:"strategic",
+    annualBenefit:130000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time package location enables AI-driven sortation sequencing, predictive misroute detection, and dynamic route optimization",
     evidenceIds:["EV-CAR-AI-01"],
     challenge:"Carrier AI investments require real-time shipment location data — RFID creates the sensor layer that activates them.",
@@ -3260,7 +3266,7 @@ const SCENARIOS = [
   { id:"TL-02", name:"Routing Guide Compliance — Shipper-Side Visibility",
     theme:"Regulatory & Compliance", verticalKey:"carriers",
     facilityKeys:["Terminal / Port","Warehouse / DC"], themeKeys:["Regulatory & Compliance","Direct Cost & Spend"],
-    annualBenefit:185000, rampType:"hard_cost",
+    annualBenefit:185000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID improves routing guide compliance 10–20% and reduces carrier chargebacks 20–40% through better load tendering",
     evidenceIds:["EV-TL-ROUTING-01"],
     challenge:"Routing guide compliance violations result in chargebacks that are tracked in AP — anchor to actual chargeback data.",
@@ -3275,7 +3281,7 @@ const SCENARIOS = [
   { id:"TL-03", name:"RFID Data Foundation for Logistics AI & Network Optimization",
     theme:"Strategic / AI / Data", verticalKey:"carriers",
     facilityKeys:["Terminal / Port","Warehouse / DC"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:140000, rampType:"strategic",
+    annualBenefit:140000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time trailer and shipment location data enables predictive ETAs, AI-driven load matching, and dynamic lane pricing",
     evidenceIds:["EV-CAR-AI-01"],
     challenge:"Logistics AI requires real-time asset location data — without RFID, models rely on stale EDI pings that miss actual yard and dock status.",
@@ -3290,7 +3296,7 @@ const SCENARIOS = [
   { id:"IE-04", name:"Oil & Gas Field Materials Management — Shrink & NPT",
     theme:"Direct Cost & Spend", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Direct Cost & Spend","Labor & Human Capacity"],
-    annualBenefit:480000, rampType:"hard_cost",
+    annualBenefit:480000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Field material shrink 8–15% of value — RFID reduces material loss 10–12% and NPT from unavailability 5–12%",
     evidenceIds:["EV-IE-OIL-01"],
     challenge:"NPT cost dwarfs material value — anchor to actual NPT events and hourly rate first, then build the material shrink case.",
@@ -3307,7 +3313,7 @@ const SCENARIOS = [
   { id:"IE-05", name:"Asset Integrity Inspection — Documentation & Compliance",
     theme:"Regulatory & Compliance", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:260000, rampType:"hard_labor",
+    annualBenefit:260000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Inspection programs spend 30–50% of budget on documentation — RFID reduces documentation labor 35–45% and compliance exceptions 25–35%",
     evidenceIds:["EV-IE-INTEGRITY-01"],
     challenge:"Regulatory inspection compliance is mandatory — the labor cost is non-discretionary. RFID reduces it while improving accuracy.",
@@ -3323,7 +3329,7 @@ const SCENARIOS = [
   { id:"IE-06", name:"Rental & High-Value Equipment — Billing Dispute Reduction",
     theme:"Direct Cost & Spend", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Direct Cost & Spend","Operational Efficiency"],
-    annualBenefit:310000, rampType:"hard_cost",
+    annualBenefit:310000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Subsea and rental asset billing disputes reduced ~80% with RFID custody transfer records — rental overages down 10–25%",
     evidenceIds:["EV-IE-RENTAL-01"],
     challenge:"Rental overages and disputes are tracked in AP and vendor management — pull actuals to anchor the model.",
@@ -3339,7 +3345,7 @@ const SCENARIOS = [
   { id:"IE-07", name:"RFID Data Foundation for Energy & Construction AI",
     theme:"Strategic / AI / Data", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Strategic / AI / Data","Regulatory & Compliance"],
-    annualBenefit:150000, rampType:"strategic",
+    annualBenefit:150000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time asset, material, and compliance data enables predictive failure analytics, automated inspection reporting, and AI-driven procurement optimization",
     evidenceIds:["EV-IE-AI-01"],
     challenge:"Predictive maintenance and AI-driven procurement require real-time physical asset data — RFID is the sensor layer.",
@@ -3354,7 +3360,7 @@ const SCENARIOS = [
   { id:"FS-04", name:"Food Recall Traceability — Scope & Response Time",
     theme:"Regulatory & Compliance", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC"], themeKeys:["Regulatory & Compliance","Direct Cost & Spend"],
-    annualBenefit:500000, rampType:"hard_cost",
+    annualBenefit:500000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Average food recall costs $10–30M — RFID lot traceability reduces scope 60–85% and response time 80–90%. FSMA 204 deadline: Jan 2026.",
     evidenceIds:["EV-FS-RECALL-01"],
     challenge:"FSMA Section 204 creates regulatory urgency independent of ROI — anchor to that compliance deadline, then build the cost avoidance case.",
@@ -3368,7 +3374,7 @@ const SCENARIOS = [
   { id:"FS-05", name:"High-Value Inventory Shrink — Proteins, Alcohol, Premiums",
     theme:"Direct Cost & Spend", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC","Store / Branch"], themeKeys:["Direct Cost & Spend"],
-    annualBenefit:195000, rampType:"hard_cost",
+    annualBenefit:195000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Food service shrink 4–8% in high-value categories — RFID chain-of-custody in high-risk zones reduces shrink 15–25%",
     evidenceIds:["EV-FS-SHRINK-01"],
     challenge:"High-value category shrink is already tracked in purchasing vs. sales reconciliation — anchor to the customer's own data.",
@@ -3381,7 +3387,7 @@ const SCENARIOS = [
   { id:"FS-06", name:"Demand Planning & Forecast Accuracy — Prep Waste Reduction",
     theme:"Operational Efficiency", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC","Store / Branch"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:170000, rampType:"soft",
+    annualBenefit:170000, rampType:"soft", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID consumption signals improve forecast accuracy 10–15%, reducing over-prep waste and stockout events",
     evidenceIds:["EV-FS-DEMAND-01"],
     challenge:"Over-prep waste and stockouts both have cost and guest experience dimensions — model the cost side conservatively.",
@@ -3395,7 +3401,7 @@ const SCENARIOS = [
   { id:"FS-07", name:"Order Accuracy & Customer Refund Reduction",
     theme:"Operational Efficiency", verticalKey:"foodservice",
     facilityKeys:["Store / Branch"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:140000, rampType:"hard_cost",
+    annualBenefit:140000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"QSR RFID order validation reduces refund and credit events 15–30% through kit completeness checks at the pass",
     evidenceIds:["EV-FS-ORDER-01"],
     challenge:"Refund and credit data is tracked in POS — pull actuals and build directly from customer's own numbers.",
@@ -3409,7 +3415,7 @@ const SCENARIOS = [
   { id:"FS-08", name:"ESG & Sustainability Reporting Automation",
     theme:"Regulatory & Compliance", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:120000, rampType:"hard_labor",
+    annualBenefit:120000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID-automated waste, donation, and cold chain logs reduce ESG audit labor 20–40% and create verifiable sustainability data",
     evidenceIds:["EV-FS-ESG-01"],
     challenge:"ESG reporting requirements are expanding — RFID creates audit-ready records that manual processes cannot reliably produce.",
@@ -3426,7 +3432,7 @@ const SCENARIOS = [
   { id:"DC-08", name:"Ghost Server Carbon Overpurchase Reduction",
     theme:"Direct Cost & Spend", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Direct Cost & Spend","Regulatory & Compliance"],
-    annualBenefit:675000, rampType:"hard_cost",
+    annualBenefit:675000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Ghost server elimination via RFID removes inflated Scope 2 baseline — stopping REC/offset overpurchase",
     evidenceIds:["EV-DC-CARBON-01"],
     challenge:"Your zombie server estimate seems aggressive — DOE/LBNL 2024 and Stanford/Anthesis independently confirmed 30% rate. We model 50% decommission of identified ghosts — conservative net position.",
@@ -3444,7 +3450,7 @@ const SCENARIOS = [
   { id:"DC-09", name:"SEC Scope 2 Disclosure — Assurance Cost & Restatement Risk",
     theme:"Regulatory & Compliance", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Regulatory & Compliance","Direct Cost & Spend"],
-    annualBenefit:135000, rampType:"hard_cost",
+    annualBenefit:135000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID-verified asset chain-of-custody reduces Scope 2 assurance cost and restatement exposure for SEC climate filers",
     evidenceIds:["EV-DC-SEC-01"],
     challenge:"Restatement probability is inherently uncertain — we model only the assurance cost reduction, which is contractually deterministic. Restatement risk appears in COI only.",
@@ -3461,7 +3467,7 @@ const SCENARIOS = [
   { id:"AVN-08", name:"CORSIA Carbon Credit Overpurchase Reduction",
     theme:"Direct Cost & Spend", verticalKey:"aviation",
     facilityKeys:["Airport / Terminal"], themeKeys:["Direct Cost & Spend","Regulatory & Compliance"],
-    annualBenefit:315000, rampType:"hard_cost",
+    annualBenefit:315000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Accurate RFID-tracked baggage/cargo data reduces CORSIA offset overpurchase — fixing the activity data before MRV",
     evidenceIds:["EV-AVN-CORSIA-01"],
     challenge:"MRV auditors verify methodology, not raw activity data accuracy. Baggage and cargo weight errors upstream of MRV create systematically inflated baselines — RFID fixes the source data before it enters the MRV process.",
@@ -4301,9 +4307,9 @@ function renderROI() {
       const ax = NRV_ACCESS[cfg.access].y;
       byYear = rp.map((r,i) => ann * r * ax[i] * (1 - cfg.h));
     } else {
-      // Raw ramp (Y1/Y2 from RAMP, Y3-Y5 flat at Y3)
+      // Raw ramp (5-year curve from RAMP)
       const r = RAMP[sc.rampType];
-      byYear = [ann*r.y1, ann*r.y2, ann*r.y3, ann*r.y3, ann*r.y3];
+      byYear = [ann*r.y[0], ann*r.y[1], ann*r.y[2], ann*r.y[3], ann*r.y[4]];
     }
     totAnnual += ann;
     byYear.forEach((v,i)=> grossByYear[i] += v);
@@ -4745,7 +4751,7 @@ function syncDelay() {
     const rows = active.map(sc => {
       const ann = Math.max(0, calcSc(sc));
       const r = RAMP[sc.rampType];
-      const y1=ann*r.y1, y2=ann*r.y2, y3=ann*r.y3;
+      const y1=ann*r.y[0], y2=ann*r.y[1], y3=ann*r.y[2];
       totAnnual+=ann; totY1+=y1; totY2+=y2; totY3+=y3;
       return {sc, ann, y1, y2, y3};
     });
@@ -4768,7 +4774,7 @@ function syncDelay() {
   const missed = document.getElementById('missed-items');
   if(missed && b.rows) {
     const totalMissed = b.rows.reduce((sum, r) => {
-      return sum + Math.round(r.ann * (RAMP[r.sc.rampType]?.y1||0.5) / 12) * months;
+      return sum + Math.round(r.ann * (RAMP[r.sc.rampType]?.y[0]||0.5) / 12) * months;
     }, 0);
     const summaryHeader = `<div style="text-align:center;padding:12px;background:rgba(235,87,87,.07);border-radius:8px;border:1px solid rgba(235,87,87,.2);margin-bottom:10px">
       <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">TOTAL VALUE LOST — ${months} MONTH DELAY</div>
@@ -4776,7 +4782,7 @@ function syncDelay() {
       <div style="font-size:11px;color:var(--muted);margin-top:4px">across ${b.rows.length} scenario${b.rows.length!==1?'s':''}</div>
     </div>`;
     const rows = b.rows.map(r => {
-      const monthlyLoss = Math.round(r.ann * (RAMP[r.sc.rampType]?.y1||0.5) / 12);
+      const monthlyLoss = Math.round(r.ann * (RAMP[r.sc.rampType]?.y[0]||0.5) / 12);
       const totalLoss = monthlyLoss * months;
       const pct = totalMissed>0 ? Math.round((totalLoss/totalMissed)*100) : 0;
       return `<div class="missed-item" style="flex-direction:column;align-items:flex-start;gap:3px;padding:8px 12px">
@@ -5090,7 +5096,7 @@ function exportExecSummary() {
     +'<style>'+popCSS+'</style>'
     +'</head><body>'
     +'<div class="cover-bar"></div>'
-    +'<div style="font-size:8pt;color:#999;font-family:Courier New;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Executive Summary · Zebra RFID Value Accelerator</div>'
+    +'<div style="font-size:8pt;color:#999;font-family:Courier New;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Executive Summary · Zebra Value Accelerator</div>'
     +'<div style="font-size:20pt;font-weight:700;margin-bottom:2px">'+title+' — '+co+'</div>'
     +'<div style="font-size:9pt;color:#757575;margin-bottom:16px">'+new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})+'</div>'
     +'<hr>'
@@ -5766,7 +5772,7 @@ function exportFullPDF() {
       <div class="tile"><div class="tile-val">$1 : $${invRatio}</div><div class="tile-lbl">Investment ratio</div></div>
     </div>
     <p style="margin-top:16px">The Investment Appraisal outlined above is based upon identified benefits that would accrue to <b>${co}</b> as a result of project acceptance.</p>
-    <p>The investment evaluation has been completed using the Zebra RFID Value Accelerator. The output from this tool is fully visible and can be audited by ${co} if so required.</p>
+    <p>The investment evaluation has been completed using the Zebra Value Accelerator. The output from this tool is fully visible and can be audited by ${co} if so required.</p>
     <p>This indicative analysis stands separately from the contractual elements of the Zebra Technologies solution and is necessarily dependent upon the benefits identified jointly with ${co}.</p>
 
     <div class="disclaimer"><b>Modeling Disclaimer:</b> Financial estimates are illustrative projections generated from benchmark data and the parameters provided. Actual results depend on deployment scope, operational execution, system integration, and market conditions. Zebra Technologies makes no guarantee of specific outcomes. This model supports internal business case development and pre-sale discovery — not a contractual commitment.</div>
@@ -6696,7 +6702,7 @@ async function runPPTXDownload(callerBtn) {
       const row=b.rows?.find(r=>r.sc.id===sc.id);
       const ann=row?.ann||sc.annualBenefit;
       const rt=RAMP[sc.rampType]||RAMP.hard_labor;
-      const y1=ann*rt.y1,y2=ann*rt.y2,y3=ann*rt.y3;
+      const y1=ann*rt.y[0],y2=ann*rt.y[1],y3=ann*rt.y[2];
       const rAc='#'+(rampAcMap[sc.rampType]||'374151');
 
       s=pres.addSlide(); s.background={color:Z.BG};
@@ -6735,11 +6741,11 @@ async function runPPTXDownload(callerBtn) {
         s.addShape(pres.shapes.RECTANGLE,{x:9.4,y:ty,w:3.5,h:0.76,fill:{color:i===2?'1A2E0A':'111111'},line:{color:'2A2A2A',width:0}});
         s.addText(lbl,{x:9.6,y:ty+0.06,w:3.1,h:0.18,fontSize:6.5,color:i===2?Z.GREEN:'888888',fontFace:FN.pptxMono,charSpacing:1});
         s.addText(fmt$(v),{x:9.6,y:ty+0.26,w:3.1,h:0.4,fontSize:17,color:i===2?Z.GREEN:Z.WHITE,fontFace:FN.pptxMono,bold:i===2,autoFit:true});
-        const rp=i===0?rt.y1:i===1?rt.y2:rt.y3;
+        const rp=i===0?rt.y[0]:i===1?rt.y[1]:rt.y[2];
         s.addShape(pres.shapes.RECTANGLE,{x:9.48,y:ty+0.68,w:3.34,h:0.05,fill:{color:'222222'},line:{color:'222222',width:0}});
         s.addShape(pres.shapes.RECTANGLE,{x:9.48,y:ty+0.68,w:3.34*rp,h:0.05,fill:{color:Z.GREEN,transparency:i===2?0:40},line:{color:Z.GREEN,width:0}});
       });
-      s.addText(Math.round(rt.y1*100)+'% · '+Math.round(rt.y2*100)+'% · '+Math.round(rt.y3*100)+'%  (YR1 · YR2 · YR3)',
+      s.addText(Math.round(rt.y[0]*100)+'% · '+Math.round(rt.y[1]*100)+'% · '+Math.round(rt.y[2]*100)+'%  (YR1 · YR2 · YR3)',
         {x:9.6,y:4.76,w:3.1,h:0.2,fontSize:7,color:'555555',fontFace:FN.pptxMono,align:'center'});
 
       addFooter(s,sc.id+' · '+sc.name.substring(0,40));
@@ -6767,7 +6773,7 @@ async function runPPTXDownload(callerBtn) {
       const ry=1.44+i*0.38,bg=i%2===0?Z.CARD:Z.BG;
       const rAc='#'+(rampAcMap[sc.rampType]||'374151');
       scx=sumXOff;
-      [sc.name,'',fmt$(ann*rt.y1),fmt$(ann*rt.y2),fmt$(ann*rt.y3),fmt$(ann)].forEach((v,j)=>{
+      [sc.name,'',fmt$(ann*rt.y[0]),fmt$(ann*rt.y[1]),fmt$(ann*rt.y[2]),fmt$(ann)].forEach((v,j)=>{
         s.addShape(pres.shapes.RECTANGLE,{x:scx,y:ry,w:sumCols[j].w,h:0.34,fill:{color:bg},line:{color:Z.BORDER,width:0.5}});
         if(j===1){
           s.addShape(pres.shapes.RECTANGLE,{x:scx+0.06,y:ry+0.05,w:sumCols[1].w-0.12,h:0.22,fill:{color:Z.BG},line:{color:rAc,width:0.5}});
@@ -7159,7 +7165,7 @@ Copy the title above to name this chat, then paste everything below.
 
 You are a strategic value engineering advisor specializing in enterprise RFID deployments. You have deep knowledge of operational ROI modeling, CFO-level financial framing, and RFID use cases across retail, warehouse, healthcare, manufacturing, T&L, government, and other verticals.
 
-The seller has used the Zebra RFID Value Accelerator to build an initial business case. Your job is NOT to summarize what they've entered — they already know that. Your job is to be a thinking partner: help them see what they might be missing, stress-test the framing, and deepen the value story.
+The seller has used the Zebra Value Accelerator to build an initial business case. Your job is NOT to summarize what they've entered — they already know that. Your job is to be a thinking partner: help them see what they might be missing, stress-test the framing, and deepen the value story.
 
 Start by doing three things in order:
 
