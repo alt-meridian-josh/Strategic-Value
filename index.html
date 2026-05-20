@@ -1909,81 +1909,25 @@ svg{max-width:100%;height:auto}
 <!-- ══ PANEL 9 — SOLUTION COMPARATOR ══════════════════════════════════════ -->
 <div class="panel" id="panel-9">
   <div class="step-eyebrow">SOLUTION COMPARATOR</div>
-  <div class="step-title">Solution NRV Comparison</div>
+  <div class="step-title">Solution Comparison</div>
   <div class="step-desc">
-    Adjust the store profile below and see how each solution tier activates
-    different value levers. NRV is calculated using the same engine as
-    the main model &#8212; ramp, accessibility decay, covariance haircut, and
-    Decay Avoided all applied.
+    Pick an environment, dial in the profile, and see how each solution tier
+    activates different value levers. The five-year financial model runs the
+    same engine as the main analysis.
   </div>
 
-  <!-- Store profile inputs -->
-  <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;margin-top:20px">
-    <div class="card">
-      <div class="card-title">Store profile</div>
+  <!-- Industry selector -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 4px">
+    <button class="vbtn active" data-ind="retail"        onclick="setComparatorIndustry('retail')">Retail Store</button>
+    <button class="vbtn"        data-ind="warehouse"     onclick="setComparatorIndustry('warehouse')">Warehouse / DC</button>
+    <button class="vbtn"        data-ind="manufacturing" onclick="setComparatorIndustry('manufacturing')">Manufacturing Plant</button>
+  </div>
 
-      <div class="slider-row">
-        <div class="slider-label">
-          <span class="slider-name">Annual Revenue</span>
-          <span class="slider-val" id="sc-val-rev">$10M</span>
-        </div>
-        <input type="range" min="1000000" max="200000000" step="500000"
-          value="10000000" id="sc-sl-rev" oninput="updateComparator()">
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-label">
-          <span class="slider-name">Inventory Accuracy</span>
-          <span class="slider-val" id="sc-val-acc">72%</span>
-        </div>
-        <input type="range" min="50" max="99" step="1"
-          value="72" id="sc-sl-acc" oninput="updateComparator()">
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-label">
-          <span class="slider-name">Shrink Rate</span>
-          <span class="slider-val" id="sc-val-shrink">1.8%</span>
-        </div>
-        <input type="range" min="0.5" max="5.0" step="0.1"
-          value="1.8" id="sc-sl-shrink" oninput="updateComparator()">
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-label">
-          <span class="slider-name">Inventory Labor (hrs/wk)</span>
-          <span class="slider-val" id="sc-val-labor">80 hrs</span>
-        </div>
-        <input type="range" min="10" max="500" step="5"
-          value="80" id="sc-sl-labor" oninput="updateComparator()">
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-label">
-          <span class="slider-name">Store Sq Ft</span>
-          <span class="slider-val" id="sc-val-sqft">30K</span>
-        </div>
-        <input type="range" min="1000" max="200000" step="1000"
-          value="30000" id="sc-sl-sqft" oninput="updateComparator()">
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-label">
-          <span class="slider-name">Average Selling Price ($)</span>
-          <span class="slider-val" id="sc-val-asp">$85</span>
-        </div>
-        <input type="range" min="5" max="500" step="5"
-          value="85" id="sc-sl-asp" oninput="updateComparator()">
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-label">
-          <span class="slider-name">WACC</span>
-          <span class="slider-val" id="sc-val-wacc">10%</span>
-        </div>
-        <input type="range" min="5" max="20" step="0.5"
-          value="10" id="sc-sl-wacc" oninput="updateComparator()">
-      </div>
+  <!-- Profile + results -->
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;margin-top:14px">
+    <div class="card" id="sc-profile-card">
+      <div class="card-title" id="sc-profile-title">Profile</div>
+      <div id="sc-profile-inputs"></div>
     </div>
 
     <div>
@@ -3847,7 +3791,7 @@ function go(n) {
   if(n===5) { ensureCosts(); if(!state.benefits || !state.benefits.totAnnual) renderROI(); renderExec(); }  // Full Analysis
   if(n===6) renderEvidence();
   if(n===8) initForecastSignal();
-  if(n===9) updateComparator();
+  if(n===9) { renderComparatorProfile(); updateComparator(); }
   document.querySelector('.main').scrollTop = 0;
   syncNav();
 }
@@ -4448,8 +4392,13 @@ function ensureCosts() {
   }
 }
 // ── NRV ENGINE HELPERS ──
-function calcNRV(activeScenarios, costs, wacc) {
-  wacc = wacc || 0.10;
+function calcNRV(activeScenarios, costs, opts) {
+  // Back-compat: allow calcNRV(scs, costs, 0.10) and calcNRV(scs, costs, {wacc, gRate, useDecay})
+  if (typeof opts === 'number') opts = { wacc: opts };
+  opts = opts || {};
+  const wacc = (typeof opts.wacc === 'number') ? opts.wacc : 0.10;
+  const gRate = (typeof opts.gRate === 'number') ? opts.gRate : 0.035;
+  const useDecay = (opts.useDecay !== undefined) ? !!opts.useDecay : true;
   const capex = costs.yr0 || 0;
   const annOpex = costs.yr1 || 0;
   const attrition = capex * 0.20;
@@ -4478,7 +4427,7 @@ function calcNRV(activeScenarios, costs, wacc) {
       return sum + ann * ramp * access * (1 - h);
     }, 0);
 
-    const decayAvoided = B0 * (Math.pow(1.035, yr) - 1);
+    const decayAvoided = useDecay ? B0 * (Math.pow(1 + gRate, yr) - 1) : 0;
     netBenefit += decayAvoided;
 
     const netCF = netBenefit - totalAnnOpex;
@@ -4783,68 +4732,251 @@ function removeCustomScenario(idx) {
 }
 
 // ── SOLUTION COMPARATOR ──
-const SC_SOLUTIONS = [
-  { name:'Handheld only', short:'HH',      color:'#EB5757',
-    accessTier:'commodity',     capex:18000,  opex:4500,
-    capexScale:0.003, opexScale:0.0005,
-    laborMult:0.20, availMult:0.10, shrinkMult:0.00, omniMult:0.000 },
-  { name:'CP + Handheld', short:'CP+HH',   color:'#F2994A',
-    accessTier:'configured',    capex:60000,  opex:12000,
-    capexScale:0.010, opexScale:0.001,
-    laborMult:0.30, availMult:0.18, shrinkMult:0.20, omniMult:0.000 },
-  { name:'CP + Robot',    short:'CP+Bot',  color:'#2F80ED',
-    accessTier:'configured',    capex:90000,  opex:18000,
-    capexScale:0.015, opexScale:0.0015,
-    laborMult:0.35, availMult:0.22, shrinkMult:0.25, omniMult:0.004 },
-  { name:'Full RTLS',     short:'RTLS',    color:'#6FCF97',
-    accessTier:'infrastructure',capex:185000, opex:32000,
-    capexScale:0.030, opexScale:0.003,
-    laborMult:0.40, availMult:0.28, shrinkMult:0.32, omniMult:0.008 },
-];
+// ── INDUSTRY PROFILES ───────────────────────────────────────────────────
+// Each industry has its own slider inputs, solution multipliers, lever
+// activation matrix, and decision-text generator.
+const SC_INDUSTRIES = {
+  retail: {
+    label: 'Retail Store',
+    profileTitle: 'Store profile',
+    inputs: [
+      {key:'rev',    label:'Annual Revenue',           min:1000000, max:200000000, step:500000, def:10000000, fmt: v => fmt(v)},
+      {key:'acc',    label:'Inventory Accuracy',       min:50,      max:99,        step:1,      def:72,       fmt: v => v + '%'},
+      {key:'shrink', label:'Shrink Rate',              min:0.5,     max:5.0,       step:0.1,    def:1.8,      fmt: v => v.toFixed(1) + '%'},
+      {key:'labor',  label:'Inventory Labor (hrs/wk)', min:10,      max:500,       step:5,      def:80,       fmt: v => v + ' hrs'},
+      {key:'sqft',   label:'Store Sq Ft',              min:1000,    max:200000,    step:1000,   def:30000,    fmt: v => v >= 1000 ? Math.round(v/1000) + 'K' : v},
+      {key:'asp',    label:'Average Selling Price ($)',min:5,       max:500,       step:5,      def:85,       fmt: v => '$' + v},
+      {key:'wacc',   label:'WACC',                     min:5,       max:20,        step:0.5,    def:10,       fmt: v => v + '%'},
+    ],
+    solutions: [
+      { name:'Handheld only', short:'HH',     color:'#EB5757', accessTier:'commodity',
+        capex:18000,  opex:4500,  capexScale:0.003,  opexScale:0.0005,
+        m: { labor:0.20, avail:0.10, shrink:0.00, omni:0.000 } },
+      { name:'CP + Handheld', short:'CP+HH',  color:'#F2994A', accessTier:'configured',
+        capex:60000,  opex:12000, capexScale:0.010,  opexScale:0.001,
+        m: { labor:0.30, avail:0.18, shrink:0.20, omni:0.000 } },
+      { name:'CP + Robot',    short:'CP+Bot', color:'#2F80ED', accessTier:'configured',
+        capex:90000,  opex:18000, capexScale:0.015,  opexScale:0.0015,
+        m: { labor:0.35, avail:0.22, shrink:0.25, omni:0.004 } },
+      { name:'Full RTLS',     short:'RTLS',   color:'#6FCF97', accessTier:'infrastructure',
+        capex:185000, opex:32000, capexScale:0.030,  opexScale:0.003,
+        m: { labor:0.40, avail:0.28, shrink:0.32, omni:0.008 } },
+    ],
+    levers: [
+      { name:'Labor — cycle count',     act:['on','on','on','on']   },
+      { name:'Labor — search/locate',   act:['on','on','on','on']   },
+      { name:'Availability / stockout', act:['p','on','on','on']    },
+      { name:'Safety stock reduction',  act:['p','on','on','on']    },
+      { name:'Shrink — exit / POS',     act:['off','on','on','on']  },
+      { name:'Receiving accuracy',      act:['off','on','on','on']  },
+      { name:'Fitting room visibility', act:['off','off','p','on']  },
+      { name:'Zone / area loss',        act:['off','off','p','on']  },
+      { name:'OMS / ATP signal',        act:['off','off','p','on']  },
+      { name:'Real-time alerting',      act:['off','off','off','on']},
+      { name:'Strategic data asset',    act:['off','off','off','on']},
+    ],
+    sizeKey: 'rev',
+    calcBenefit: (p, sol) => {
+      const laborRate = 21.50;
+      const laborBase  = p.labor * 52 * laborRate * sol.m.labor;
+      const availBase  = p.rev   * (1 - p.acc/100) * sol.m.avail;
+      const shrinkBase = p.rev   * (p.shrink/100)  * sol.m.shrink;
+      const omniBase   = p.rev   * sol.m.omni;
+      return laborBase + availBase + shrinkBase + omniBase;
+    },
+    decisionText: (winner, p) => {
+      if (winner.sol.short === 'RTLS') {
+        if (p.asp >= 100)         return `Full RTLS wins on value density — ASP of $${p.asp} means every prevented theft and BOPIS promise has high dollar impact. Infrastructure cost is trivial relative to the per-item value at stake.`;
+        if (p.rev >= 50000000)    return `At ${fmt(p.rev)} revenue, infrastructure cost is small relative to recoverable value. Full RTLS unlocks BOPIS, safety stock, and always-on shrink coverage.`;
+        return `Full RTLS wins because the combination of profile parameters justifies the always-on event stream.`;
+      }
+      if (winner.sol.short === 'CP+Bot') {
+        return `CP + Robot wins: ${p.sqft >= 25000 ? Math.round(p.sqft/1000)+'K sq ft floor' : 'the floor size'} combined with ${p.labor} inventory hrs/wk means floor sweep is the binding constraint. Fixed readers cover dock + exit shrink while the robot handles continuous floor coverage.`;
+      }
+      if (winner.sol.short === 'CP+HH') {
+        return `CP + Handheld is the right balance. The store is manageable with handheld floor coverage while fixed readers at choke points activate shrink and receiving accuracy that HH-only misses.`;
+      }
+      return `Handheld only is the ceiling for this profile. ${p.asp <= 30 ? `At $${p.asp} ASP, tag economics make RFID infrastructure cost unsustainable.` : 'Fixed-infrastructure levers do not offset their cost at this size.'}`;
+    },
+  },
 
-const SC_LEVERS = [
-  { name:'Labor — cycle count',     act:['on','on','on','on']   },
-  { name:'Labor — search/locate',   act:['on','on','on','on']   },
-  { name:'Availability / stockout', act:['p','on','on','on']    },
-  { name:'Safety stock reduction',  act:['p','on','on','on']    },
-  { name:'Shrink — exit / POS',     act:['off','on','on','on']  },
-  { name:'Receiving accuracy',      act:['off','on','on','on']  },
-  { name:'Fitting room visibility', act:['off','off','p','on']  },
-  { name:'Zone / area loss',        act:['off','off','p','on']  },
-  { name:'OMS / ATP signal',        act:['off','off','p','on']  },
-  { name:'Real-time alerting',      act:['off','off','off','on']},
-  { name:'Strategic data asset',    act:['off','off','off','on']},
-];
+  warehouse: {
+    label: 'Warehouse / DC',
+    profileTitle: 'DC profile',
+    inputs: [
+      {key:'pallets',  label:'Pallets shipped / year',  min:10000,   max:5000000,   step:10000, def:500000,  fmt: v => v.toLocaleString()},
+      {key:'pickacc',  label:'Pick accuracy',           min:90,      max:99.9,      step:0.1,   def:97.5,    fmt: v => v.toFixed(1) + '%'},
+      {key:'misship',  label:'Cost per misship event',  min:25,      max:500,       step:5,     def:120,     fmt: v => '$' + v},
+      {key:'fte',      label:'DC labor (FTEs)',         min:10,      max:1000,      step:5,     def:120,     fmt: v => v + ' FTE'},
+      {key:'invvalue', label:'Avg inventory value',     min:1000000, max:500000000, step:500000,def:25000000,fmt: v => fmt(v)},
+      {key:'detention',label:'Annual detention spend',  min:0,       max:5000000,   step:25000, def:400000,  fmt: v => fmt(v)},
+      {key:'wacc',     label:'WACC',                    min:5,       max:20,        step:0.5,   def:10,      fmt: v => v + '%'},
+    ],
+    solutions: [
+      { name:'Handheld only',    short:'HH',       color:'#EB5757', accessTier:'commodity',
+        capex:25000,  opex:6000,  capexScale:0.05, opexScale:0.005,
+        m: { labor:0.10, accuracy:0.30, detention:0.10, wc:0.02 } },
+      { name:'HH + Dock Gates',  short:'HH+Gates', color:'#F2994A', accessTier:'configured',
+        capex:75000,  opex:14000, capexScale:0.08, opexScale:0.008,
+        m: { labor:0.18, accuracy:0.55, detention:0.25, wc:0.05 } },
+      { name:'CP + Yard RFID',   short:'CP+Yard',  color:'#2F80ED', accessTier:'configured',
+        capex:140000, opex:24000, capexScale:0.12, opexScale:0.012,
+        m: { labor:0.22, accuracy:0.65, detention:0.45, wc:0.08 } },
+      { name:'Full RTLS',        short:'RTLS',     color:'#6FCF97', accessTier:'infrastructure',
+        capex:280000, opex:42000, capexScale:0.18, opexScale:0.018,
+        m: { labor:0.30, accuracy:0.80, detention:0.60, wc:0.12 } },
+    ],
+    levers: [
+      { name:'Cycle count labor',        act:['on','on','on','on']  },
+      { name:'Receiving accuracy',       act:['p','on','on','on']   },
+      { name:'Pick / ship verification', act:['p','on','on','on']   },
+      { name:'Chargeback reduction',     act:['off','on','on','on'] },
+      { name:'Dock-to-stock time',       act:['off','on','on','on'] },
+      { name:'Trailer / yard locating',  act:['off','off','on','on']},
+      { name:'Detention / dwell',        act:['off','off','on','on']},
+      { name:'Safety stock release',     act:['off','off','p','on'] },
+      { name:'Real-time WMS feed',       act:['off','off','off','on']},
+      { name:'AMR / automation data',    act:['off','off','off','on']},
+    ],
+    sizeKey: 'pallets',
+    calcBenefit: (p, sol) => {
+      const laborRate = 26;
+      const laborBase = p.fte * 2080 * laborRate * sol.m.labor;
+      const accBase   = p.pallets * (1 - p.pickacc/100) * p.misship * sol.m.accuracy;
+      const detBase   = p.detention * sol.m.detention;
+      const wcBase    = p.invvalue * 0.25 * sol.m.wc;
+      return laborBase + accBase + detBase + wcBase;
+    },
+    decisionText: (winner, p) => {
+      if (winner.sol.short === 'RTLS') {
+        return `Full RTLS wins: ${p.fte} FTEs combined with ${p.pallets.toLocaleString()} pallets/yr and ${fmt(p.detention)} detention spend means always-on visibility unlocks every lever — labor, accuracy, yard, detention, and working capital.`;
+      }
+      if (winner.sol.short === 'CP+Yard') {
+        return `CP + Yard RFID wins: detention spend of ${fmt(p.detention)} and pallet volume of ${p.pallets.toLocaleString()}/yr make yard visibility the highest-leverage investment. Fixed readers handle inbound/outbound accuracy at lower cost than full RTLS.`;
+      }
+      if (winner.sol.short === 'HH+Gates') {
+        return `Dock gates win the cost-coverage trade-off. ${p.pallets.toLocaleString()} pallets/yr through fixed read points eliminates manual scan-each at the dock while keeping infrastructure cost contained.`;
+      }
+      return `Handheld only is the ceiling. ${p.pallets < 100000 ? 'At low pallet volume, fixed infrastructure cannot pay for itself.' : 'Profile favors flexible coverage over fixed automation.'}`;
+    },
+  },
 
+  manufacturing: {
+    label: 'Manufacturing Plant',
+    profileTitle: 'Plant profile',
+    inputs: [
+      {key:'output',    label:'Annual output value',        min:1000000, max:1000000000, step:1000000, def:50000000, fmt: v => fmt(v)},
+      {key:'toolvalue', label:'Tool / asset inventory value', min:100000, max:50000000,  step:100000,  def:1500000,  fmt: v => fmt(v)},
+      {key:'toolloss',  label:'Annual tool loss rate',      min:1,        max:30,         step:1,       def:15,       fmt: v => v + '%'},
+      {key:'wipvalue',  label:'WIP inventory value',        min:500000,   max:100000000,  step:500000,  def:5000000,  fmt: v => fmt(v)},
+      {key:'mrovalue',  label:'MRO inventory value',        min:500000,   max:50000000,   step:500000,  def:3000000,  fmt: v => fmt(v)},
+      {key:'fte',       label:'Plant FTEs',                 min:20,       max:2000,       step:10,      def:200,      fmt: v => v + ' FTE'},
+      {key:'wacc',      label:'WACC',                       min:5,        max:20,         step:0.5,     def:10,       fmt: v => v + '%'},
+    ],
+    solutions: [
+      { name:'Handheld only',           short:'HH',       color:'#EB5757', accessTier:'commodity',
+        capex:22000,  opex:5500,  capexScale:0.0004, opexScale:0.00005,
+        m: { tool:0.30, wip:0.05, mro:0.05, labor:0.04 } },
+      { name:'HH + Workcell Readers',   short:'HH+WC',    color:'#F2994A', accessTier:'configured',
+        capex:70000,  opex:14000, capexScale:0.0008, opexScale:0.00010,
+        m: { tool:0.55, wip:0.12, mro:0.10, labor:0.08 } },
+      { name:'CP + Line RFID',          short:'CP+Line',  color:'#2F80ED', accessTier:'configured',
+        capex:130000, opex:24000, capexScale:0.0012, opexScale:0.00015,
+        m: { tool:0.65, wip:0.20, mro:0.18, labor:0.12 } },
+      { name:'Full RTLS',               short:'RTLS',     color:'#6FCF97', accessTier:'infrastructure',
+        capex:260000, opex:42000, capexScale:0.0020, opexScale:0.00025,
+        m: { tool:0.75, wip:0.28, mro:0.25, labor:0.18 } },
+    ],
+    levers: [
+      { name:'Tool & asset loss',         act:['on','on','on','on']   },
+      { name:'Tool search / FOD risk',    act:['p','on','on','on']    },
+      { name:'WIP cycle time',            act:['off','on','on','on']  },
+      { name:'MRO carrying cost',         act:['off','on','on','on']  },
+      { name:'Compliance traceability',   act:['p','on','on','on']    },
+      { name:'Recall scope reduction',    act:['off','off','on','on'] },
+      { name:'Shipment chargebacks',      act:['off','off','on','on'] },
+      { name:'Fixture / jig utilization', act:['off','off','p','on']  },
+      { name:'Real-time MES integration', act:['off','off','off','on']},
+      { name:'Digital twin data feed',    act:['off','off','off','on']},
+    ],
+    sizeKey: 'output',
+    calcBenefit: (p, sol) => {
+      const toolBase  = p.toolvalue * (p.toolloss/100) * sol.m.tool;
+      const wipBase   = p.wipvalue  * 0.25 * sol.m.wip;
+      const mroBase   = p.mrovalue  * 0.25 * sol.m.mro;
+      const laborBase = p.fte * 2080 * 35 * sol.m.labor;
+      return toolBase + wipBase + mroBase + laborBase;
+    },
+    decisionText: (winner, p) => {
+      const trackedInv = p.toolvalue + p.wipvalue + p.mrovalue;
+      if (winner.sol.short === 'RTLS') {
+        return `Full RTLS wins: at ${fmt(p.output)} output with ${fmt(trackedInv)} in tracked inventory, infrastructure cost is a fraction of recoverable carrying cost and tool loss. Continuous tracking unlocks every lever.`;
+      }
+      if (winner.sol.short === 'CP+Line') {
+        return `CP + Line RFID wins: production-line readers catch WIP movement and provide the data layer for compliance traceability. At ${fmt(p.wipvalue)} WIP, cycle-time reduction alone justifies the fixed reader investment.`;
+      }
+      if (winner.sol.short === 'HH+WC') {
+        return `HH + Workcell Readers wins: ${p.toolloss}% tool loss on ${fmt(p.toolvalue)} of assets is the largest pain. Strategic readers at high-loss workcells plus handhelds handle the rest at reasonable cost.`;
+      }
+      return `Handheld only is the floor. Tool tracking pays for it on ${fmt(p.toolvalue)} of assets, but fixed-infrastructure value (WIP, MRO, compliance) doesn't justify the cost at this profile.`;
+    },
+  },
+};
+
+let scCurrentIndustry = 'retail';
 let scChartBar = null, scChartCF = null;
 
+function setComparatorIndustry(ind) {
+  if (!SC_INDUSTRIES[ind]) return;
+  scCurrentIndustry = ind;
+  document.querySelectorAll('#panel-9 [data-ind]').forEach(b =>
+    b.classList.toggle('active', b.dataset.ind === ind));
+  renderComparatorProfile();
+  updateComparator();
+}
+
+function renderComparatorProfile() {
+  const ind = SC_INDUSTRIES[scCurrentIndustry];
+  const titleEl = document.getElementById('sc-profile-title');
+  const wrap = document.getElementById('sc-profile-inputs');
+  if (!ind || !titleEl || !wrap) return;
+  titleEl.textContent = ind.profileTitle;
+  wrap.innerHTML = ind.inputs.map(inp => `
+    <div class="slider-row">
+      <div class="slider-label">
+        <span class="slider-name">${inp.label}</span>
+        <span class="slider-val" id="sc-val-${inp.key}">${inp.fmt(inp.def)}</span>
+      </div>
+      <input type="range" min="${inp.min}" max="${inp.max}" step="${inp.step}"
+        value="${inp.def}" id="sc-sl-${inp.key}" oninput="updateComparator()">
+    </div>
+  `).join('');
+}
+
 function updateComparator() {
-  const rev    = +document.getElementById('sc-sl-rev').value;
-  const acc    = +document.getElementById('sc-sl-acc').value / 100;
-  const shrink = +document.getElementById('sc-sl-shrink').value / 100;
-  const labor  = +document.getElementById('sc-sl-labor').value;
-  const sqft   = +document.getElementById('sc-sl-sqft').value;
-  const asp    = +document.getElementById('sc-sl-asp').value;
-  const wacc   = +document.getElementById('sc-sl-wacc').value / 100;
+  const ind = SC_INDUSTRIES[scCurrentIndustry];
+  if (!ind) return;
+  if (!document.getElementById('sc-sl-' + ind.inputs[0].key)) {
+    renderComparatorProfile();
+  }
 
-  document.getElementById('sc-val-rev').textContent    = fmt(rev);
-  document.getElementById('sc-val-acc').textContent    = Math.round(acc*100) + '%';
-  document.getElementById('sc-val-shrink').textContent = (shrink*100).toFixed(1) + '%';
-  document.getElementById('sc-val-labor').textContent  = labor + ' hrs';
-  document.getElementById('sc-val-sqft').textContent   = sqft >= 1000 ? Math.round(sqft/1000) + 'K' : sqft;
-  document.getElementById('sc-val-asp').textContent    = '$' + asp;
-  document.getElementById('sc-val-wacc').textContent   = Math.round(wacc*100) + '%';
+  // Read all slider values + update value labels
+  const params = {};
+  ind.inputs.forEach(inp => {
+    const el = document.getElementById('sc-sl-' + inp.key);
+    if (!el) return;
+    params[inp.key] = +el.value;
+    const valEl = document.getElementById('sc-val-' + inp.key);
+    if (valEl) valEl.textContent = inp.fmt(params[inp.key]);
+  });
 
-  const laborRate = 21.50;
-  const results = SC_SOLUTIONS.map(sol => {
-    const laborBase  = labor * 52 * laborRate * sol.laborMult;
-    const availBase  = rev * (1 - acc) * sol.availMult;
-    const shrinkBase = rev * shrink * sol.shrinkMult;
-    const omniBase   = rev * sol.omniMult;
-    const grossBen   = laborBase + availBase + shrinkBase + omniBase;
+  const wacc = (params.wacc || 10) / 100;
+  const sizeVal = params[ind.sizeKey] || 0;
 
-    const capex = sol.capex + rev * sol.capexScale;
-    const opex  = sol.opex  + rev * sol.opexScale;
+  const results = ind.solutions.map(sol => {
+    const grossBen = ind.calcBenefit(params, sol);
+    const capex = sol.capex + sizeVal * (sol.capexScale || 0);
+    const opex  = sol.opex  + sizeVal * (sol.opexScale  || 0);
     const costs = { yr0: capex, yr1: opex };
 
     const syntheticSc = [{
@@ -4858,15 +4990,26 @@ function updateComparator() {
       inputs: { annual_value: grossBen },
     }];
 
-    const r = calcNRV(syntheticSc, costs, wacc);
+    const r = calcNRV(syntheticSc, costs, { wacc });
     return { sol, grossBen, capex, opex, result: r };
   });
 
   renderSCCards(results);
-  renderSCLeverMap();
-  renderSCCharts(results, wacc);
+  renderSCLeverMap(ind.levers, ind.solutions);
+  renderSCCharts(results, wacc, ind.solutions);
   renderSCTable(results);
-  renderSCDecision(results, sqft, labor, asp, rev);
+  renderSCDecisionGeneric(results, params, ind);
+}
+
+function renderSCDecisionGeneric(results, params, ind) {
+  const sorted = [...results].sort((a, b) => b.result.nrv - a.result.nrv);
+  const winner = sorted[0];
+  const loser  = sorted[sorted.length - 1];
+  let reason = ind.decisionText(winner, params);
+  if (loser.result.nrv < 0) {
+    reason += ` ${loser.sol.name} produces negative NRV — infrastructure cost exceeds recoverable value at this profile.`;
+  }
+  document.getElementById('sc-decision-text').textContent = reason;
 }
 
 function renderSCCards(results) {
@@ -4892,19 +5035,20 @@ function renderSCCards(results) {
   }).join('');
 }
 
-function renderSCLeverMap() {
+function renderSCLeverMap(levers, solutions) {
   const el = document.getElementById('sc-lever-map');
-  const headers = `<div style="display:grid;grid-template-columns:160px repeat(4,1fr);gap:4px;margin-bottom:6px">
+  const cols = solutions.length;
+  const headers = `<div style="display:grid;grid-template-columns:180px repeat(${cols},1fr);gap:4px;margin-bottom:6px">
     <div style="font-size:9px;color:var(--muted);text-transform:uppercase">Lever</div>
-    ${SC_SOLUTIONS.map(s => `<div style="font-size:9px;color:var(--muted);text-transform:uppercase;text-align:center">${s.short}</div>`).join('')}
+    ${solutions.map(s => `<div style="font-size:9px;color:var(--muted);text-transform:uppercase;text-align:center">${s.short}</div>`).join('')}
   </div>`;
-  const rows = SC_LEVERS.map(lev => {
+  const rows = levers.map(lev => {
     const cells = lev.act.map(a => {
       if (a==='on')  return `<div style="height:20px;border-radius:3px;background:rgba(167,188,2,.2);border:1px solid rgba(167,188,2,.4);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--brand-green)">●</div>`;
       if (a==='p')   return `<div style="height:20px;border-radius:3px;background:rgba(242,153,74,.12);border:1px solid rgba(242,153,74,.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:#c07a30">◐</div>`;
       return `<div style="height:20px;border-radius:3px;background:var(--gray-100);border:1px solid var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--gray-400)">○</div>`;
     }).join('');
-    return `<div style="display:grid;grid-template-columns:160px repeat(4,1fr);gap:4px;margin-bottom:4px">
+    return `<div style="display:grid;grid-template-columns:180px repeat(${cols},1fr);gap:4px;margin-bottom:4px">
       <div style="font-size:11px;color:var(--muted);display:flex;align-items:center">${lev.name}</div>
       ${cells}
     </div>`;
@@ -4912,9 +5056,9 @@ function renderSCLeverMap() {
   el.innerHTML = headers + rows;
 }
 
-function renderSCCharts(results, wacc) {
+function renderSCCharts(results, wacc, solutions) {
   const labels = ['Y1','Y2','Y3','Y4','Y5'];
-  const colors = SC_SOLUTIONS.map(s => s.color);
+  const colors = solutions.map(s => s.color);
 
   if (scChartBar) scChartBar.destroy();
   const ctxBar = document.getElementById('sc-chart-bar').getContext('2d');
@@ -4989,27 +5133,6 @@ function renderSCTable(results) {
   el.innerHTML = headers + '<tbody>' + rows + '</tbody>';
 }
 
-function renderSCDecision(results, sqft, labor, asp, rev) {
-  const sorted = [...results].sort((a,b) => b.result.nrv - a.result.nrv);
-  const winner = sorted[0];
-  const loser  = sorted[sorted.length-1];
-  let reason = '';
-  if (winner.sol.short === 'RTLS') {
-    if (asp >= 100) reason = `Full RTLS wins on value density — ASP $${asp} means every prevented theft and every BOPIS promise kept has high dollar impact. The infrastructure cost is trivial relative to the per-item value at stake.`;
-    else if (rev >= 50000000) reason = `At ${fmt(rev)} revenue, infrastructure cost is trivial as a percentage of recoverable value. Full RTLS delivers the continuous event stream needed for BOPIS, safety stock, and always-on shrink coverage at this scale.`;
-    else reason = `Full RTLS wins because the combination of store profile parameters makes the always-on event stream worth the infrastructure investment.`;
-  } else if (winner.sol.short === 'CP+Bot') {
-    reason = `CP + Robot wins because ${sqft >= 25000 ? `${Math.round(sqft/1000)}K sq ft floor` : 'the floor size'} combined with ${labor} inventory hours/week means the floor sweep problem is the binding constraint. Fixed readers at choke points cover dock and exit shrink while the robot handles continuous floor coverage.`;
-  } else if (winner.sol.short === 'CP+HH') {
-    reason = `CP + Handheld is the right balance for this profile. The store is manageable with handheld floor coverage while fixed readers at choke points activate the shrink and receiving accuracy levers that HH-only misses.`;
-  } else {
-    reason = `Handheld only is the ceiling for this profile. ${asp <= 30 ? `At $${asp} ASP, tag economics make RFID infrastructure cost unsustainable — the lifetime recoverable value cannot justify fixed reader investment.` : 'The value levers activated by fixed infrastructure do not offset their cost at this store size and profile.'}`;
-  }
-  if (loser.result.nrv < 0) {
-    reason += ` ${loser.sol.name} produces negative NRV — infrastructure cost exceeds lifetime recoverable value at this profile.`;
-  }
-  document.getElementById('sc-decision-text').textContent = reason;
-}
 
 // ── STEP 5: ROI & VALUE CASE ──
 function renderROI() {
@@ -5034,7 +5157,7 @@ function renderROI() {
 
   ensureCosts();
   const c = state.costs;
-  const result = calcNRV(active, c, 0.10);
+  const result = calcNRV(active, c, { wacc, gRate, useDecay });
   const { nrv, mirr, paybackMo, bcr, peakAnnual, roi5, yearlyData } = result;
 
   state.nrvResult = result;
@@ -5080,12 +5203,12 @@ function renderROI() {
     <div class="kpi kblue hero-kpi">
       <div class="kpi-label">Payback Period</div>
       <div class="kpi-val">${paybackMo !== null ? paybackMo : '—'}<span style="font-size:15px;font-weight:400"> mo</span></div>
-      <div class="kpi-sub">discounted at 10% WACC</div>
+      <div class="kpi-sub">discounted at ${(wacc*100).toFixed(1)}% WACC</div>
     </div>
     <div class="kpi kamber hero-kpi">
       <div class="kpi-label">NRV (5-yr NPV)</div>
       <div class="kpi-val">${fmt(nrv)}</div>
-      <div class="kpi-sub">discounted at 10% · normalized</div>
+      <div class="kpi-sub">discounted at ${(wacc*100).toFixed(1)}% · normalized</div>
     </div>
     <div class="kpi kgold hero-kpi">
       <div class="kpi-label">5-Year Net ROI</div>
@@ -5099,14 +5222,17 @@ function renderROI() {
     <div class="kpi-sec"><div class="ks-label">Benefit:Cost (5-yr)</div><div class="ks-val">${bcr !== null ? bcr.toFixed(1) + 'x' : '—'}</div></div>
     <div class="kpi-sec"><div class="ks-label">Monthly at Peak</div><div class="ks-val">${fmt(Math.round(peakAnnual / 12))}</div></div>`;
 
+  const _bcrMsgPlain = bcrFlag
+    ? `<strong>⚠ Benefit-to-cost ratio of ${bcr.toFixed(1)}x looks too good to be true.</strong> A B:C ratio above 10x almost always means the cost model is incomplete — missing services, training, integration, or change-management line items — or one or two scenarios are double-counting benefits. Before showing this to a customer: revisit the Cost Model and trim or remove your most aggressive scenarios.`
+    : '';
   const bcrBanner = document.getElementById('bcr-banner');
   if (bcrBanner) {
     bcrBanner.style.display = bcrFlag ? 'block' : 'none';
-    if (bcrFlag) bcrBanner.innerHTML = `&#9651; BCR above 10x (${bcr.toFixed(1)}x). Per the NRV SOP this requires mandatory review before the model leaves your hands. Audit covariance haircuts and challenge top-3 drivers at ~20% before exporting.`;
+    if (bcrFlag) bcrBanner.innerHTML = _bcrMsgPlain;
   }
   const flagEl = document.getElementById('nrv-bcr-flag-host');
   if (flagEl) flagEl.innerHTML = bcrWarn
-    ? `<div class="nrv-bcr-flag"><strong>⚠ BCR above 10x (${bcr.toFixed(1)}x).</strong> Per the NRV SOP this requires mandatory review before the model leaves your hands. Audit covariance haircuts and challenge top-3 drivers at &minus;20% before exporting.</div>`
+    ? `<div class="nrv-bcr-flag">${_bcrMsgPlain}</div>`
     : '';
 
   renderWalkdownTable(active, result);
@@ -5342,7 +5468,7 @@ function renderROI() {
   document.getElementById('fin-grid').innerHTML = `
     <div class="fin-card accent-green"><div class="fin-label">${nrvOn?'NRV (NPV @ '+(wacc*100).toFixed(0)+'%)':'NPV (5-Year @ '+(wacc*100).toFixed(0)+'%)'}</div><div class="fin-val">${fmt(npv5)}</div><div class="fin-sub">${nrvOn?'5-yr decay-adjusted · WACC sensitivity 8/10/12':'Net present value of cash flows'}</div></div>
     <div class="fin-card accent-blue"><div class="fin-label">${nrvOn?'MIRR':'IRR'}</div><div class="fin-val">${nrvOn?mirrTxt:(irr+'%')}</div><div class="fin-sub">${nrvOn?'Reinvested at WACC · CFO-grade (IRR '+irr+'%)':'Modeled unlevered IRR (illustrative, pre-tax)'}</div></div>
-    <div class="fin-card accent-amber ${bcrWarn?'warn':''}"><div class="fin-label">Benefit : Cost (5-yr)</div><div class="fin-val" style="${bcrWarn?'color:#c8330e':''}">${bcr===null?'—':bcr.toFixed(1)+'x'}</div><div class="fin-sub">${bcrWarn?'⚠ Above 10x — mandatory SOP review':'Undiscounted total benefit ÷ total cost'}</div></div>
+    <div class="fin-card accent-amber ${bcrWarn?'warn':''}"><div class="fin-label">Benefit : Cost (5-yr)</div><div class="fin-val" style="${bcrWarn?'color:#c8330e':''}">${bcr===null?'—':bcr.toFixed(1)+'x'}</div><div class="fin-sub">${bcrWarn?'⚠ Above 10x — review cost model & scenarios':'Undiscounted total benefit ÷ total cost'}</div></div>
     <div class="fin-card" style="border-top:3px solid var(--red)"><div class="fin-label">Monthly Value at Risk</div><div class="fin-val" style="color:var(--red)">${fmt(Math.round(totY1/12))}</div><div class="fin-sub">Foregone per month of delay (Yr 1 ramped)</div></div>`;
 
   // WACC sensitivity — slim strip beneath the fin-grid
@@ -7873,7 +7999,7 @@ covariance haircut (default 10% per driver), and Decay Avoided (baseline cost
 growing at 3.5%/yr). Return metric is MIRR (not IRR) — reinvested at WACC.
 Model period: 5 years. Discount rate: 10% WACC.
 Sources: Auburn University RFID Lab · GS1 US · ECR Retail Loss Group ·
-McKinsey Retail Operations · NRV SOP v1 (Alt Meridian Value Engineering).`;
+McKinsey Retail Operations.`;
 
     const prompt = `SUGGESTED CHAT TITLE: ${co} — RFID Value Analysis (${dateStr})
 ─────────────────────────────────────────────────────────────────────
@@ -7945,7 +8071,7 @@ Peak Annual NRV (Year 3):                      ${r ? fmt(Math.round(r.peakAnnual
 Payback Period:                                ${r && r.paybackMo ? r.paybackMo + ' months' : '—'}
 5-Year Net ROI:                                ${r ? r.roi5 + '%' : '—'}
 Benefit-Cost Ratio:                            ${r && r.bcr ? r.bcr.toFixed(1) + 'x' : '—'}
-${r && r.bcr > 10 ? 'NOTE: BCR exceeds 10x — per NRV SOP, top-3 drivers should be stress-tested at -20% before presenting.' : ''}
+${r && r.bcr > 10 ? 'NOTE: BCR exceeds 10x — this usually indicates the cost model is incomplete or scenarios are double-counting. Stress-test top drivers at -20% before presenting.' : ''}
 ${hasCustom ? '\nNOTE: This model includes user-generated custom scenarios that have not been verified by the Zebra Value Engineering team. These are flagged in the scenario list above.' : ''}
 
 ════════════════════════════════════════════════════════════════════
