@@ -340,6 +340,11 @@ svg{max-width:100%;height:auto}
 .srow{display:flex;align-items:center;gap:10px}
 .srow input[type=range]{flex:1;accent-color:var(--brand-black);cursor:pointer}
 .sval{font-family:var(--mono);font-size:11px;color:var(--brand-black);min-width:60px;text-align:right;font-weight:700}
+.slider-row{margin-bottom:14px}
+.slider-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.slider-name{font-size:11px;color:var(--gray-700);font-weight:600}
+.slider-val{font-family:var(--mono);font-size:11px;color:var(--brand-black);font-weight:700}
+.slider-row input[type=range]{width:100%;accent-color:var(--brand-black);cursor:pointer}
 
 /* CHIPS &#8212; Zebra filter pill spec */
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
@@ -759,7 +764,7 @@ svg{max-width:100%;height:auto}
 
   /* ── Print header strip (replaces black topbar) ── */
   #panel-5::before{
-    content:'ZEBRA TECHNOLOGIES — RFID VALUE CASE';
+    content:'ZEBRA TECHNOLOGIES — ZEBRA VALUE ACCELERATOR';
     display:block;
     font-family:'Courier New',monospace;
     font-size:7pt;
@@ -905,6 +910,7 @@ svg{max-width:100%;height:auto}
   <div class="sb-item" onclick="go(6)"><div class="sb-num">≡</div><span class="sb-label">Evidence Registry</span><span class="sb-short">Evidence</span></div>
   <div class="sb-item" onclick="go(7)"><div class="sb-num">?</div><span class="sb-label">Help &amp; Reference</span><span class="sb-short">Help</span></div>
   <div class="sb-item" onclick="go(8)"><div class="sb-num">FS</div><span class="sb-label">Forecast Signal</span><span class="sb-short">Forecast</span></div>
+  <div class="sb-item" onclick="go(9)"><div class="sb-num">SC</div><span class="sb-label">Solution Comparator</span><span class="sb-short">Compare</span></div>
   <div class="sb-progress">
     <div class="sb-prog-label">PROGRESS</div>
     <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:11%"></div></div>
@@ -1027,6 +1033,26 @@ svg{max-width:100%;height:auto}
   <div class="step-desc">Enter customer-specific values. Defaults are conservative benchmarks &#8212; update any field with real data. Completed scenarios are marked green.</div>
 
   <div id="disc-accordion"></div>
+
+  <div style="margin-top:32px;padding-top:20px;border-top:2px dashed var(--gray-300)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <div style="font-family:var(--head);font-size:15px;font-weight:700">Custom Value Scenarios</div>
+      <div style="font-size:10px;background:var(--gray-100);color:var(--gray-600);
+        padding:2px 8px;border-radius:10px;font-family:var(--mono);letter-spacing:.04em">
+        NOT VERIFIED BY ZEBRA VE TEAM
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;max-width:620px">
+      Add value levers that aren't in the standard library. Select a mechanism,
+      fill in your numbers, and it flows into the NRV model. These scenarios are
+      clearly flagged as user-generated in all exports.
+    </div>
+    <div id="custom-scenarios-list"></div>
+    <button class="btn btn-outline" onclick="addCustomScenario()"
+      style="margin-top:12px;font-size:12px">
+      + Add Value Lever
+    </button>
+  </div>
 
   <div class="btn-row">
     <button class="btn btn-outline" onclick="go(1)">← Back</button>
@@ -1574,7 +1600,7 @@ svg{max-width:100%;height:auto}
       Month in which cumulative net cash crosses zero. Shown on the cash position chart as a dashed line. If beyond 60 months, displayed as &gt;60 mo.
     </div>
     <div style="padding:10px 12px;background:var(--gray-50);border-radius:6px;border:1px solid var(--gray-100)">
-      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">5-Year NPV</div>
+      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">NRV (5-Yr)</div>
       Net Present Value discounted at 10%. Positive NPV = value creation above cost of capital. This is the primary metric for finance committee approval.
     </div>
     <div style="padding:10px 12px;background:var(--gray-50);border-radius:6px;border:1px solid var(--gray-100)">
@@ -1878,8 +1904,124 @@ svg{max-width:100%;height:auto}
     <button class="btn btn-secondary" onclick="go(7)">← Help &amp; Reference</button>
     <button class="btn btn-primary" onclick="go(5)">Full Analysis →</button>
   </div>
+</div>
 
+<!-- ══ PANEL 9 — SOLUTION COMPARATOR ══════════════════════════════════════ -->
+<div class="panel" id="panel-9">
+  <div class="step-eyebrow">SOLUTION COMPARATOR</div>
+  <div class="step-title">Solution NRV Comparison</div>
+  <div class="step-desc">
+    Adjust the store profile below and see how each solution tier activates
+    different value levers. NRV is calculated using the same engine as
+    the main model &#8212; ramp, accessibility decay, covariance haircut, and
+    Decay Avoided all applied.
+  </div>
 
+  <!-- Store profile inputs -->
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;margin-top:20px">
+    <div class="card">
+      <div class="card-title">Store profile</div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">Annual Revenue</span>
+          <span class="slider-val" id="sc-val-rev">$10M</span>
+        </div>
+        <input type="range" min="1000000" max="200000000" step="500000"
+          value="10000000" id="sc-sl-rev" oninput="updateComparator()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">Inventory Accuracy</span>
+          <span class="slider-val" id="sc-val-acc">72%</span>
+        </div>
+        <input type="range" min="50" max="99" step="1"
+          value="72" id="sc-sl-acc" oninput="updateComparator()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">Shrink Rate</span>
+          <span class="slider-val" id="sc-val-shrink">1.8%</span>
+        </div>
+        <input type="range" min="0.5" max="5.0" step="0.1"
+          value="1.8" id="sc-sl-shrink" oninput="updateComparator()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">Inventory Labor (hrs/wk)</span>
+          <span class="slider-val" id="sc-val-labor">80 hrs</span>
+        </div>
+        <input type="range" min="10" max="500" step="5"
+          value="80" id="sc-sl-labor" oninput="updateComparator()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">Store Sq Ft</span>
+          <span class="slider-val" id="sc-val-sqft">30K</span>
+        </div>
+        <input type="range" min="1000" max="200000" step="1000"
+          value="30000" id="sc-sl-sqft" oninput="updateComparator()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">Average Selling Price ($)</span>
+          <span class="slider-val" id="sc-val-asp">$85</span>
+        </div>
+        <input type="range" min="5" max="500" step="5"
+          value="85" id="sc-sl-asp" oninput="updateComparator()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">WACC</span>
+          <span class="slider-val" id="sc-val-wacc">10%</span>
+        </div>
+        <input type="range" min="5" max="20" step="0.5"
+          value="10" id="sc-sl-wacc" oninput="updateComparator()">
+      </div>
+    </div>
+
+    <div>
+      <div id="sc-nrv-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px"></div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Value lever activation by solution</div>
+        <div id="sc-lever-map"></div>
+      </div>
+
+      <div class="card" id="sc-decision-card" style="border-left:4px solid var(--brand-green)">
+        <div class="card-title">Why the winning solution wins</div>
+        <div id="sc-decision-text" style="font-size:13px;line-height:1.65;color:var(--gray-700)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
+    <div class="card">
+      <div class="card-title">5-Year NRV by solution</div>
+      <div style="position:relative;height:260px"><canvas id="sc-chart-bar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Cumulative cashflow &#8212; payback crossover</div>
+      <div style="position:relative;height:260px"><canvas id="sc-chart-cf"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;overflow-x:auto">
+    <div class="card-title">Full comparison</div>
+    <table id="sc-comp-table" style="width:100%;font-size:12px;border-collapse:collapse"></table>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="go(8)">← Forecast Signal</button>
+    <button class="btn btn-primary" onclick="go(5)">Full Analysis →</button>
+  </div>
+</div>
 
 </main>
 </div>
@@ -3680,6 +3822,7 @@ let state = {
   inputs: {},
   benefits: {totAnnual:0, totY1:0, totY2:0, totY3:0, rows:[]},
   costs: {yr0:0, yr1:0, yr2:0},
+  customScenarios: [],
 };
 
 // init inputs
@@ -3698,12 +3841,13 @@ function go(n) {
     else if((n===6||n===7||n===8) && i<5) el.classList.add('done'); // Library pages: keep steps 0-4 as done
   });
   document.getElementById('prog-fill').style.width = Math.min(100, Math.round((Math.min(n,5)/5)*100))+'%';
-  if(n===2) renderDisc();
+  if(n===2) { renderDisc(); renderCustomScenarios(); }
   if(n===3) { syncCost(); }                   // Cost — rebuild from sliders
   if(n===4) { ensureCosts(); renderROI(); }   // ROI
   if(n===5) { ensureCosts(); if(!state.benefits || !state.benefits.totAnnual) renderROI(); renderExec(); }  // Full Analysis
   if(n===6) renderEvidence();
   if(n===8) initForecastSignal();
+  if(n===9) updateComparator();
   document.querySelector('.main').scrollTop = 0;
   syncNav();
 }
@@ -4173,6 +4317,11 @@ function addCostRow() {
 
 // ── SCENARIO CALC ──
 function calcSc(sc) {
+  if (sc.custom === true) {
+    const mech = CUSTOM_MECHANISMS.find(m => m.id === sc.mechanismId);
+    if (!mech) return 0;
+    return Math.max(0, mech.formula(sc.inputs));
+  }
   const p = state.inputs[sc.id];
   try {
     switch(sc.id) {
@@ -4434,6 +4583,432 @@ function renderWalkdownTable(activeScenarios, result) {
   </tr>`;
 
   el.innerHTML = rows + decayRow + tcoRow + nrvRow;
+}
+
+// ── CUSTOM VALUE SCENARIO BUILDER ──
+const CUSTOM_MECHANISMS = [
+  { id:'labor_recovery',   label:'Labor recovery',
+    vars:[
+      {key:'events_per_week',    label:'Events / week',       default:50},
+      {key:'hours_per_event',    label:'Hours per event',      default:0.5},
+      {key:'loaded_rate',        label:'Fully-loaded rate ($/hr)', default:28},
+      {key:'reduction_pct',      label:'Reduction rate (%)',   default:0.70},
+    ],
+    formula: v => v.events_per_week * v.hours_per_event * v.loaded_rate * v.reduction_pct * 52,
+    rampDefault: 'hard_labor'
+  },
+  { id:'shrink_reduction', label:'Shrink reduction',
+    vars:[
+      {key:'annual_revenue',     label:'Annual revenue ($)',   default:5000000},
+      {key:'shrink_pct',         label:'Shrink rate (%)',       default:0.018},
+      {key:'reduction_pct',      label:'Reduction achieved (%)', default:0.30},
+    ],
+    formula: v => v.annual_revenue * v.shrink_pct * v.reduction_pct,
+    rampDefault: 'hard_cost'
+  },
+  { id:'availability_uplift', label:'Availability / stockout uplift',
+    vars:[
+      {key:'annual_revenue',     label:'Annual revenue ($)',   default:5000000},
+      {key:'oos_baseline_pct',   label:'OOS baseline (%)',      default:0.08},
+      {key:'improvement_pct',    label:'Improvement (%)',       default:0.40},
+      {key:'gm_pct',             label:'Gross margin (%)',      default:0.45},
+    ],
+    formula: v => v.annual_revenue * v.oos_baseline_pct * v.improvement_pct * v.gm_pct,
+    rampDefault: 'revenue'
+  },
+  { id:'safety_stock',     label:'Safety stock / working capital release',
+    vars:[
+      {key:'inventory_value',    label:'Inventory value ($)',   default:2000000},
+      {key:'reduction_pct',      label:'Reduction achieved (%)', default:0.12},
+      {key:'carrying_cost_pct',  label:'Carrying cost rate (%)', default:0.22},
+    ],
+    formula: v => v.inventory_value * v.reduction_pct * v.carrying_cost_pct,
+    rampDefault: 'working_cap'
+  },
+  { id:'compliance_fines', label:'Compliance / chargeback avoidance',
+    vars:[
+      {key:'annual_chargebacks', label:'Annual chargeback value ($)', default:150000},
+      {key:'reduction_pct',      label:'Reduction achieved (%)',      default:0.60},
+    ],
+    formula: v => v.annual_chargebacks * v.reduction_pct,
+    rampDefault: 'hard_cost'
+  },
+  { id:'custom_formula',   label:'Custom — I\'ll enter the annual value directly',
+    vars:[
+      {key:'annual_value',       label:'Annual benefit value ($)',    default:100000},
+    ],
+    formula: v => v.annual_value,
+    rampDefault: 'hard_cost'
+  },
+];
+
+let customIdCounter = 1;
+
+function addCustomScenario() {
+  const id = 'CUSTOM-' + String(customIdCounter++).padStart(2,'0');
+  const sc = {
+    id,
+    name: 'Custom scenario ' + id,
+    custom: true,
+    active: true,
+    mechanismId: 'labor_recovery',
+    rampType: 'hard_labor',
+    accessibilityTier: 'configured',
+    haircut: 0.10,
+    inputs: {},
+  };
+  const mech = CUSTOM_MECHANISMS[0];
+  mech.vars.forEach(v => { sc.inputs[v.key] = v.default; });
+  state.customScenarios.push(sc);
+  renderCustomScenarios();
+}
+
+function renderCustomScenarios() {
+  const el = document.getElementById('custom-scenarios-list');
+  if (!el) return;
+  if (!state.customScenarios.length) { el.innerHTML = ''; return; }
+
+  el.innerHTML = state.customScenarios.map((sc, idx) => {
+    const mech = CUSTOM_MECHANISMS.find(m => m.id === sc.mechanismId) || CUSTOM_MECHANISMS[0];
+    const val = mech.formula(sc.inputs);
+    const mechOptions = CUSTOM_MECHANISMS.map(m =>
+      `<option value="${m.id}"${m.id === sc.mechanismId ? ' selected' : ''}>${m.label}</option>`
+    ).join('');
+    const rampOptions = Object.keys(RAMP).map(k =>
+      `<option value="${k}"${k === sc.rampType ? ' selected' : ''}>${RAMP[k].label}</option>`
+    ).join('');
+    const tierOptions = ['commodity','configured','infrastructure'].map(t =>
+      `<option value="${t}"${t === sc.accessibilityTier ? ' selected' : ''}>${t.charAt(0).toUpperCase()+t.slice(1)}</option>`
+    ).join('');
+
+    const varInputs = mech.vars.map(v => `
+      <div style="margin-bottom:8px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:3px">${v.label}</div>
+        <input type="number" value="${sc.inputs[v.key] !== undefined ? sc.inputs[v.key] : v.default}"
+          style="width:160px;font-size:12px"
+          onchange="updateCustomInput(${idx},'${v.key}',+this.value)">
+      </div>`).join('');
+
+    return `
+      <div style="border:1px dashed var(--gray-300);border-radius:8px;padding:16px;margin-bottom:12px;background:var(--gray-50)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div>
+            <div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:4px">${sc.id}
+              <span style="background:var(--gray-200);color:var(--gray-600);padding:1px 6px;border-radius:8px;font-size:9px;margin-left:6px">
+                NOT VERIFIED BY ZEBRA VE TEAM
+              </span>
+            </div>
+            <input type="text" value="${sc.name}" placeholder="Scenario name"
+              style="font-size:13px;font-weight:600;border:none;background:transparent;width:280px"
+              onchange="updateCustomName(${idx},this.value)">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <label style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px">
+              <input type="checkbox" ${sc.active ? 'checked' : ''}
+                onchange="toggleCustomActive(${idx},this.checked)"> Include in model
+            </label>
+            <button onclick="removeCustomScenario(${idx})"
+              style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer">Remove</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Value mechanism</div>
+            <select style="font-size:12px;width:100%" onchange="updateCustomMechanism(${idx},this.value)">
+              ${mechOptions}
+            </select>
+            <div style="margin-top:12px">${varInputs}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Ramp profile</div>
+            <select style="font-size:12px;width:100%;margin-bottom:8px" onchange="updateCustomProp(${idx},'rampType',this.value)">
+              ${rampOptions}
+            </select>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Accessibility tier</div>
+            <select style="font-size:12px;width:100%;margin-bottom:8px" onchange="updateCustomProp(${idx},'accessibilityTier',this.value)">
+              ${tierOptions}
+            </select>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Covariance haircut</div>
+            <input type="number" min="0" max="1" step="0.01" value="${sc.haircut}"
+              style="font-size:12px;width:100px"
+              onchange="updateCustomProp(${idx},'haircut',+this.value)">
+            <div style="margin-top:14px;padding:10px;background:rgba(80,160,80,.08);border-radius:6px;border:1px solid rgba(80,160,80,.2)">
+              <div style="font-size:10px;color:var(--muted);font-family:var(--mono)">ANNUAL VALUE (GROSS)</div>
+              <div style="font-size:20px;font-weight:700;color:var(--brand-green)">${fmt(Math.round(val))}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">before ramp · before adjustments</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function updateCustomInput(idx, key, val) {
+  state.customScenarios[idx].inputs[key] = val;
+  renderCustomScenarios();
+  if (document.getElementById('kpi-grid')) renderROI();
+}
+
+function updateCustomMechanism(idx, mechId) {
+  const sc = state.customScenarios[idx];
+  sc.mechanismId = mechId;
+  const mech = CUSTOM_MECHANISMS.find(m => m.id === mechId);
+  sc.rampType = mech.rampDefault;
+  sc.inputs = {};
+  mech.vars.forEach(v => { sc.inputs[v.key] = v.default; });
+  renderCustomScenarios();
+  if (document.getElementById('kpi-grid')) renderROI();
+}
+
+function updateCustomProp(idx, key, val) {
+  state.customScenarios[idx][key] = val;
+  renderCustomScenarios();
+  if (document.getElementById('kpi-grid')) renderROI();
+}
+
+function updateCustomName(idx, val) {
+  state.customScenarios[idx].name = val;
+}
+
+function toggleCustomActive(idx, val) {
+  state.customScenarios[idx].active = val;
+  if (document.getElementById('kpi-grid')) renderROI();
+}
+
+function removeCustomScenario(idx) {
+  state.customScenarios.splice(idx, 1);
+  renderCustomScenarios();
+  if (document.getElementById('kpi-grid')) renderROI();
+}
+
+// ── SOLUTION COMPARATOR ──
+const SC_SOLUTIONS = [
+  { name:'Handheld only', short:'HH',      color:'#EB5757',
+    accessTier:'commodity',     capex:18000,  opex:4500,
+    capexScale:0.003, opexScale:0.0005,
+    laborMult:0.20, availMult:0.10, shrinkMult:0.00, omniMult:0.000 },
+  { name:'CP + Handheld', short:'CP+HH',   color:'#F2994A',
+    accessTier:'configured',    capex:60000,  opex:12000,
+    capexScale:0.010, opexScale:0.001,
+    laborMult:0.30, availMult:0.18, shrinkMult:0.20, omniMult:0.000 },
+  { name:'CP + Robot',    short:'CP+Bot',  color:'#2F80ED',
+    accessTier:'configured',    capex:90000,  opex:18000,
+    capexScale:0.015, opexScale:0.0015,
+    laborMult:0.35, availMult:0.22, shrinkMult:0.25, omniMult:0.004 },
+  { name:'Full RTLS',     short:'RTLS',    color:'#6FCF97',
+    accessTier:'infrastructure',capex:185000, opex:32000,
+    capexScale:0.030, opexScale:0.003,
+    laborMult:0.40, availMult:0.28, shrinkMult:0.32, omniMult:0.008 },
+];
+
+const SC_LEVERS = [
+  { name:'Labor — cycle count',     act:['on','on','on','on']   },
+  { name:'Labor — search/locate',   act:['on','on','on','on']   },
+  { name:'Availability / stockout', act:['p','on','on','on']    },
+  { name:'Safety stock reduction',  act:['p','on','on','on']    },
+  { name:'Shrink — exit / POS',     act:['off','on','on','on']  },
+  { name:'Receiving accuracy',      act:['off','on','on','on']  },
+  { name:'Fitting room visibility', act:['off','off','p','on']  },
+  { name:'Zone / area loss',        act:['off','off','p','on']  },
+  { name:'OMS / ATP signal',        act:['off','off','p','on']  },
+  { name:'Real-time alerting',      act:['off','off','off','on']},
+  { name:'Strategic data asset',    act:['off','off','off','on']},
+];
+
+let scChartBar = null, scChartCF = null;
+
+function updateComparator() {
+  const rev    = +document.getElementById('sc-sl-rev').value;
+  const acc    = +document.getElementById('sc-sl-acc').value / 100;
+  const shrink = +document.getElementById('sc-sl-shrink').value / 100;
+  const labor  = +document.getElementById('sc-sl-labor').value;
+  const sqft   = +document.getElementById('sc-sl-sqft').value;
+  const asp    = +document.getElementById('sc-sl-asp').value;
+  const wacc   = +document.getElementById('sc-sl-wacc').value / 100;
+
+  document.getElementById('sc-val-rev').textContent    = fmt(rev);
+  document.getElementById('sc-val-acc').textContent    = Math.round(acc*100) + '%';
+  document.getElementById('sc-val-shrink').textContent = (shrink*100).toFixed(1) + '%';
+  document.getElementById('sc-val-labor').textContent  = labor + ' hrs';
+  document.getElementById('sc-val-sqft').textContent   = sqft >= 1000 ? Math.round(sqft/1000) + 'K' : sqft;
+  document.getElementById('sc-val-asp').textContent    = '$' + asp;
+  document.getElementById('sc-val-wacc').textContent   = Math.round(wacc*100) + '%';
+
+  const laborRate = 21.50;
+  const results = SC_SOLUTIONS.map(sol => {
+    const laborBase  = labor * 52 * laborRate * sol.laborMult;
+    const availBase  = rev * (1 - acc) * sol.availMult;
+    const shrinkBase = rev * shrink * sol.shrinkMult;
+    const omniBase   = rev * sol.omniMult;
+    const grossBen   = laborBase + availBase + shrinkBase + omniBase;
+
+    const capex = sol.capex + rev * sol.capexScale;
+    const opex  = sol.opex  + rev * sol.opexScale;
+    const costs = { yr0: capex, yr1: opex };
+
+    const syntheticSc = [{
+      id: sol.short,
+      name: sol.name,
+      custom: true,
+      mechanismId: 'custom_formula',
+      rampType: 'hard_labor',
+      accessibilityTier: sol.accessTier,
+      haircut: 0.10,
+      inputs: { annual_value: grossBen },
+    }];
+
+    const r = calcNRV(syntheticSc, costs, wacc);
+    return { sol, grossBen, capex, opex, result: r };
+  });
+
+  renderSCCards(results);
+  renderSCLeverMap();
+  renderSCCharts(results, wacc);
+  renderSCTable(results);
+  renderSCDecision(results, sqft, labor, asp, rev);
+}
+
+function renderSCCards(results) {
+  const sorted = [...results].sort((a,b) => b.result.nrv - a.result.nrv);
+  const el = document.getElementById('sc-nrv-cards');
+  el.innerHTML = results.map((r) => {
+    const rank = sorted.findIndex(s => s.sol.short === r.sol.short) + 1;
+    const isBest = rank === 1;
+    const nrvNeg = r.result.nrv < 0;
+    return `
+      <div style="border:1px solid ${isBest ? 'var(--brand-green)' : 'var(--gray-200)'};
+        border-radius:10px;padding:16px;text-align:center;
+        background:${isBest ? 'rgba(167,188,2,.05)' : 'var(--gray-50)'}">
+        ${isBest ? '<div style="font-size:10px;font-weight:700;background:var(--brand-green);color:var(--brand-black);padding:2px 10px;border-radius:20px;display:inline-block;margin-bottom:8px">BEST FIT</div>' : `<div style="font-size:10px;color:var(--muted);margin-bottom:8px">#${rank}</div>`}
+        <div style="font-size:11px;font-weight:700;color:var(--gray-700);margin-bottom:6px">${r.sol.name}</div>
+        <div style="font-size:22px;font-weight:800;color:${nrvNeg ? 'var(--red)' : 'var(--brand-black)'}">${fmt(r.result.nrv)}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">5-yr NRV</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">
+          MIRR: ${calcMIRRDisplay(r.result.mirr)}<br>
+          Payback: ${r.result.paybackMo !== null ? r.result.paybackMo + ' mo' : 'N/A'}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderSCLeverMap() {
+  const el = document.getElementById('sc-lever-map');
+  const headers = `<div style="display:grid;grid-template-columns:160px repeat(4,1fr);gap:4px;margin-bottom:6px">
+    <div style="font-size:9px;color:var(--muted);text-transform:uppercase">Lever</div>
+    ${SC_SOLUTIONS.map(s => `<div style="font-size:9px;color:var(--muted);text-transform:uppercase;text-align:center">${s.short}</div>`).join('')}
+  </div>`;
+  const rows = SC_LEVERS.map(lev => {
+    const cells = lev.act.map(a => {
+      if (a==='on')  return `<div style="height:20px;border-radius:3px;background:rgba(167,188,2,.2);border:1px solid rgba(167,188,2,.4);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--brand-green)">●</div>`;
+      if (a==='p')   return `<div style="height:20px;border-radius:3px;background:rgba(242,153,74,.12);border:1px solid rgba(242,153,74,.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:#c07a30">◐</div>`;
+      return `<div style="height:20px;border-radius:3px;background:var(--gray-100);border:1px solid var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--gray-400)">○</div>`;
+    }).join('');
+    return `<div style="display:grid;grid-template-columns:160px repeat(4,1fr);gap:4px;margin-bottom:4px">
+      <div style="font-size:11px;color:var(--muted);display:flex;align-items:center">${lev.name}</div>
+      ${cells}
+    </div>`;
+  }).join('');
+  el.innerHTML = headers + rows;
+}
+
+function renderSCCharts(results, wacc) {
+  const labels = ['Y1','Y2','Y3','Y4','Y5'];
+  const colors = SC_SOLUTIONS.map(s => s.color);
+
+  if (scChartBar) scChartBar.destroy();
+  const ctxBar = document.getElementById('sc-chart-bar').getContext('2d');
+  scChartBar = new Chart(ctxBar, {
+    type:'bar',
+    data:{
+      labels,
+      datasets: results.map((r,i) => ({
+        label: r.sol.short,
+        data: r.result.yearlyData.map(y => Math.round(y.netBenefit)),
+        backgroundColor: colors[i] + '99',
+        borderColor: colors[i],
+        borderWidth:1,
+      }))
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom', labels:{ font:{size:11} } } },
+      scales:{ y:{ ticks:{ callback: v => fmt(v) } } }
+    }
+  });
+
+  if (scChartCF) scChartCF.destroy();
+  const ctxCF = document.getElementById('sc-chart-cf').getContext('2d');
+  scChartCF = new Chart(ctxCF, {
+    type:'line',
+    data:{
+      labels:['Start','Y1','Y2','Y3','Y4','Y5'],
+      datasets: results.map((r,i) => ({
+        label: r.sol.short,
+        data: [-r.result.capex, ...r.result.yearlyData.map(y => Math.round(y.cumCF))],
+        borderColor: colors[i],
+        backgroundColor: 'transparent',
+        borderWidth:2, pointRadius:3, tension:0.3,
+      }))
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom', labels:{ font:{size:11} } } },
+      scales:{
+        y:{ ticks:{ callback: v => fmt(v) } },
+        x:{}
+      }
+    }
+  });
+}
+
+function renderSCTable(results) {
+  const sorted = [...results].sort((a,b) => b.result.nrv - a.result.nrv);
+  const el = document.getElementById('sc-comp-table');
+  const headers = `<thead><tr style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+    <th style="text-align:left;padding:6px 10px">Solution</th>
+    <th style="text-align:right;padding:6px 10px">Investment</th>
+    <th style="text-align:right;padding:6px 10px">Peak annual NRV</th>
+    <th style="text-align:right;padding:6px 10px">5-yr NRV</th>
+    <th style="text-align:right;padding:6px 10px">MIRR</th>
+    <th style="text-align:right;padding:6px 10px">Payback</th>
+    <th style="text-align:right;padding:6px 10px">5-yr ROI</th>
+  </tr></thead>`;
+  const rows = results.map(r => {
+    const rank = sorted.findIndex(s => s.sol.short === r.sol.short);
+    const isBest = rank === 0;
+    const neg = r.result.nrv < 0;
+    return `<tr style="${isBest ? 'background:rgba(167,188,2,.04);font-weight:600' : ''}">
+      <td style="padding:8px 10px;font-size:12px">${isBest ? '★ ' : ''}${r.sol.name}</td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px">${fmt(Math.round(r.result.capex))}</td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px">${fmt(Math.round(r.result.peakAnnual))}</td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px;color:${neg?'var(--red)':'inherit'}">${fmt(r.result.nrv)}</td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px">${calcMIRRDisplay(r.result.mirr)}</td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px">${r.result.paybackMo !== null ? r.result.paybackMo + ' mo' : 'N/A'}</td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px">${r.result.roi5}%</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = headers + '<tbody>' + rows + '</tbody>';
+}
+
+function renderSCDecision(results, sqft, labor, asp, rev) {
+  const sorted = [...results].sort((a,b) => b.result.nrv - a.result.nrv);
+  const winner = sorted[0];
+  const loser  = sorted[sorted.length-1];
+  let reason = '';
+  if (winner.sol.short === 'RTLS') {
+    if (asp >= 100) reason = `Full RTLS wins on value density — ASP $${asp} means every prevented theft and every BOPIS promise kept has high dollar impact. The infrastructure cost is trivial relative to the per-item value at stake.`;
+    else if (rev >= 50000000) reason = `At ${fmt(rev)} revenue, infrastructure cost is trivial as a percentage of recoverable value. Full RTLS delivers the continuous event stream needed for BOPIS, safety stock, and always-on shrink coverage at this scale.`;
+    else reason = `Full RTLS wins because the combination of store profile parameters makes the always-on event stream worth the infrastructure investment.`;
+  } else if (winner.sol.short === 'CP+Bot') {
+    reason = `CP + Robot wins because ${sqft >= 25000 ? `${Math.round(sqft/1000)}K sq ft floor` : 'the floor size'} combined with ${labor} inventory hours/week means the floor sweep problem is the binding constraint. Fixed readers at choke points cover dock and exit shrink while the robot handles continuous floor coverage.`;
+  } else if (winner.sol.short === 'CP+HH') {
+    reason = `CP + Handheld is the right balance for this profile. The store is manageable with handheld floor coverage while fixed readers at choke points activate the shrink and receiving accuracy levers that HH-only misses.`;
+  } else {
+    reason = `Handheld only is the ceiling for this profile. ${asp <= 30 ? `At $${asp} ASP, tag economics make RFID infrastructure cost unsustainable — the lifetime recoverable value cannot justify fixed reader investment.` : 'The value levers activated by fixed infrastructure do not offset their cost at this store size and profile.'}`;
+  }
+  if (loser.result.nrv < 0) {
+    reason += ` ${loser.sol.name} produces negative NRV — infrastructure cost exceeds lifetime recoverable value at this profile.`;
+  }
+  document.getElementById('sc-decision-text').textContent = reason;
 }
 
 // ── STEP 5: ROI & VALUE CASE ──
@@ -5570,7 +6145,7 @@ function exportFullPDF() {
           return '<div class="sc-block">'
             // Header row
             +'<div style="display:grid;grid-template-columns:1fr auto;align-items:start;margin-bottom:6px">'
-            +'<div><h3 style="margin:0 0 1px">'+sc.name+' <span style="font-weight:400;color:#999;font-size:9pt">['+sc.id+']</span></h3>'
+            +'<div><h3 style="margin:0 0 1px">'+sc.name+' <span style="font-weight:400;color:#999;font-size:9pt">['+sc.id+']</span>'+(sc.custom===true?' <span style="font-weight:400;color:#999;font-size:9pt;font-style:italic">(user-generated)</span>':'')+'</h3>'
             +(sc.oneLiner?'<p style="color:#757575;font-size:8.5pt;margin:0;font-style:italic">'+sc.oneLiner+'</p>':'')+'</div>'
             +'<div style="text-align:center;padding-left:10px">'
             +'<div style="font-size:7.5pt;text-transform:uppercase;letter-spacing:.5px;color:#999;font-family:Courier New;margin-bottom:2px">Share of Total</div>'
@@ -5654,7 +6229,7 @@ function exportFullPDF() {
   // ── Assemble full document ───────────────────────────────────────────────
   const html = `<!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
-    <title>${co} — RFID Investment Appraisal</title>
+    <title>${co} — Zebra Value Accelerator · Investment Appraisal</title>
     <style>${CSS}</style>
   </head><body>
 
@@ -5674,7 +6249,7 @@ function exportFullPDF() {
     <div class="cover pb">
       <div class="cover-hero">
         <div class="cover-stripe"></div>
-        <div class="cover-tag">RFID Investment Appraisal · Confidential</div>
+        <div class="cover-tag">Zebra Value Accelerator · Investment Appraisal · Confidential</div>
         <div class="cover-title">Investment Appraisal<br>for ${co}</div>
         <div class="cover-sub">${titleS}</div>
         <div class="cover-meta">
@@ -5686,20 +6261,24 @@ function exportFullPDF() {
         <!-- KPI strip -->
         <div class="cover-kpi-strip" style="background:#fff">
           <div class="ck" style="background:#1A1A1A">
-            <div class="ck-val" style="color:#A8F931">${F(totAnnual)}</div>
-            <div class="ck-lbl" style="color:rgba(255,255,255,.5)">Full Annual Value</div>
+            <div class="ck-val" style="color:#A8F931">${state.nrvResult ? F(Math.round(state.nrvResult.peakAnnual)) : F(totAnnual)}</div>
+            <div class="ck-lbl" style="color:rgba(255,255,255,.5)">Peak Annual Value (Y3)</div>
           </div>
           <div class="ck">
-            <div class="ck-val">${pb}</div>
+            <div class="ck-val">${state.nrvResult && state.nrvResult.paybackMo ? state.nrvResult.paybackMo + ' mo' : pb}</div>
             <div class="ck-lbl">Payback Period</div>
           </div>
           <div class="ck">
-            <div class="ck-val">${F(npv5)}</div>
-            <div class="ck-lbl">5-Year NPV</div>
+            <div class="ck-val">${state.nrvResult ? F(state.nrvResult.nrv) : F(npv5)}</div>
+            <div class="ck-lbl">NRV (5-Yr NPV)</div>
           </div>
           <div class="ck">
-            <div class="ck-val">${roi3}%</div>
-            <div class="ck-lbl">3-Year Net ROI (benefit less cost)</div>
+            <div class="ck-val">${state.nrvResult ? calcMIRRDisplay(state.nrvResult.mirr) : '—'}</div>
+            <div class="ck-lbl">MIRR (replaces IRR)</div>
+          </div>
+          <div class="ck">
+            <div class="ck-val">${state.nrvResult ? state.nrvResult.roi5 + '%' : roi3 + '%'}</div>
+            <div class="ck-lbl">5-Year Net ROI</div>
           </div>
         </div>
         <!-- Scenario pills -->
@@ -5723,11 +6302,11 @@ function exportFullPDF() {
     ${seller&&seller!=='—'?`<p>This appraisal has been prepared by <b>${seller}</b> in collaboration with ${partners}. It should be cross-referred to the sales proposal submitted separately.</p>`:''}
     <p>The following appraisal methods have been used:</p>
 
-    <h2>Net Present Value</h2>
-    <p>A financial measure of whether a proposal delivers a "profit" or a "loss" using an annual cost of money applied to the timing of spend and savings. It includes the initial cost of the equipment and services, the monthly cost of maintenance, compared to the financial benefits accruing. The result is the change in shareholder value to be anticipated from project acceptance.</p>
+    <h2>Net Realization Value (NRV) — 5-Year NPV</h2>
+    <p>The headline financial measure used throughout this appraisal. NRV is the net present value of all projected benefits across 5 years, after adjustment for: type-specific adoption ramp (Y1–Y5 with post-peak decay), accessibility tier modifier (commodity / configured / infrastructure), covariance haircut (10% default per driver), and Decay Avoided (cost of the status quo growing at 3.5%/yr). Benefits are discounted at the customer's WACC (10% baseline).</p>
 
-    <h2>Internal Rate of Return (IRR) — Modeled, Illustrative, Pre-Tax</h2>
-    <p>The return rate per year to <b>${co}</b> taking into account: initial cost of the equipment and services, monthly cost of maintenance, and comparing these to the timing of benefits identified as a result of implementing the project.</p>
+    <h2>MIRR — Modified Internal Rate of Return (replaces IRR)</h2>
+    <p>Return metric: MIRR (Modified Internal Rate of Return), not IRR. MIRR uses WACC as the reinvestment rate, producing a more conservative and accurate return estimate for operational technology investments. All benefits are adjusted using the NRV methodology: type-specific ramp profiles (Y1–Y5 including post-peak decay), accessibility tier modifiers, covariance haircuts, and Decay Avoided. Sources available on request.</p>
 
     <h2>Payback</h2>
     <p>A comparison of the initial outlay to buy equipment or services, against the time taken for the savings to cover the initial outlay. This derives an answer which is a time measure, usually quoted in months / years.</p>
@@ -5760,6 +6339,47 @@ function exportFullPDF() {
 
     <div class="pb"></div>
 
+    <!-- ── NRV WALK-DOWN ── -->
+    <h1>NRV Walk-Down — Per-Driver Decomposition (Y3 Peak)</h1><hr class="rule-heavy">
+    <p>The walk-down below shows, for each scenario, how the gross annual benefit is adjusted through the NRV methodology to arrive at the discounted final value. Columns: gross annual → after adoption ramp (Y3) → after accessibility tier A(t) → after covariance haircut.</p>
+    ${(() => {
+      const r = state.nrvResult;
+      if (!r) return '<p style="color:#999;font-style:italic">NRV walk-down unavailable — model has not been computed.</p>';
+      const peakT = 2;
+      const wkRows = active.map(sc => {
+        const ann = Math.max(0, calcSc(sc));
+        const h = (sc.haircut !== undefined) ? sc.haircut : 0.10;
+        const tier = sc.accessibilityTier || 'configured';
+        const ramp = RAMP[sc.rampType].y[peakT];
+        const access = ACCESS_TIER[tier][peakT];
+        const afterRamp = ann * ramp;
+        const afterAccess = afterRamp * access;
+        const afterHaircut = afterAccess * (1 - h);
+        const isCustom = sc.custom === true;
+        return `<tr${isCustom ? ' style="font-style:italic;color:#555"' : ''}>
+          <td>${sc.id}${isCustom ? ' <span style="color:#999">(user-generated)</span>' : ''} — ${sc.name}</td>
+          <td class="r">${F(Math.round(ann))}</td>
+          <td class="r">${F(Math.round(afterRamp))}</td>
+          <td class="r">${F(Math.round(afterAccess))}</td>
+          <td class="r">${F(Math.round(afterHaircut))}</td>
+          <td class="r" style="font-size:9pt;color:#757575">${tier}</td>
+        </tr>`;
+      }).join('');
+      const decayRow = `<tr style="background:#f7f7f7"><td colspan="4" style="font-style:italic;color:#555">+ Decay Avoided (status-quo growth @ 3.5%/yr)</td><td class="r">${F(Math.round(r.yearlyData[2].decayAvoided))}</td><td></td></tr>`;
+      const tcoRow = `<tr style="background:#f7f7f7"><td colspan="4" style="font-style:italic;color:#555">− Annual TCO (opex + attrition + training)</td><td class="r" style="color:#c8330e">-${F(Math.round(r.totalAnnOpex))}</td><td></td></tr>`;
+      const nrvRow = `<tr class="total-row"><td colspan="4"><b>NRV (5-yr discounted @ 10% WACC)</b></td><td class="r"><b style="color:#3a7a00">${F(r.nrv)}</b></td><td></td></tr>`;
+      return `<table>
+        <thead><tr><th>Scenario</th><th class="r">Gross annual</th><th class="r">After ramp (Y3)</th><th class="r">After A(t)</th><th class="r">After haircut</th><th class="r">Tier</th></tr></thead>
+        <tbody>${wkRows}${decayRow}${tcoRow}${nrvRow}</tbody>
+      </table>`;
+    })()}
+    ${active.some(sc => sc.custom === true) ? `
+      <div style="margin-top:14px;padding:10px 14px;background:#fff8e6;border:1px solid #ffd577;border-left:3px solid #d97706;border-radius:3px;font-size:9.5pt;color:#7a3a05;line-height:1.5">
+        <b>Custom scenario notice:</b> One or more scenarios in this model are user-generated and have not been reviewed or verified by the Zebra Value Engineering team. These scenarios are included for completeness but should be treated as directional estimates pending internal validation.
+      </div>` : ''}
+
+    <div class="pb"></div>
+
     <!-- ── BENEFITS EVALUATION ── -->
     <h1>Benefits Evaluation</h1><hr class="rule-heavy">
     <div class="section-strip">
@@ -5787,8 +6407,8 @@ function exportFullPDF() {
       <div style="font-size:8pt;font-family:Courier New;text-transform:uppercase;letter-spacing:1px;color:#757575;margin-bottom:10px">Investment Ratio</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center">
         <div><div style="font-size:20pt;font-weight:700">$1 : $${invRatio}</div><div style="font-size:8pt;color:#757575;font-family:Courier New;text-transform:uppercase">Return per $1 invested</div></div>
-        <div><div style="font-size:20pt;font-weight:700">${F(npv5)}</div><div style="font-size:8pt;color:#757575;font-family:Courier New;text-transform:uppercase">5-Year NPV</div></div>
-        <div><div style="font-size:20pt;font-weight:700">${roi3}%</div><div style="font-size:8pt;color:#757575;font-family:Courier New;text-transform:uppercase">3-Year Net ROI (benefit less total cost)</div></div>
+        <div><div style="font-size:20pt;font-weight:700">${F(npv5)}</div><div style="font-size:8pt;color:#757575;font-family:Courier New;text-transform:uppercase">NRV (5-Yr)</div></div>
+        <div><div style="font-size:20pt;font-weight:700">${roi3}%</div><div style="font-size:8pt;color:#757575;font-family:Courier New;text-transform:uppercase">5-Year Net ROI</div></div>
       </div>
     </div>
 
@@ -5815,7 +6435,7 @@ function exportFullPDF() {
       <tbody>
         <tr class="total-row"><td><b>Net Benefits</b></td><td class="r"><b>${F(totAnnual-yr0)}</b></td></tr>
         <tr><td><b>Investment Ratio*</b></td><td class="r"><b>$1.00 : $${invRatio}</b></td></tr>
-        <tr><td><b>3-Year ROI</b></td><td class="r"><b>${roi3}%</b></td></tr>
+        <tr><td><b>5-Year ROI</b></td><td class="r"><b>${roi3}%</b></td></tr>
       </tbody>
     </table>
     <p style="font-size:8.5pt;color:#757575;margin-top:6px">*The ratio between the investment cost and the benefit returned. For every $1.00 spent, $${invRatio} is returned.</p>
@@ -5841,15 +6461,15 @@ function exportFullPDF() {
     <div class="pb"></div>
 
     <div style="margin-bottom:16px;max-width:680px">${makeRampSVG(cfPts)}</div>
-    <div class="chart-cap">NPV Cumulative Discounted Cashflow ${F(npv5)}</div>
+    <div class="chart-cap">NRV Cumulative Discounted Cashflow ${F(npv5)}</div>
 
-    <h2 style="margin-top:24px">Internal Rate of Return (IRR) — Modeled, Illustrative, Pre-Tax</h2>
+    <h2 style="margin-top:24px">MIRR (replaces IRR) — Reinvested at WACC</h2>
     <table style="width:60%">
       <tbody>
         <tr><td>Review period (months)</td><td class="r">60</td></tr>
         <tr><td>Non-recurring costs</td><td class="r">${F(yr0)}</td></tr>
         <tr><td>Average monthly benefits</td><td class="r">${F(moAvg)}</td></tr>
-        <tr class="total-row"><td><b>IRR</b></td><td class="r"><b>${irrVal==='N/A'?'N/A':irrVal+'%'}</b></td></tr>
+        <tr class="total-row"><td><b>MIRR</b></td><td class="r"><b>${irrVal==='N/A'?'N/A':irrVal+(typeof irrVal==='string'&&irrVal.indexOf('%')>=0?'':'%')}</b></td></tr>
       </tbody>
     </table>
 
@@ -5884,9 +6504,9 @@ function exportFullPDF() {
       <div class="tile"><div class="tile-val">60 months</div><div class="tile-lbl">Review period</div></div>
       <div class="tile"><div class="tile-val">${F(moAvg)}</div><div class="tile-lbl">Average monthly benefits</div></div>
       <div class="tile"><div class="tile-val">${F(npv5)}</div><div class="tile-lbl">Net Present Value (5-year)</div></div>
-      <div class="tile"><div class="tile-val">${irrVal==='N/A'?'N/A':irrVal+'%'}</div><div class="tile-lbl">Modeled Unlevered IRR (illustrative, pre-tax)</div></div>
+      <div class="tile"><div class="tile-val">${irrVal==='N/A'?'N/A':irrVal+(typeof irrVal==='string'&&irrVal.indexOf('%')>=0?'':'%')}</div><div class="tile-lbl">MIRR — replaces IRR · reinvested at WACC</div></div>
       <div class="tile"><div class="tile-val">${pb}</div><div class="tile-lbl">Payback period</div></div>
-      <div class="tile"><div class="tile-val">${roi3}%</div><div class="tile-lbl">3-Year Net ROI (benefit less total cost, conservative ramps)</div></div>
+      <div class="tile"><div class="tile-val">${roi3}%</div><div class="tile-lbl">5-Year Net ROI · NRV-normalized</div></div>
       <div class="tile"><div class="tile-val">10%</div><div class="tile-lbl">Assumed cost of capital</div></div>
       <div class="tile"><div class="tile-val">$1 : $${invRatio}</div><div class="tile-lbl">Investment ratio</div></div>
     </div>
@@ -5956,7 +6576,7 @@ async function exportPPTX() {
         <div class="slide-num">${num} / ${total}</div>
         ${content}
         <div class="slide-footer" style="color:${dark?'rgba(255,255,255,.3)':'#BDBDBD'}">
-          <span>ZEBRA TECHNOLOGIES · RFID VALUE ACCELERATOR</span>
+          <span>ZEBRA TECHNOLOGIES · ZEBRA VALUE ACCELERATOR</span>
           <span>${co} · ${dateStr}</span>
         </div>
       </div>
@@ -6026,7 +6646,7 @@ async function exportPPTX() {
     <div style="display:grid;grid-template-columns:1fr 280px;gap:32px;height:100%">
       <div style="display:flex;flex-direction:column;justify-content:center">
         <div class="cover-bar"></div>
-        <div class="cover-tag">RFID Investment Appraisal · Confidential</div>
+        <div class="cover-tag">Zebra Value Accelerator · Investment Appraisal · Confidential</div>
         <div class="cover-title">${titleS}</div>
         <div class="cover-co">${co}</div>
         <div class="cover-meta">
@@ -6041,8 +6661,8 @@ async function exportPPTX() {
         <div class="cover-kpi-row" style="grid-template-columns:1fr 1fr">
           <div class="ck"><div class="ck-v">${F(totAnnual)}</div><div class="ck-l">Annual Value</div></div>
           <div class="ck"><div class="ck-v">${pb}</div><div class="ck-l">Payback</div></div>
-          <div class="ck"><div class="ck-v">${F(npv5)}</div><div class="ck-l">5-Yr NPV</div></div>
-          <div class="ck"><div class="ck-v">${roi3}%</div><div class="ck-l">3-Yr ROI</div></div>
+          <div class="ck"><div class="ck-v">${F(npv5)}</div><div class="ck-l">NRV (5-Yr)</div></div>
+          <div class="ck"><div class="ck-v">${roi3}%</div><div class="ck-l">5-Yr ROI</div></div>
         </div>
         <div style="margin-top:8px;border-top:1px solid rgba(255,255,255,.08);padding-top:8px">
           ${active.slice(0,6).map(sc=>`<div style="font-size:7px;font-family:Courier New;color:rgba(255,255,255,.3);padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05)">${sc.id} · ${sc.name}</div>`).join('')}
@@ -6061,8 +6681,8 @@ async function exportPPTX() {
         <div class="kpi4">
           <div class="k4"><div class="k4v" style="color:#1A1A1A">${F(totAnnual)}</div><div class="k4l">Full Annual Value</div></div>
           <div class="k4"><div class="k4v">${pb}</div><div class="k4l">Payback Period</div></div>
-          <div class="k4"><div class="k4v">${F(npv5)}</div><div class="k4l">5-Year NPV</div></div>
-          <div class="k4"><div class="k4v">${roi3}%</div><div class="k4l">3-Year ROI</div></div>
+          <div class="k4"><div class="k4v">${F(npv5)}</div><div class="k4l">NRV (5-Yr)</div></div>
+          <div class="k4"><div class="k4v">${roi3}%</div><div class="k4l">5-Year ROI</div></div>
         </div>
         <div class="slide-sub" style="margin-top:14px">Investment Profile</div>
         <div class="kpi4">
@@ -6245,8 +6865,8 @@ async function exportPPTX() {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
       <div>
         <div class="kpi4" style="grid-template-columns:repeat(2,1fr)">
-          <div class="k4"><div class="k4v">${F(npv5)}</div><div class="k4l">5-Year NPV</div></div>
-          <div class="k4"><div class="k4v">${roi3}%</div><div class="k4l">3-Yr Net ROI</div></div>
+          <div class="k4"><div class="k4v">${F(npv5)}</div><div class="k4l">NRV (5-Yr)</div></div>
+          <div class="k4"><div class="k4v">${roi3}%</div><div class="k4l">5-Yr Net ROI</div></div>
           <div class="k4"><div class="k4v">${pb}</div><div class="k4l">Payback</div></div>
           <div class="k4" style="background:#F0FAE4;border-color:#D4EFA8"><div class="k4v" style="color:#2E7D32">$1:$${invRatio}</div><div class="k4l">Return Ratio</div></div>
         </div>
@@ -6305,7 +6925,7 @@ async function exportPPTX() {
             <div style="font-size:8px"><span style="color:#999">Scenarios:</span> <strong>${active.length}</strong></div>
             <div style="font-size:8px"><span style="color:#999">Annual Value:</span> <strong>${F(totAnnual)}</strong></div>
             <div style="font-size:8px"><span style="color:#999">Payback:</span> <strong>${pb}</strong></div>
-            <div style="font-size:8px"><span style="color:#999">5-Yr NPV:</span> <strong>${F(npv5)}</strong></div>
+            <div style="font-size:8px"><span style="color:#999">NRV (5-Yr):</span> <strong>${F(npv5)}</strong></div>
           </div>
         </div>
       </div>
@@ -6556,7 +7176,7 @@ async function runPPTXDownload(callerBtn) {
     s.addText('Presented by '+partners+'  ·  '+dateStr,{x:0.9,y:5.1,w:11,h:0.26,fontSize:9,color:'555555',fontFace:FN.pptxBody});
     // KPI row — simple, no dark box
     s.addShape(pres.shapes.RECTANGLE,{x:0.9,y:5.9,w:11.5,h:0.02,fill:{color:'333333'},line:{color:'333333',width:0}});
-    [[fmt$(b.totAnnual),'ANNUAL BENEFIT'],[payback+'mo','PAYBACK'],[fmt$(npv5),'5-YR NPV'],[roi3+'%','3-YR ROI']].forEach(([v,l],i)=>{
+    [[fmt$(b.totAnnual),'ANNUAL BENEFIT'],[payback+'mo','PAYBACK'],[fmt$(npv5),'NRV (5-YR)'],[roi3+'%','5-YR ROI']].forEach(([v,l],i)=>{
       const sx=0.9+i*2.88;
       if(i>0) s.addShape(pres.shapes.RECTANGLE,{x:sx,y:5.96,w:0.01,h:1.1,fill:{color:'333333'},line:{color:'333333',width:0}});
       s.addText(v,{x:sx+0.12,y:5.96,w:2.7,h:0.62,fontSize:22,color:Z.GREEN,fontFace:FN.pptxHead,bold:true,align:'center',autoFit:true});
@@ -6603,13 +7223,14 @@ async function runPPTXDownload(callerBtn) {
     const kW=2.0, kH=1.38, kGap=0.13;
     const kX0=0.5;
     const roi5 = c.yr0>0 ? Math.round(((b.totY1+b.totY2+b.totAnnual+b.totAnnual+b.totAnnual-(c.yr0+c.yr1+c.yr2*4))/(c.yr0+c.yr1+c.yr2*4))*100) : 0;
+    const _pptxR = state.nrvResult;
     [
-      [fmt$(b.totAnnual),'ANNUAL BENEFIT','yr 3 steady state',Z.GREEN],
-      [payback+'mo',     'PAYBACK',       'months to recover yr 0',Z.INK],
-      [fmt$(npv5),       '5-YEAR NPV',    'at 10% discount rate',Z.TEAL],
-      [irr+'%',          'IRR',           'unlevered pre-tax',Z.BLUE],
-      [roi3+'%',         '3-YEAR ROI',    'net return on investment',Z.AMBER],
-      [roi5+'%',         '5-YEAR ROI',    'net return on investment',Z.BLUE],
+      [_pptxR ? fmt$(Math.round(_pptxR.peakAnnual)) : fmt$(b.totAnnual), 'PEAK ANNUAL NRV', 'Year 3 · decay-adjusted',Z.GREEN],
+      [_pptxR && _pptxR.paybackMo ? _pptxR.paybackMo+'mo' : payback+'mo', 'PAYBACK', 'discounted at 10% WACC',Z.INK],
+      [_pptxR ? fmt$(_pptxR.nrv) : fmt$(npv5), 'NRV (5-YR)', '5-yr NPV · 10% WACC',Z.TEAL],
+      [_pptxR ? calcMIRRDisplay(_pptxR.mirr) : irr+'%', 'MIRR', 'replaces IRR · reinvested at WACC',Z.BLUE],
+      [_pptxR ? _pptxR.roi5+'%' : roi3+'%', '5-YEAR ROI', 'NRV-normalized · decay applied',Z.AMBER],
+      [_pptxR && _pptxR.bcr ? _pptxR.bcr.toFixed(1)+'x' : '—', 'B:C RATIO', '5-yr benefit ÷ total cost',Z.BLUE],
     ].forEach(([v,l,sub,ac],i)=>mTile(s,kX0+i*(kW+kGap),1.1,kW,kH,l,v,sub,ac));
 
     // ── ROW 2 LEFT: Project summary panel ───────────────────────────────
@@ -6894,7 +7515,8 @@ async function runPPTXDownload(callerBtn) {
       const ry=1.44+i*0.38,bg=i%2===0?Z.CARD:Z.BG;
       const rAc='#'+(rampAcMap[sc.rampType]||'374151');
       scx=sumXOff;
-      [sc.name,'',fmt$(ann*rt.y[0]),fmt$(ann*rt.y[1]),fmt$(ann*rt.y[2]),fmt$(ann)].forEach((v,j)=>{
+      const _scName = sc.custom === true ? sc.name + ' *' : sc.name;
+      [_scName,'',fmt$(ann*rt.y[0]),fmt$(ann*rt.y[1]),fmt$(ann*rt.y[2]),fmt$(ann)].forEach((v,j)=>{
         s.addShape(pres.shapes.RECTANGLE,{x:scx,y:ry,w:sumCols[j].w,h:0.34,fill:{color:bg},line:{color:Z.BORDER,width:0.5}});
         if(j===1){
           s.addShape(pres.shapes.RECTANGLE,{x:scx+0.06,y:ry+0.05,w:sumCols[1].w-0.12,h:0.22,fill:{color:Z.BG},line:{color:rAc,width:0.5}});
@@ -6912,6 +7534,11 @@ async function runPPTXDownload(callerBtn) {
       if(v) s.addText(v,{x:scx+0.06,y:totY+0.08,w:sumCols[j].w-0.12,h:0.28,fontSize:j===0?9.5:8.5,color:j>=2?Z.GREEN:Z.WHITE,fontFace:FN.pptxMono,bold:true,align:j>=2?'right':'left'});
       scx+=sumCols[j].w+0.04;
     });
+    const _hasCustomActive = active.some(sc=>sc.custom===true);
+    if (_hasCustomActive) {
+      s.addText('* User-generated scenario — not verified by Zebra Value Engineering team',
+        {x:0.5, y:7.05, w:12.33, h:0.22, fontSize:8, color:Z.MUTED||Z.BODY, fontFace:FN.pptxMono, italic:true});
+    }
     addFooter(s,co+' — Scenario Summary');
 
     // ══════════════════════════════════════════════════════════════════════
@@ -6950,8 +7577,8 @@ async function runPPTXDownload(callerBtn) {
     // RAMP METHODOLOGY
     s=pres.addSlide(); s.background={color:Z.BG};
     hdr(s,'METHODOLOGY','Benefit Realization Framework',co); addLogo(s);
-    s.addText('Adoption curves calibrated to operational change velocity — GS1 US and Auburn University RFID Lab guidance.',
-      {x:0.5,y:1.08,w:12.4,h:0.24,fontSize:9,color:Z.MUTED,fontFace:FN.pptxBody});
+    s.addText('NRV Methodology: Benefits adjusted for adoption ramp (Y1–Y5 with post-peak decay), accessibility tier (commodity/configured/infrastructure), covariance haircut (10% default), and Decay Avoided (3.5%/yr baseline growth). MIRR used as return metric — reinvests at WACC. 5-year model, 10% discount rate. Sources: Auburn RFID Lab, GS1 US, ECR Retail Loss Group, McKinsey Retail Operations.',
+      {x:0.5,y:1.08,w:12.4,h:0.42,fontSize:8.5,color:Z.MUTED,fontFace:FN.pptxBody,autoFit:true});
     [{key:'hard_labor',label:'Hard Labor',rates:'50 → 85 → 100%',rationale:'Direct labor hours freed at go-live. Process change lag only — not technical risk.',ac:'0F766E'},
      {key:'hard_cost',label:'Hard Cost',rates:'50 → 85 → 100%',rationale:'Direct P&L cost avoidance confirmed through audits.',ac:'065F46'},
      {key:'revenue',label:'Revenue Uplift',rates:'30 → 70 → 100%',rationale:'Demand-side variability requires integration ramp. Lead as upside.',ac:'1D4ED8'},
@@ -6972,14 +7599,14 @@ async function runPPTXDownload(callerBtn) {
     // BASIS OF PREPARATION
     s=pres.addSlide(); s.background={color:Z.BG};
     hdr(s,'BASIS OF PREPARATION','Model Inputs & Methods',co); addLogo(s);
-    [['Discount Rate','10% per annum (cost of capital assumption)'],
-     ['Horizon','60 months (5 years)'],
-     ['NPV Method','Discounted cash flow — benefits net of investment'],
-     ['IRR','Unlevered, pre-tax, illustrative model output'],
-     ['ROI Framing','3-year net ROI: cumulative benefit less total cost'],
-     ['Benefit Ramps','Hard labor/cost: 3–12 month ramp. Revenue: 6–18 month ramp. Working capital: 6–12 month ramp.'],
+    [['Discount Rate','10% WACC per annum (cost of capital assumption)'],
+     ['Horizon','60 months (5 years) · NRV method'],
+     ['NRV Method','Discounted cash flow with adoption ramp, accessibility tier, covariance haircut, and Decay Avoided'],
+     ['MIRR (not IRR)','Reinvests positive flows at WACC — more conservative and accurate for operational technology investments'],
+     ['ROI Framing','5-year net ROI: cumulative NRV benefit less total cost'],
+     ['Benefit Ramps','Type-specific Y1–Y5 curves with post-peak decay (hard_labor, hard_cost, revenue, soft, working_cap, strategic)'],
      ['Scenarios',''+active.length+' scenarios across '+Object.keys(groups).length+' value theme(s)'],
-     ['Inputs','Benchmark defaults from published studies; replace with customer data where available'],
+     ['Inputs','Benchmark defaults from Auburn RFID Lab, GS1 US, ECR Retail Loss Group; replace with customer data where available'],
     ].forEach((row,i)=>{
       const ry=1.18+i*0.46,bg=i%2===0?Z.CARD:Z.BG;
       s.addShape(pres.shapes.RECTANGLE,{x:0.5,y:ry,w:5.5,h:0.4,fill:{color:bg},line:{color:Z.BORDER,width:0.5}});
@@ -7051,10 +7678,10 @@ async function runPPTXDownload(callerBtn) {
     s.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:13.33,h:0.04,fill:{color:Z.GREEN},line:{color:Z.GREEN,width:0}});
     s.addShape(pres.shapes.RECTANGLE,{x:0,y:7.46,w:13.33,h:0.04,fill:{color:Z.GREEN},line:{color:Z.GREEN,width:0}});
     s.addImage({data:PPTX_LOGO_DARK_BG,x:10.5,y:0.1,w:2.6,h:0.8});
-    s.addText('ZEBRA TECHNOLOGIES  ·  RFID VALUE CASE',{x:1.0,y:1.1,w:10.5,h:0.28,fontSize:9,color:Z.GREEN,fontFace:FN.pptxMono,charSpacing:5,bold:true});
+    s.addText('ZEBRA TECHNOLOGIES  ·  ZEBRA VALUE ACCELERATOR',{x:1.0,y:1.1,w:10.5,h:0.28,fontSize:9,color:Z.GREEN,fontFace:FN.pptxMono,charSpacing:5,bold:true});
     s.addText('Thank You.',{x:1.0,y:1.52,w:8.5,h:2.2,fontSize:72,color:Z.WHITE,fontFace:FN.pptxHead,bold:true,autoFit:true});
     s.addText("Questions, next steps, or a live walk-through — we're ready.",{x:1.0,y:3.86,w:8.5,h:0.38,fontSize:12,color:"888888",fontFace:FN.pptxBody});
-    [[fmt$(b.totAnnual),'Annual Benefit'],[active.length+' Scenarios','Quantified'],[payback+'mo','Payback'],[fmt$(npv5),'5-Yr NPV']].forEach(([v,l],i)=>{
+    [[fmt$(b.totAnnual),'Annual Benefit'],[active.length+' Scenarios','Quantified'],[payback+'mo','Payback'],[fmt$(npv5),'NRV (5-Yr)']].forEach(([v,l],i)=>{
       const sx=1.0+i*2.88;
       if(i>0) s.addShape(pres.shapes.RECTANGLE,{x:sx,y:4.86,w:0.015,h:0.7,fill:{color:'333333'},line:{color:'333333',width:0}});
       s.addText(v,{x:sx+0.1,y:4.84,w:2.7,h:0.32,fontSize:12,color:Z.GREEN,fontFace:FN.pptxHead,bold:true,align:'center',autoFit:true});
@@ -7197,6 +7824,8 @@ function exportLLMPrompt() {
     const fmt  = v => v == null ? '—' : '$' + Math.round(v).toLocaleString();
     const pct  = v => Math.round((v||0)*100) + '%';
     const _aiNrv = state.nrvResult;
+    const r = _aiNrv;
+    const hasCustom = (state.customScenarios||[]).some(s=>s.active);
     const moAvg = (b.totAnnual||0)/12;
     const paybackMo = _aiNrv ? _aiNrv.paybackMo : (moAvg>0 && (c.yr0||0)>0 ? Math.round((c.yr0||0)/moAvg) : null);
     const npv5 = _aiNrv ? _aiNrv.nrv : Math.round(
@@ -7256,29 +7885,14 @@ Evidence IDs: ${evIds||'—'}`;
     }).join('\n');
 
     // Modeling methodology note
-    const methodNote = `MODELING METHODOLOGY
-────────────────────
-• Ramp Types:
-    hard_labor    — Year 1: 50%, Year 2: 85%, Year 3: 100%
-    hard_cost     — Year 1: 50%, Year 2: 85%, Year 3: 100%
-    revenue       — Year 1: 30%, Year 2: 65%, Year 3: 100%
-    working_cap   — Year 1: 40%, Year 2: 75%, Year 3: 100%
-    soft          — Year 1: 20%, Year 2: 55%, Year 3: 85%
-
-• Financial model assumptions:
-    – Cost of capital (discount rate): 10% per annum
-    – NPV calculated over 5 years (Years 1–5); Years 4–5 carry Year 3 steady-state benefits
-    – Yr0 investment is fully expensed in period 0 (not discounted)
-    – Recurring OpEx (yr1, yr2) deducted from benefits before discounting
-    – Payback = Yr0 investment ÷ (Annual steady-state benefit ÷ 12), expressed in months
-    – ROI (3-year) = ((Total 3-yr benefits − Total 3-yr cost) ÷ Total 3-yr cost) × 100%
-    – Only quantified direct benefits are included; strategic/soft benefits are noted but excluded from totals
-
-• Input defaults are conservative end-of-range benchmarks from:
-    GS1 US RFID Implementation Guidelines (2022)
-    Auburn University RFID Lab Item-Level RFID Initiative benchmarks
-    NRF National Retail Security Survey (2023)
-    ECR Community Retail Out-of-Stock Study`;
+    const methodNote = `Methodology note: Financial model uses Net Realization Value (NRV) methodology.
+Benefits are adjusted for type-specific adoption ramps (Y1–Y5 including post-peak
+decay), accessibility tier compression (commodity / configured / infrastructure),
+covariance haircut (default 10% per driver), and Decay Avoided (baseline cost
+growing at 3.5%/yr). Return metric is MIRR (not IRR) — reinvested at WACC.
+Model period: 5 years. Discount rate: 10% WACC.
+Sources: Auburn University RFID Lab · GS1 US · ECR Retail Loss Group ·
+McKinsey Retail Operations · NRV SOP v1 (Alt Meridian Value Engineering).`;
 
     const prompt = `SUGGESTED CHAT TITLE: ${co} — RFID Value Analysis (${dateStr})
 ─────────────────────────────────────────────────────────────────────
@@ -7339,15 +7953,19 @@ Pain Signal:        ${pain || '(not entered)'}
 ════════════════════════════════════════════════════════════════════
 KEY FINANCIAL KPIs
 ════════════════════════════════════════════════════════════════════
-Annual Benefit (steady-state):   ${fmt(b.totAnnual)}
-  Year 1:                        ${fmt(b.totY1)}
-  Year 2:                        ${fmt(b.totY2)}
-  Year 3+:                       ${fmt(b.totAnnual)}
-Initial Investment (Yr0):        ${fmt(c.yr0)}
-Payback Period:                  ${paybackMo ? paybackMo + ' months' : '—'}
-3-Year ROI:                      ${roi3}%
-5-Year NPV (10% discount rate):  ${fmt(npv5)}
-B:C Ratio (3-yr):                ${(c.yr2||0)>0 ? (((b.totY1+b.totY2+b.totAnnual)/(c.yr0+c.yr1+(c.yr2||0)*2)).toFixed(1)+'x') : '—'}
+Annual Benefit (steady-state):                 ${fmt(b.totAnnual)}
+  Year 1:                                      ${fmt(b.totY1)}
+  Year 2:                                      ${fmt(b.totY2)}
+  Year 3+:                                     ${fmt(b.totAnnual)}
+Initial Investment (Yr0):                      ${fmt(c.yr0)}
+NRV (5-year, discounted at 10% WACC):          ${r ? fmt(r.nrv) : '—'}
+MIRR:                                          ${r ? calcMIRRDisplay(r.mirr) : '—'}
+Peak Annual NRV (Year 3):                      ${r ? fmt(Math.round(r.peakAnnual)) : '—'}
+Payback Period:                                ${r && r.paybackMo ? r.paybackMo + ' months' : '—'}
+5-Year Net ROI:                                ${r ? r.roi5 + '%' : '—'}
+Benefit-Cost Ratio:                            ${r && r.bcr ? r.bcr.toFixed(1) + 'x' : '—'}
+${r && r.bcr > 10 ? 'NOTE: BCR exceeds 10x — per NRV SOP, top-3 drivers should be stress-tested at -20% before presenting.' : ''}
+${hasCustom ? '\nNOTE: This model includes user-generated custom scenarios that have not been verified by the Zebra Value Engineering team. These are flagged in the scenario list above.' : ''}
 
 ════════════════════════════════════════════════════════════════════
 SCENARIOS SELECTED (${active.length})
