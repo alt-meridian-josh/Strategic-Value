@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
   <meta name="color-scheme" content="light only">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zebra RFID Value Accelerator v3.0</title>
+<title>Zebra Value Accelerator v3.0</title>
 <!-- ZEBRA BRAND FONTS — Licensed OTF assets loaded from assets/fonts/
      ZebraSans   = Zebra Sans (Regular, Bold, BoldItalic, Italic, Condensed ExtraBold)
      ZebraMono   = Zebra Mono (Medium, ExtraBold)
@@ -340,6 +340,11 @@ svg{max-width:100%;height:auto}
 .srow{display:flex;align-items:center;gap:10px}
 .srow input[type=range]{flex:1;accent-color:var(--brand-black);cursor:pointer}
 .sval{font-family:var(--mono);font-size:11px;color:var(--brand-black);min-width:60px;text-align:right;font-weight:700}
+.slider-row{margin-bottom:14px}
+.slider-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.slider-name{font-size:11px;color:var(--gray-700);font-weight:600}
+.slider-val{font-family:var(--mono);font-size:11px;color:var(--brand-black);font-weight:700}
+.slider-row input[type=range]{width:100%;accent-color:var(--brand-black);cursor:pointer}
 
 /* CHIPS &#8212; Zebra filter pill spec */
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
@@ -759,7 +764,7 @@ svg{max-width:100%;height:auto}
 
   /* ── Print header strip (replaces black topbar) ── */
   #panel-5::before{
-    content:'ZEBRA TECHNOLOGIES — RFID VALUE CASE';
+    content:'ZEBRA TECHNOLOGIES — ZEBRA VALUE ACCELERATOR';
     display:block;
     font-family:'Courier New',monospace;
     font-size:7pt;
@@ -884,7 +889,7 @@ svg{max-width:100%;height:auto}
     </span>
     <div style="width:1px;height:20px;background:rgba(255,255,255,.2);margin:0 4px"></div>
     <div>
-      <div class="brand-name">RFID Value Accelerator</div>
+      <div class="brand-name">Zebra Value Accelerator</div>
       <div class="brand-sub">Zebra Technologies</div>
     </div>
   </div>
@@ -905,6 +910,7 @@ svg{max-width:100%;height:auto}
   <div class="sb-item" onclick="go(6)"><div class="sb-num">≡</div><span class="sb-label">Evidence Registry</span><span class="sb-short">Evidence</span></div>
   <div class="sb-item" onclick="go(7)"><div class="sb-num">?</div><span class="sb-label">Help &amp; Reference</span><span class="sb-short">Help</span></div>
   <div class="sb-item" onclick="go(8)"><div class="sb-num">FS</div><span class="sb-label">Forecast Signal</span><span class="sb-short">Forecast</span></div>
+  <div class="sb-item" onclick="go(9)"><div class="sb-num">SC</div><span class="sb-label">Solution Comparator</span><span class="sb-short">Compare</span></div>
   <div class="sb-progress">
     <div class="sb-prog-label">PROGRESS</div>
     <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:11%"></div></div>
@@ -1028,6 +1034,26 @@ svg{max-width:100%;height:auto}
 
   <div id="disc-accordion"></div>
 
+  <div style="margin-top:32px;padding-top:20px;border-top:2px dashed var(--gray-300)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <div style="font-family:var(--head);font-size:15px;font-weight:700">Custom Value Scenarios</div>
+      <div style="font-size:10px;background:var(--gray-100);color:var(--gray-600);
+        padding:2px 8px;border-radius:10px;font-family:var(--mono);letter-spacing:.04em">
+        NOT VERIFIED BY ZEBRA VE TEAM
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;max-width:620px">
+      Add value levers that aren't in the standard library. Select a mechanism,
+      fill in your numbers, and it flows into the NRV model. These scenarios are
+      clearly flagged as user-generated in all exports.
+    </div>
+    <div id="custom-scenarios-list"></div>
+    <button class="btn btn-outline" onclick="addCustomScenario()"
+      style="margin-top:12px;font-size:12px">
+      + Add Value Lever
+    </button>
+  </div>
+
   <div class="btn-row">
     <button class="btn btn-outline" onclick="go(1)">← Back</button>
     <button class="btn btn-primary" onclick="go(3)">Next: Cost Model →</button>
@@ -1102,7 +1128,7 @@ svg{max-width:100%;height:auto}
 <div class="panel" id="panel-4">
   <div class="step-eyebrow">Step 5 of 6</div>
   <div class="step-title">ROI & Value Case</div>
-  <div class="step-desc">Full financial model with type-driven benefit realization ramps. Hard Labor &amp; Cost: 50&#8594;85&#8594;100%. Revenue: 30&#8594;70&#8594;100%. Soft Productivity: 25&#8594;65&#8594;100%. Working Capital: 20&#8594;60&#8594;100%. Strategic: 0&#8594;20&#8594;60%. Each ramp reflects operational change velocity, not technical risk. <strong>Scroll past the headline KPIs to the <span style="color:var(--brand-black)">NRV — Net Realization Value</span> card</strong> for the normalized, decay-aware view (5-yr ramp with post-peak erosion, accessibility tier, covariance haircut, MIRR, WACC sensitivity).</div>
+  <div class="step-desc">Full financial model using the NRV (Net Realization Value) methodology. Every benefit is adjusted for adoption ramp, accessibility decay, and covariance haircut before discounting. Decay Avoided captures the growing cost of the status quo. MIRR replaces IRR &#8212; reinvesting at WACC, not at the internal rate. Scroll past the headline KPIs to the <strong>NRV Walk-Down</strong> for the full per-driver decomposition.</div>
 
   <div class="alert a-strategy" style="margin-bottom:18px">
     <span>⬡</span>
@@ -1150,6 +1176,27 @@ svg{max-width:100%;height:auto}
 
   <div class="kpi-grid" id="kpi-grid"></div>
   <div class="kpi-secondary-row" id="kpi-secondary"></div>
+  <details style="margin:20px 0" id="walkdown-details">
+    <summary style="cursor:pointer;font-size:12px;font-family:var(--mono);color:var(--muted);
+      text-transform:uppercase;letter-spacing:.06em;padding:8px 0;border-bottom:1px solid var(--gray-200)">
+      NRV Walk-Down — how each adjustment is applied (Y3 peak)
+    </summary>
+    <div style="overflow-x:auto;margin-top:12px">
+      <table style="width:100%;font-size:12px;border-collapse:collapse">
+        <thead>
+          <tr style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+            <th style="text-align:left;padding:4px 8px">Scenario</th>
+            <th style="text-align:right;padding:4px 8px">Gross annual</th>
+            <th style="text-align:right;padding:4px 8px">After ramp</th>
+            <th style="text-align:right;padding:4px 8px">After A(t)</th>
+            <th style="text-align:right;padding:4px 8px">After haircut</th>
+            <th style="text-align:center;padding:4px 8px">Tier</th>
+          </tr>
+        </thead>
+        <tbody id="nrv-walkdown-body"></tbody>
+      </table>
+    </div>
+  </details>
   <div id="nrv-bcr-flag-host"></div>
 
   <!-- Delay + Missed Value side by side -->
@@ -1553,12 +1600,12 @@ svg{max-width:100%;height:auto}
       Month in which cumulative net cash crosses zero. Shown on the cash position chart as a dashed line. If beyond 60 months, displayed as &gt;60 mo.
     </div>
     <div style="padding:10px 12px;background:var(--gray-50);border-radius:6px;border:1px solid var(--gray-100)">
-      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">5-Year NPV</div>
+      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">NRV (5-Yr)</div>
       Net Present Value discounted at 10%. Positive NPV = value creation above cost of capital. This is the primary metric for finance committee approval.
     </div>
     <div style="padding:10px 12px;background:var(--gray-50);border-radius:6px;border:1px solid var(--gray-100)">
-      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">IRR</div>
-      The discount rate at which NPV = 0. If IRR exceeds the customer's hurdle rate (typically 8–15%), the investment passes finance review at the headline level.
+      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">MIRR (replaces IRR)</div>
+      The discount rate at which NPV = 0. If the rate exceeds the customer's hurdle rate (typically 8–15%), the investment passes finance review at the headline level. <strong>MIRR is used in place of IRR throughout this tool. MIRR uses WACC as the reinvestment rate, which is more conservative and more accurate for operational technology investments.</strong>
     </div>
     <div style="padding:10px 12px;background:var(--gray-50);border-radius:6px;border:1px solid var(--gray-100)">
       <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Cost of Delay</div>
@@ -1857,8 +1904,124 @@ svg{max-width:100%;height:auto}
     <button class="btn btn-secondary" onclick="go(7)">← Help &amp; Reference</button>
     <button class="btn btn-primary" onclick="go(5)">Full Analysis →</button>
   </div>
+</div>
 
+<!-- ══ PANEL 9 — SOLUTION COMPARATOR ══════════════════════════════════════ -->
+<div class="panel" id="panel-9">
+  <div class="step-eyebrow">SOLUTION COMPARATOR</div>
+  <div class="step-title">Solution NRV Comparison</div>
+  <div class="step-desc">
+    Adjust the store profile below and see how each solution tier activates
+    different value levers. NRV is calculated using the same engine as
+    the main model &#8212; ramp, accessibility decay, covariance haircut, and
+    Decay Avoided all applied.
+  </div>
 
+  <!-- Store profile inputs -->
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;margin-top:20px">
+    <div class="card">
+      <div class="card-title">Store profile</div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">Annual Revenue</span>
+          <span class="slider-val" id="sc-val-rev">$10M</span>
+        </div>
+        <input type="range" min="1000000" max="200000000" step="500000"
+          value="10000000" id="sc-sl-rev" oninput="updateComparator()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">Inventory Accuracy</span>
+          <span class="slider-val" id="sc-val-acc">72%</span>
+        </div>
+        <input type="range" min="50" max="99" step="1"
+          value="72" id="sc-sl-acc" oninput="updateComparator()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">Shrink Rate</span>
+          <span class="slider-val" id="sc-val-shrink">1.8%</span>
+        </div>
+        <input type="range" min="0.5" max="5.0" step="0.1"
+          value="1.8" id="sc-sl-shrink" oninput="updateComparator()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">Inventory Labor (hrs/wk)</span>
+          <span class="slider-val" id="sc-val-labor">80 hrs</span>
+        </div>
+        <input type="range" min="10" max="500" step="5"
+          value="80" id="sc-sl-labor" oninput="updateComparator()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">Store Sq Ft</span>
+          <span class="slider-val" id="sc-val-sqft">30K</span>
+        </div>
+        <input type="range" min="1000" max="200000" step="1000"
+          value="30000" id="sc-sl-sqft" oninput="updateComparator()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">Average Selling Price ($)</span>
+          <span class="slider-val" id="sc-val-asp">$85</span>
+        </div>
+        <input type="range" min="5" max="500" step="5"
+          value="85" id="sc-sl-asp" oninput="updateComparator()">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-label">
+          <span class="slider-name">WACC</span>
+          <span class="slider-val" id="sc-val-wacc">10%</span>
+        </div>
+        <input type="range" min="5" max="20" step="0.5"
+          value="10" id="sc-sl-wacc" oninput="updateComparator()">
+      </div>
+    </div>
+
+    <div>
+      <div id="sc-nrv-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px"></div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Value lever activation by solution</div>
+        <div id="sc-lever-map"></div>
+      </div>
+
+      <div class="card" id="sc-decision-card" style="border-left:4px solid var(--brand-green)">
+        <div class="card-title">Why the winning solution wins</div>
+        <div id="sc-decision-text" style="font-size:13px;line-height:1.65;color:var(--gray-700)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
+    <div class="card">
+      <div class="card-title">5-Year NRV by solution</div>
+      <div style="position:relative;height:260px"><canvas id="sc-chart-bar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Cumulative cashflow &#8212; payback crossover</div>
+      <div style="position:relative;height:260px"><canvas id="sc-chart-cf"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;overflow-x:auto">
+    <div class="card-title">Full comparison</div>
+    <table id="sc-comp-table" style="width:100%;font-size:12px;border-collapse:collapse"></table>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="go(8)">← Forecast Signal</button>
+    <button class="btn btn-primary" onclick="go(5)">Full Analysis →</button>
+  </div>
+</div>
 
 </main>
 </div>
@@ -1873,7 +2036,7 @@ svg{max-width:100%;height:auto}
 const BRAND = {
   // ── IDENTITY ──────────────────────────────────────────────
   company:      "Zebra Technologies",
-  product:      "RFID Value Accelerator",
+  product:      "Zebra Value Accelerator",
   tagline:      "Capture Your Edge.",
 
   // ── COLORS — confirmed from Zebra Web Brand Guidelines (Figma) ──
@@ -1992,12 +2155,18 @@ document.addEventListener('DOMContentLoaded', applyBrand);
 
 // ── RAMP (50% Y1 / 85% Y2 / 100% Y3 as conservative standard) ──
 const RAMP = {
-  hard_labor:  { y1:.50, y2:.85, y3:1.00, label:"Hard Labor",  cls:"bf-hl" },
-  hard_cost:   { y1:.50, y2:.85, y3:1.00, label:"Hard Cost",   cls:"bf-hc" },
-  revenue:     { y1:.30, y2:.70, y3:1.00, label:"Revenue",     cls:"bf-rv" },
-  soft:        { y1:.25, y2:.65, y3:1.00, label:"Soft Prod.",  cls:"bf-sf" },
-  working_cap: { y1:.20, y2:.60, y3:1.00, label:"Working Cap.",cls:"bf-wc" },
-  strategic:   { y1:.00, y2:.20, y3:.60,  label:"Strategic",   cls:"bf-sf" },
+  hard_labor:  { y:[0.50,0.85,1.00,0.97,0.90], label:"Hard Labor",   cls:"bf-hl" },
+  hard_cost:   { y:[0.50,0.85,1.00,0.97,0.90], label:"Hard Cost",    cls:"bf-hc" },
+  revenue:     { y:[0.30,0.70,1.00,0.93,0.82], label:"Revenue",      cls:"bf-rv" },
+  soft:        { y:[0.25,0.65,1.00,0.88,0.74], label:"Soft Prod.",   cls:"bf-sf" },
+  working_cap: { y:[0.20,0.60,1.00,0.94,0.85], label:"Working Cap.", cls:"bf-wc" },
+  strategic:   { y:[0.00,0.20,0.60,0.52,0.44], label:"Strategic",    cls:"bf-sf" },
+};
+
+const ACCESS_TIER = {
+  commodity:      [0.90, 0.75, 0.60, 0.50, 0.45],
+  configured:     [0.95, 0.90, 0.82, 0.78, 0.75],
+  infrastructure: [1.00, 0.98, 0.96, 0.93, 0.90],
 };
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -2147,7 +2316,7 @@ const SCENARIOS = [
   { id:"RET-01", name:"Inventory Accuracy — Cycle Count Labor",
     theme:"Labor & Human Capacity", verticalKey:"retail",
     facilityKeys:["Store / Branch"], techKeys:["RFID Core","Handheld RFID","Fixed RFID Infrastructure"],
-    themeKeys:["Labor & Human Capacity"], evidence:"Strong", annualBenefit:312000, rampType:"hard_labor",
+    themeKeys:["Labor & Human Capacity"], evidence:"Strong", annualBenefit:312000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Cut cycle-count labor 75–90% — from 3 min/item to 12 sec with handheld RFID",
     evidenceIds:["EV-RET-LABOR-01","EV-RET-ACC-01"],
     challenge:"When the customer questions headcount reduction: these are hours recovered and redirected to growth or higher-value tasks — not necessarily elimination. Finance counts schedulable labor hours at 100% credit.",
@@ -2163,7 +2332,7 @@ const SCENARIOS = [
   { id:"RET-02", name:"On-Shelf Availability — Stockout Recovery",
     theme:"Revenue / Margin", verticalKey:"retail",
     facilityKeys:["Store / Branch"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Revenue / Margin","Operational Efficiency"], evidence:"Strong", annualBenefit:500000, rampType:"revenue",
+    themeKeys:["Revenue / Margin","Operational Efficiency"], evidence:"Strong", annualBenefit:500000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Recover 50% of stockout losses through RFID-triggered automated replenishment alerts",
     evidenceIds:["EV-RET-OSA-01"],
     challenge:"When revenue uplift is questioned: ECR benchmarks a 5% out-of-stock rate globally. We use the customer's own gross margin — the only variable we ask them to confirm is their current OOS frequency.",
@@ -2178,7 +2347,7 @@ const SCENARIOS = [
   { id:"RET-03", name:"Shrink Reduction — Loss Prevention",
     theme:"Direct Cost & Spend", verticalKey:"retail",
     facilityKeys:["Store / Branch"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Direct Cost & Spend"], evidence:"Strong", annualBenefit:350000, rampType:"hard_cost",
+    themeKeys:["Direct Cost & Spend"], evidence:"Strong", annualBenefit:350000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Item-level visibility deters internal theft and sharpens LP exception reporting — 20–40% shrink reduction",
     evidenceIds:["EV-RET-SHRINK-01"],
     challenge:"When shrink attribution is challenged: NRF documents 1.4% average. The customer's actual shrink rate is already a line item in their P&L — we use their own number, not a benchmark.",
@@ -2192,7 +2361,7 @@ const SCENARIOS = [
   { id:"RET-04", name:"Markdown Reduction — Better Sell-Through",
     theme:"Revenue / Margin", verticalKey:"retail",
     facilityKeys:["Store / Branch"], techKeys:["RFID Core"],
-    themeKeys:["Revenue / Margin","Operational Efficiency"], evidence:"Medium-Strong", annualBenefit:150000, rampType:"revenue",
+    themeKeys:["Revenue / Margin","Operational Efficiency"], evidence:"Medium-Strong", annualBenefit:150000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Accurate inventory eliminates phantom overstock — 10% markdown reduction in apparel",
     evidenceIds:["EV-RET-MARKDOWN-01"],
     challenge:"When markdown savings are seen as aspirational: Accenture tracked this across 8 retailers. We model only 10% — their study showed up to 20%. Size and color accuracy is the mechanism, not demand forecasting.",
@@ -2206,7 +2375,7 @@ const SCENARIOS = [
   { id:"RET-05", name:"Receiving Accuracy & Vendor Compliance",
     theme:"Labor & Human Capacity", verticalKey:"retail",
     facilityKeys:["Store / Branch","Warehouse / DC"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Labor & Human Capacity"], evidence:"Medium-Strong", annualBenefit:96000, rampType:"hard_labor",
+    themeKeys:["Labor & Human Capacity"], evidence:"Medium-Strong", annualBenefit:96000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Inbound accuracy 85% → 99%+ — eliminate manual scan-each and cut receiving labor 40%",
     evidenceIds:["EV-RET-RECV-01"],
     challenge:"When receiving labor seems minor: this is hard labor hours at a real rate, plus vendor chargeback avoidance which is a direct P&L line. Both are independently verifiable from AP records.",
@@ -2222,7 +2391,7 @@ const SCENARIOS = [
   { id:"RET-06", name:"Associate Productivity — Recovered Hours",
     theme:"Labor & Human Capacity", verticalKey:"retail",
     facilityKeys:["Store / Branch"], techKeys:["RFID Core","Handheld RFID"],
-    themeKeys:["Labor & Human Capacity"], evidence:"Medium-Strong", annualBenefit:187200, rampType:"soft",
+    themeKeys:["Labor & Human Capacity"], evidence:"Medium-Strong", annualBenefit:187200, rampType:"soft", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Recover 2–5 hrs/week per associate — redirect from inventory search to customer-facing work",
     evidenceIds:["EV-RET-LABOR-01"],
     challenge:"When soft productivity savings are questioned: these hours are real but not automatically cashable. Position as capacity to absorb growth or improve NPS without adding headcount — not a direct cost reduction.",
@@ -2238,7 +2407,7 @@ const SCENARIOS = [
   { id:"RET-07", name:"Omnichannel Fulfillment — BOPIS Accuracy",
     theme:"Revenue / Margin", verticalKey:"retail",
     facilityKeys:["Store / Branch"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Revenue / Margin","Operational Efficiency"], evidence:"Strong", annualBenefit:162000, rampType:"working_cap",
+    themeKeys:["Revenue / Margin","Operational Efficiency"], evidence:"Strong", annualBenefit:162000, rampType:"working_cap", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Reduce BOPIS cancellations 60% and improve pick accuracy to 99%+ — protect omnichannel margin",
     evidenceIds:["EV-RET-OMNI-01","EV-RET-ACC-01"],
     challenge:"When omnichannel performance is seen as a systems issue: the root cause of order cancellation is inventory inaccuracy. RFID is the data layer that fixes the signal your OMS relies on — not an OMS replacement.",
@@ -2254,7 +2423,7 @@ const SCENARIOS = [
   { id:"RET-08", name:"Safety Stock Reduction — Carrying Cost",
     theme:"Working Capital", verticalKey:"retail",
     facilityKeys:["Store / Branch","Warehouse / DC"], techKeys:["RFID Core"],
-    themeKeys:["Working Capital","Operational Efficiency"], evidence:"Medium-Strong", annualBenefit:100000, rampType:"working_cap",
+    themeKeys:["Working Capital","Operational Efficiency"], evidence:"Medium-Strong", annualBenefit:100000, rampType:"working_cap", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"5–15% safety stock reduction without stockout risk — enabled by perpetual accurate inventory",
     evidenceIds:["EV-RET-SAFETY-01","EV-RET-ACC-01"],
     challenge:"When inventory reduction risks service levels: RFID accuracy is precisely why you can carry less — you always know exactly what is available. The reduction is driven by data confidence, not optimism.",
@@ -2269,7 +2438,7 @@ const SCENARIOS = [
   { id:"WH-01", name:"Cycle Count Labor — Perpetual DC Accuracy",
     theme:"Labor & Human Capacity", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Labor & Human Capacity"], evidence:"Strong", annualBenefit:480000, rampType:"hard_labor",
+    themeKeys:["Labor & Human Capacity"], evidence:"Strong", annualBenefit:480000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"DC cycle-count labor down 75–85% — 3 min/position to 20 sec per pallet position",
     evidenceIds:["EV-WH-LABOR-01"],
     challenge:"When headcount reduction is the objection: hours recovered from manual counting redeploy to value-add tasks or absorb volume growth without additional FTE. Finance counts schedulable hours at 100%.",
@@ -2285,7 +2454,7 @@ const SCENARIOS = [
   { id:"WH-02", name:"Receiving Throughput & Dock-to-Stock",
     theme:"Labor & Human Capacity", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Labor & Human Capacity","Operational Efficiency"], evidence:"Strong", annualBenefit:210000, rampType:"hard_labor",
+    themeKeys:["Labor & Human Capacity","Operational Efficiency"], evidence:"Strong", annualBenefit:210000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Inbound throughput up 30–50% — eliminate manual scan-each confirmation at dock doors",
     evidenceIds:["EV-WH-RECV-01"],
     challenge:"When receiving speed is dismissed: dock-to-stock time directly affects same-day SLA compliance. Missed SLAs convert directly to chargeback exposure — a verifiable P&L line.",
@@ -2300,7 +2469,7 @@ const SCENARIOS = [
   { id:"WH-03", name:"Pick Accuracy & Returns Reduction",
     theme:"Operational Efficiency", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], techKeys:["RFID Core","Handheld RFID"],
-    themeKeys:["Operational Efficiency","Direct Cost & Spend"], evidence:"Medium-Strong", annualBenefit:160000, rampType:"hard_cost",
+    themeKeys:["Operational Efficiency","Direct Cost & Spend"], evidence:"Medium-Strong", annualBenefit:160000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Pick errors from 0.5% to under 0.1% — prevent thousands of costly re-picks and returns annually",
     evidenceIds:["EV-WH-PICK-01"],
     challenge:"When per-error costs seem small: at 2M annual orders and 0.5% error rate that is 10,000 errors at $20+ each — compounding with return shipping, customer service, and chargeback exposure.",
@@ -2316,7 +2485,7 @@ const SCENARIOS = [
   { id:"HC-01", name:"Equipment Rental Reduction & Asset Utilization",
     theme:"Direct Cost & Spend", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], techKeys:["RFID Core","RTLS / Location"],
-    themeKeys:["Direct Cost & Spend","Labor & Human Capacity"], evidence:"Strong", annualBenefit:325000, rampType:"hard_cost",
+    themeKeys:["Direct Cost & Spend","Labor & Human Capacity"], evidence:"Strong", annualBenefit:325000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"15–25% equipment rental reduction + 40–70% nursing search time elimination",
     evidenceIds:["EV-HC-ASSET-01"],
     challenge:"When asset tracking is dismissed as a cost-reduction play: GE Healthcare and ECRI documented 15–25% rental reduction. The mechanism is visibility into owned assets sitting idle — not purchasing fewer assets.",
@@ -2333,7 +2502,7 @@ const SCENARIOS = [
   { id:"HC-02", name:"Surgical Instrument Tracking — OR Throughput",
     theme:"Operational Efficiency", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], techKeys:["RFID Core"],
-    themeKeys:["Operational Efficiency","Regulatory & Compliance"], evidence:"Strong", annualBenefit:280000, rampType:"hard_cost",
+    themeKeys:["Operational Efficiency","Regulatory & Compliance"], evidence:"Strong", annualBenefit:280000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"25–35% reduction in lost/late instruments — protect OR throughput at $100–180/minute of delay",
     evidenceIds:["EV-HC-SURG-01"],
     challenge:"When OR delays are framed as a clinical management issue: Auburn University and AORN documented 25–35% instrument delay reduction with RFID tracking. The data separates the technology problem from the management problem.",
@@ -2350,7 +2519,7 @@ const SCENARIOS = [
   { id:"GOV-01", name:"Audit Readiness — Property NFR & CAP Reduction",
     theme:"Regulatory & Compliance", verticalKey:"government",
     facilityKeys:["Government Facility","Depot / MRO"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Regulatory & Compliance"], evidence:"Strong", annualBenefit:1200000, rampType:"hard_cost",
+    themeKeys:["Regulatory & Compliance"], evidence:"Strong", annualBenefit:1200000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"7 consecutive audit disclaimers. RFID closes the asset existence-and-completeness gap — NDAA 2028 mandate.",
     evidenceIds:["EV-FED-AUDIT-01"],
     challenge:"When RFID's connection to audit findings is questioned: GAO-25-107427 names asset accountability as the primary driver of DoD's disclaimer opinion. NDAA 2028 mandates a clean opinion — RFID is the data foundation required to get there.",
@@ -2367,7 +2536,7 @@ const SCENARIOS = [
   { id:"MTL-01", name:"Tool & Asset Loss Reduction",
     theme:"Direct Cost & Spend", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory","Depot / MRO","Warehouse / DC"], techKeys:["RFID Core"],
-    themeKeys:["Direct Cost & Spend","Labor & Human Capacity"], evidence:"Medium-Strong", annualBenefit:220000, rampType:"hard_cost",
+    themeKeys:["Direct Cost & Spend","Labor & Human Capacity"], evidence:"Medium-Strong", annualBenefit:220000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manufacturing plants lose 15–20% of tool value annually — RFID cuts that loss 60–80% within the first year",
     evidenceIds:["EV-MTL-TOOL-01"],
     challenge:"When tool loss is accepted as a cost of doing business: Aberdeen Group documented 15–20% annual tool value loss across manufacturing. The first-year ROI on tracking is typically 6–12 months based on replacement cost alone.",
@@ -2382,7 +2551,7 @@ const SCENARIOS = [
   { id:"CAR-01", name:"Trailer Utilization & Yard Visibility",
     theme:"Operational Efficiency", verticalKey:"carriers",
     facilityKeys:["Terminal / Port","Warehouse / DC"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
-    themeKeys:["Operational Efficiency","Revenue / Margin"], evidence:"Medium-Strong", annualBenefit:380000, rampType:"revenue",
+    themeKeys:["Operational Efficiency","Revenue / Margin"], evidence:"Medium-Strong", annualBenefit:380000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"10–20% trailer utilization improvement — eliminate manual yard checks and convert idle assets into revenue capacity",
     evidenceIds:["EV-TL-ASSET-01"],
     challenge:"When trailer utilization upside is questioned: ATA documents 10–20% improvement. We model 10%. The mechanism is eliminating ghost trailers — assets that appear available but can't be located in the yard.",
@@ -2398,7 +2567,7 @@ const SCENARIOS = [
   { id:"TL-01", name:"Detention & Dwell Cost Reduction",
     theme:"Direct Cost & Spend", verticalKey:"carriers",
     facilityKeys:["Terminal / Port","Warehouse / DC","Depot / MRO"], techKeys:["RFID Core"],
-    themeKeys:["Direct Cost & Spend","Operational Efficiency"], evidence:"Medium-Strong", annualBenefit:290000, rampType:"hard_cost",
+    themeKeys:["Direct Cost & Spend","Operational Efficiency"], evidence:"Medium-Strong", annualBenefit:290000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Carriers experience detention on 20–35% of loads — RFID dock visibility cuts excess dwell 30–50%",
     evidenceIds:["EV-TL-DWELL-01"],
     challenge:"When detention costs seem like a shipper problem: detention directly erodes driver productivity and asset yield. Reducing it improves on-time performance which protects rate and relationship with shipper accounts.",
@@ -2416,7 +2585,7 @@ const SCENARIOS = [
   { id:"WH-04", name:"SLA Compliance — 3PL Chargeback Reduction",
     theme:"Revenue / Margin", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], themeKeys:["Revenue / Margin","Direct Cost & Spend"],
-    annualBenefit:210000, rampType:"hard_cost",
+    annualBenefit:210000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"3PLs average 2–5% SLA miss rate — RFID reduces chargebacks 60–80% through real-time load verification",
     evidenceIds:["EV-WH-SLA-01"],
     challenge:"Chargebacks are a direct P&L line item — pull from AP or the customer's contract summary to anchor the number.",
@@ -2430,7 +2599,7 @@ const SCENARIOS = [
   { id:"WH-05", name:"Safety Stock Reduction — Carrying Cost Savings",
     theme:"Working Capital", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], themeKeys:["Working Capital","Operational Efficiency"],
-    annualBenefit:175000, rampType:"working_cap",
+    annualBenefit:175000, rampType:"working_cap", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID accuracy enables 10–20% safety stock reduction without increasing stockout risk",
     evidenceIds:["EV-WH-SAFETY-01"],
     challenge:"Model as working capital release + annual carrying cost — both are creditable to finance.",
@@ -2445,7 +2614,7 @@ const SCENARIOS = [
   { id:"WH-06", name:"Cross-Dock & Outbound Verification Labor",
     theme:"Labor & Human Capacity", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], themeKeys:["Labor & Human Capacity"],
-    annualBenefit:165000, rampType:"hard_labor",
+    annualBenefit:165000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Eliminate manual scan-each at outbound — 30–50% dock labor reduction with RFID tunnel/gate reads",
     evidenceIds:["EV-WH-XDOCK-01"],
     challenge:"This is a pure labor math argument — hours × rate × reduction %. Easy to verify from time-and-motion studies.",
@@ -2461,7 +2630,7 @@ const SCENARIOS = [
   { id:"HC-03", name:"Patient Flow — ED Length of Stay Reduction",
     theme:"Operational Efficiency", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], themeKeys:["Operational Efficiency","Revenue / Margin"],
-    annualBenefit:420000, rampType:"revenue",
+    annualBenefit:420000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RTLS bed tracking reduces ED LOS 10–20% — each hour recovered has direct margin and capacity value",
     evidenceIds:["EV-HC-FLOW-01"],
     challenge:"LOS reduction is both a margin and a capacity argument — recovering throughput avoids capital expansion. CFOs respond to both angles.",
@@ -2476,7 +2645,7 @@ const SCENARIOS = [
   { id:"HC-04", name:"Medication Tracking — Dispensing Error Reduction",
     theme:"Regulatory & Compliance", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], themeKeys:["Regulatory & Compliance","Direct Cost & Spend"],
-    annualBenefit:280000, rampType:"hard_cost",
+    annualBenefit:280000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Medication errors affect 1–3% of admissions — RFID chain-of-custody reduces dispensing errors 20–30%",
     evidenceIds:["EV-HC-MED-01"],
     challenge:"Frame as risk cost + labor cost. Each error event carries investigation, reporting, and potential liability cost beyond the medication itself.",
@@ -2491,7 +2660,7 @@ const SCENARIOS = [
   { id:"HC-05", name:"Joint Commission Audit — Compliance Labor Reduction",
     theme:"Regulatory & Compliance", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:195000, rampType:"hard_labor",
+    annualBenefit:195000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manual Joint Commission prep is 8–15% of clinical support labor — RFID reduces audit prep 40–65%",
     evidenceIds:["EV-HC-COMP-01"],
     challenge:"This is a pure labor cost recovery with a compliance risk kicker. Anchor to actual hours spent in last audit cycle.",
@@ -2505,7 +2674,7 @@ const SCENARIOS = [
   { id:"HC-06", name:"Supply Stockout & Expiry Reduction",
     theme:"Direct Cost & Spend", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], themeKeys:["Direct Cost & Spend","Working Capital"],
-    annualBenefit:160000, rampType:"hard_cost",
+    annualBenefit:160000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Supply stockouts at 2–5% of PAR locations weekly — RFID reduces stockouts 20–30% and expired write-offs 15–20%",
     evidenceIds:["EV-HC-SUPPLY-01"],
     challenge:"Pull from supply chain or materials management — expired write-offs are already a tracked line item.",
@@ -2520,7 +2689,7 @@ const SCENARIOS = [
   { id:"HC-07", name:"Controlled Substance Diversion Prevention",
     theme:"Direct Cost & Spend", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], themeKeys:["Direct Cost & Spend","Regulatory & Compliance"],
-    annualBenefit:230000, rampType:"hard_cost",
+    annualBenefit:230000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Controlled substance diversion drives write-offs and DEA investigations — RFID chain-of-custody reduces loss 15–30%",
     evidenceIds:["EV-HC-DIVERSION-01"],
     challenge:"This is a risk argument as much as a cost argument — DEA investigation costs and potential liability dwarf the medication value.",
@@ -2536,7 +2705,7 @@ const SCENARIOS = [
   { id:"GOV-02", name:"Annual Physical Inventory Labor Reduction",
     theme:"Labor & Human Capacity", verticalKey:"government",
     facilityKeys:["Government Facility","Depot / MRO"], themeKeys:["Labor & Human Capacity"],
-    annualBenefit:480000, rampType:"hard_labor",
+    annualBenefit:480000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Federal agencies must certify annual physical inventories by Sep 30 — RFID reduces count time 75–85% vs. manual",
     evidenceIds:["EV-FED-INVENTORY-01"],
     challenge:"Annual inventory is mandated — the labor cost is non-discretionary. RFID doesn't eliminate the requirement; it fulfills it at a fraction of the labor cost.",
@@ -2551,7 +2720,7 @@ const SCENARIOS = [
   { id:"GOV-03", name:"Ghost Asset Elimination — Procurement Avoidance",
     theme:"Operational Efficiency", verticalKey:"government",
     facilityKeys:["Government Facility","Depot / MRO"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:650000, rampType:"hard_cost",
+    annualBenefit:650000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Ghost assets and unrecorded inventory cause agencies to procure items they already own — RFID closes the gap",
     evidenceIds:["EV-FED-GHOST-01"],
     challenge:"Procurement avoidance is a hard dollar save — pull from budget vs. actuals and connect to specific equipment categories.",
@@ -2565,7 +2734,7 @@ const SCENARIOS = [
   { id:"GOV-04", name:"Property Accountability Staff Overhead Reduction",
     theme:"Labor & Human Capacity", verticalKey:"government",
     facilityKeys:["Government Facility","Depot / MRO"], themeKeys:["Labor & Human Capacity"],
-    annualBenefit:320000, rampType:"hard_labor",
+    annualBenefit:320000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"PBOs and ECOs spend significant time on manual reconciliation and APSR data entry — RFID automates location capture",
     evidenceIds:["EV-FED-STAFF-01"],
     challenge:"This labor is already funded — the question is how it's being used. RFID redirects it from reconciliation to mission-critical property management.",
@@ -2580,7 +2749,7 @@ const SCENARIOS = [
   { id:"GOV-05", name:"Sensitive Item Loss Prevention",
     theme:"Direct Cost & Spend", verticalKey:"government",
     facilityKeys:["Government Facility","Depot / MRO"], themeKeys:["Direct Cost & Spend","Regulatory & Compliance"],
-    annualBenefit:900000, rampType:"hard_cost",
+    annualBenefit:900000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Loss of controlled items triggers FLIPL and security investigations — RFID provides continuous custody chain",
     evidenceIds:["EV-FED-SENSITIVE-01"],
     challenge:"The cost of a FLIPL investigation far exceeds the replacement value of the lost item — that's the number to anchor to.",
@@ -2597,7 +2766,7 @@ const SCENARIOS = [
   { id:"MTL-02", name:"WIP Inventory — Cycle Time & Carrying Cost Reduction",
     theme:"Working Capital", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory"], themeKeys:["Working Capital","Operational Efficiency"],
-    annualBenefit:380000, rampType:"working_cap",
+    annualBenefit:380000, rampType:"working_cap", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID eliminates lost work orders between stations — 10–25% cycle time reduction, 15–30% WIP reduction",
     evidenceIds:["EV-MTL-WIP-01"],
     challenge:"WIP reduction is a working capital argument — model as one-time release plus annual carrying cost. Both are creditable.",
@@ -2611,7 +2780,7 @@ const SCENARIOS = [
   { id:"MTL-03", name:"Compliance & Traceability Documentation Labor",
     theme:"Regulatory & Compliance", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:290000, rampType:"hard_labor",
+    annualBenefit:290000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"FDA, ITAR, AS9100 compliance costs 3–8% of revenue — RFID automated traceability cuts documentation labor 40–70%",
     evidenceIds:["EV-MTL-TRACE-01"],
     challenge:"Regulatory compliance labor is non-discretionary — the question is the cost of fulfilling it manually vs. automatically.",
@@ -2625,7 +2794,7 @@ const SCENARIOS = [
   { id:"MTL-04", name:"Recall Scope Reduction — Targeted Traceability",
     theme:"Direct Cost & Spend", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory"], themeKeys:["Direct Cost & Spend","Regulatory & Compliance"],
-    annualBenefit:500000, rampType:"hard_cost",
+    annualBenefit:500000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Without RFID, recall scope is the full lot — serialization limits exposure to specific units, reducing recall cost 60–90%",
     evidenceIds:["EV-MTL-RECALL-01"],
     challenge:"Frame as risk-adjusted expected value — even a low probability of recall with a large scope creates a quantifiable expected cost that RFID reduces.",
@@ -2639,7 +2808,7 @@ const SCENARIOS = [
   { id:"MTL-05", name:"MRO Inventory Optimization — Carrying Cost Reduction",
     theme:"Working Capital", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Working Capital","Direct Cost & Spend"],
-    annualBenefit:245000, rampType:"working_cap",
+    annualBenefit:245000, rampType:"working_cap", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"MRO carrying costs 20–30% of value — RFID reduces excess MRO 10–25% and emergency procurement 30–50%",
     evidenceIds:["EV-MTL-MRO-01"],
     challenge:"Pull MRO inventory value and carrying cost rate from finance — these are already tracked. Emergency procurement is usually visible in AP.",
@@ -2655,7 +2824,7 @@ const SCENARIOS = [
   { id:"MTL-06", name:"Finished Goods Shipment Accuracy — Chargeback Reduction",
     theme:"Direct Cost & Spend", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory","Warehouse / DC"], themeKeys:["Direct Cost & Spend","Operational Efficiency"],
-    annualBenefit:180000, rampType:"hard_cost",
+    annualBenefit:180000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manual finished goods tracking yields 0.5–2% shipment errors — RFID reduces to under 0.1%",
     evidenceIds:["EV-MTL-SHIP-01"],
     challenge:"Chargeback data is in AP — anchor the baseline from actual records, not benchmarks.",
@@ -2670,7 +2839,7 @@ const SCENARIOS = [
   { id:"MTL-07", name:"Asset & Fixture Tracking — Utilization & Procurement Avoidance",
     theme:"Operational Efficiency", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:165000, rampType:"hard_cost",
+    annualBenefit:165000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Reusable fixtures and production assets are over-procured when unlocatable — RFID prevents phantom replacements",
     evidenceIds:["EV-MTL-FIXTURE-01"],
     challenge:"This is procurement avoidance — pull from capex or asset replacement budgets to anchor.",
@@ -2686,7 +2855,7 @@ const SCENARIOS = [
   { id:"CAR-02", name:"OS&D Claim Reduction — Load Verification Accuracy",
     theme:"Direct Cost & Spend", verticalKey:"carriers",
     facilityKeys:["Terminal / Port","Warehouse / DC"], themeKeys:["Direct Cost & Spend","Operational Efficiency"],
-    annualBenefit:210000, rampType:"hard_cost",
+    annualBenefit:210000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manual load verification yields 0.3–0.8% OS&D rate — RFID reduces to under 0.05% before shipment departs",
     evidenceIds:["EV-CAR-OSD-01"],
     challenge:"OS&D claims are tracked in claims management — pull actual data, not benchmarks.",
@@ -2701,7 +2870,7 @@ const SCENARIOS = [
   { id:"CAR-03", name:"Hub Sortation Labor — Barcode to RFID Throughput",
     theme:"Labor & Human Capacity", verticalKey:"carriers",
     facilityKeys:["Terminal / Port"], themeKeys:["Labor & Human Capacity","Operational Efficiency"],
-    annualBenefit:320000, rampType:"hard_labor",
+    annualBenefit:320000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID read-while-moving eliminates manual divert lanes — hub labor efficiency improves 20–35%",
     evidenceIds:["EV-CAR-SORT-01"],
     challenge:"This is an operations efficiency argument — model hours eliminated at the divert lanes plus reduction in manual scan events.",
@@ -2717,7 +2886,7 @@ const SCENARIOS = [
   { id:"CAR-04", name:"Misroute Reduction — Package Recovery Cost Avoidance",
     theme:"Operational Efficiency", verticalKey:"carriers",
     facilityKeys:["Terminal / Port"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:195000, rampType:"hard_cost",
+    annualBenefit:195000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Misroute rate 0.5–1.5% at $8–25 per incident — RFID real-time location enables recovery before departure",
     evidenceIds:["EV-CAR-MISROUTE-01"],
     challenge:"Pull misroute data from operations — this is a tracked KPI at most carriers.",
@@ -2732,7 +2901,7 @@ const SCENARIOS = [
   { id:"CAR-05", name:"Trailer Search Time & Yard Labor Elimination",
     theme:"Labor & Human Capacity", verticalKey:"carriers",
     facilityKeys:["Terminal / Port","Warehouse / DC"], themeKeys:["Labor & Human Capacity","Operational Efficiency"],
-    annualBenefit:145000, rampType:"hard_labor",
+    annualBenefit:145000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Without RFID, yard jockeys spend 15–30% of shift time locating trailers — RFID reduces search time 80–90%",
     evidenceIds:["EV-CAR-YARD-01"],
     challenge:"Time-and-motion study data is the best anchor — ask how much of yard jockey shift time is pure search.",
@@ -2750,7 +2919,7 @@ const SCENARIOS = [
   { id:"AVN-01", name:"Baggage Mishandling Reduction — Claims & Re-delivery",
     theme:"Direct Cost & Spend", verticalKey:"aviation",
     facilityKeys:["Terminal / Port","Warehouse / DC"], themeKeys:["Direct Cost & Spend","Operational Efficiency"],
-    annualBenefit:480000, rampType:"hard_cost",
+    annualBenefit:480000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"IATA: 4.35 mishandled bags per 1K passengers — RFID 99%+ read rate reduces mishandling 20–25%",
     evidenceIds:["EV-AVN-BAGGAGE-01"],
     challenge:"Delta reported 25% mishandling reduction at enterprise scale — use as a Tier 1 reference alongside IATA data.",
@@ -2765,7 +2934,7 @@ const SCENARIOS = [
   { id:"AVN-02", name:"MRO Tool Control — Search Time & FOD Risk Reduction",
     theme:"Labor & Human Capacity", verticalKey:"aviation",
     facilityKeys:["Terminal / Port","Depot / MRO"], themeKeys:["Labor & Human Capacity","Direct Cost & Spend"],
-    annualBenefit:310000, rampType:"hard_labor",
+    annualBenefit:310000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Missing tools halt maintenance and create FOD risk — Airbus reports 90% reduction in missing tool incidents",
     evidenceIds:["EV-AVN-MRO-01"],
     challenge:"FOD risk has both a cost and a safety/regulatory angle — both resonate with MRO leadership.",
@@ -2780,7 +2949,7 @@ const SCENARIOS = [
   { id:"AVN-03", name:"MRO Turnaround Time — Aircraft Utilization Improvement",
     theme:"Revenue / Margin", verticalKey:"aviation",
     facilityKeys:["Terminal / Port","Depot / MRO"], themeKeys:["Revenue / Margin","Operational Efficiency"],
-    annualBenefit:520000, rampType:"revenue",
+    annualBenefit:520000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID part and tool visibility reduces MRO turnaround 10–15% — each hour of AOG reduction has direct revenue impact",
     evidenceIds:["EV-AVN-TAT-01"],
     challenge:"AOG cost varies significantly — get the customer's actual aircraft lease or lost revenue rate. Even conservative estimates yield large values.",
@@ -2795,7 +2964,7 @@ const SCENARIOS = [
   { id:"AVN-04", name:"Component Traceability — Compliance Labor & Grounding Risk",
     theme:"Regulatory & Compliance", verticalKey:"aviation",
     facilityKeys:["Terminal / Port","Depot / MRO"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:275000, rampType:"hard_labor",
+    annualBenefit:275000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"FAA/EASA require full lifecycle traceability — manual documentation is 40–60% of maintenance admin labor",
     evidenceIds:["EV-AVN-TRACE-01"],
     challenge:"Regulatory compliance labor is mandatory — frame as fulfilling an existing obligation at lower cost with lower error risk.",
@@ -2811,7 +2980,7 @@ const SCENARIOS = [
   { id:"AVN-05", name:"Safety Equipment Inspection Labor Reduction",
     theme:"Labor & Human Capacity", verticalKey:"aviation",
     facilityKeys:["Terminal / Port","Depot / MRO"], themeKeys:["Labor & Human Capacity","Regulatory & Compliance"],
-    annualBenefit:185000, rampType:"hard_labor",
+    annualBenefit:185000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manual safety equipment checks take 4–8 hrs per aircraft — RFID reduces to under 30 min",
     evidenceIds:["EV-AVN-SAFETY-01"],
     challenge:"Time-and-motion data is available for most carriers — anchor to actual current inspection duration and fleet size.",
@@ -2827,7 +2996,7 @@ const SCENARIOS = [
   { id:"AVN-06", name:"Boarding Time Reduction — Passenger Throughput",
     theme:"Operational Efficiency", verticalKey:"aviation",
     facilityKeys:["Terminal / Port"], themeKeys:["Operational Efficiency","Revenue / Margin"],
-    annualBenefit:220000, rampType:"revenue",
+    annualBenefit:220000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Airport RFID pilots show 20% boarding time reduction — fewer missed connections, reduced voucher spend",
     evidenceIds:["EV-AVN-BOARD-01"],
     challenge:"This argument leads with cost avoidance (vouchers, rebooking) and builds to throughput capacity unlock.",
@@ -2842,7 +3011,7 @@ const SCENARIOS = [
   { id:"HOS-01", name:"Linen Lifecycle — Loss Reduction & Laundry Efficiency",
     theme:"Direct Cost & Spend", verticalKey:"hospitality",
     facilityKeys:["Store / Branch"], themeKeys:["Direct Cost & Spend","Operational Efficiency"],
-    annualBenefit:195000, rampType:"hard_cost",
+    annualBenefit:195000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Hotels lose 10–25% of linen annually — RFID tracking reduces linen loss 15–20% and over-processing 10–15%",
     evidenceIds:["EV-HOS-LINEN-01"],
     challenge:"Annual linen replacement cost is a clear P&L line — pull from housekeeping or purchasing budget.",
@@ -2857,7 +3026,7 @@ const SCENARIOS = [
   { id:"HOS-02", name:"F&B Inventory — Counting Labor & Shrink Control",
     theme:"Labor & Human Capacity", verticalKey:"hospitality",
     facilityKeys:["Store / Branch"], themeKeys:["Labor & Human Capacity","Direct Cost & Spend"],
-    annualBenefit:145000, rampType:"hard_labor",
+    annualBenefit:145000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"F&B shrink 4–8% in high-value categories — RFID reduces counting labor 40–70% and shrink 15–25%",
     evidenceIds:["EV-HOS-FB-01"],
     challenge:"High-value category shrink (proteins, alcohol) is immediately quantifiable from purchasing vs. sales reconciliation.",
@@ -2875,7 +3044,7 @@ const SCENARIOS = [
   { id:"DC-01", name:"Physical Audit Acceleration — CMDB Accuracy",
     theme:"Operational Efficiency", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Operational Efficiency","Labor & Human Capacity"],
-    annualBenefit:280000, rampType:"hard_labor",
+    annualBenefit:280000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manual data center audits: 2–5 days per 1,000 assets at 85–95% match — RFID cuts audit time 75–85%",
     evidenceIds:["EV-DC-AUDIT-01"],
     challenge:"CMDB accuracy is a business continuity issue — frame as labor cost plus risk reduction from asset configuration errors.",
@@ -2891,7 +3060,7 @@ const SCENARIOS = [
   { id:"DC-02", name:"Stranded Asset Recovery — Capital Deferral",
     theme:"Operational Efficiency", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:350000, rampType:"hard_cost",
+    annualBenefit:350000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"5–15% of data center assets are stranded — RFID sweeps identify orphaned assets for redeployment before new procurement",
     evidenceIds:["EV-DC-STRANDED-01"],
     challenge:"This is a capex avoidance argument — model as % of annual IT procurement budget deferred by reutilization.",
@@ -2907,7 +3076,7 @@ const SCENARIOS = [
   { id:"IE-01", name:"Tool, Vehicle & Equipment Tracking — Search & Loss",
     theme:"Direct Cost & Spend", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO","Warehouse / DC"], themeKeys:["Direct Cost & Spend","Labor & Human Capacity"],
-    annualBenefit:380000, rampType:"hard_cost",
+    annualBenefit:380000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Energy/construction projects lose 20–30% of tool value annually — RFID cuts loss 30–50% and search time 65–80%",
     evidenceIds:["EV-IE-TOOL-01"],
     challenge:"Tool loss is already tracked in project accounting — pull replacement cost data and rental overages from AP.",
@@ -2923,7 +3092,7 @@ const SCENARIOS = [
   { id:"IE-02", name:"PPE Compliance & Safety Audit Automation",
     theme:"Regulatory & Compliance", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:220000, rampType:"hard_cost",
+    annualBenefit:220000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"OSHA PPE violations average $5K–$15K per citation — RFID automated zone access validation reduces fines 20–50%",
     evidenceIds:["EV-IE-PPE-01"],
     challenge:"OSHA violation history is public record — anchor to actual citation history and HSE audit labor.",
@@ -2939,7 +3108,7 @@ const SCENARIOS = [
   { id:"IE-03", name:"MRO Spare Parts — Carrying Cost & NPT Reduction",
     theme:"Working Capital", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Working Capital","Direct Cost & Spend"],
-    annualBenefit:420000, rampType:"working_cap",
+    annualBenefit:420000, rampType:"working_cap", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Critical spare stockouts cause NPT at $50K–$500K/hr offshore — RFID reduces excess inventory and emergency buys",
     evidenceIds:["EV-IE-MRO-01"],
     challenge:"NPT cost is the big number — anchor to actual NPT events and their duration before building the MRO efficiency case.",
@@ -2957,7 +3126,7 @@ const SCENARIOS = [
   { id:"FS-01", name:"Food Waste Reduction — FEFO Management",
     theme:"Direct Cost & Spend", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC","Store / Branch"], themeKeys:["Direct Cost & Spend","Operational Efficiency"],
-    annualBenefit:240000, rampType:"hard_cost",
+    annualBenefit:240000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Food service operators lose 4–10% of food purchased to pre-consumer waste — RFID FEFO reduces this 20–30%",
     evidenceIds:["EV-FS-WASTE-01"],
     challenge:"Food waste is tracked in most food service operations — pull from purchasing vs. sales reconciliation or waste logs.",
@@ -2971,7 +3140,7 @@ const SCENARIOS = [
   { id:"FS-02", name:"Food Recall Traceability — Scope & Response Time",
     theme:"Regulatory & Compliance", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC"], themeKeys:["Regulatory & Compliance","Direct Cost & Spend"],
-    annualBenefit:500000, rampType:"hard_cost",
+    annualBenefit:500000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Average food recall costs $10–30M — RFID lot-level traceability reduces scope 60–85% and response time 80–90%",
     evidenceIds:["EV-FS-RECALL-01"],
     challenge:"FSMA Section 204 compliance deadline creates regulatory urgency on top of the cost argument.",
@@ -2985,7 +3154,7 @@ const SCENARIOS = [
   { id:"FS-03", name:"Cold Chain Compliance — Spoilage & HACCP Documentation",
     theme:"Regulatory & Compliance", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC"], themeKeys:["Regulatory & Compliance","Direct Cost & Spend"],
-    annualBenefit:185000, rampType:"hard_cost",
+    annualBenefit:185000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Manual temp logs: 60–75% HACCP compliance — RFID automated logging reaches 99%+ with real-time excursion alerts",
     evidenceIds:["EV-FS-COLD-01"],
     challenge:"Spoilage from temperature excursions is a direct cost — pull from QA rejection logs. HACCP audit labor is separately recoverable.",
@@ -3005,7 +3174,7 @@ const SCENARIOS = [
   { id:"RET-09", name:"RFID Data Foundation for Retail AI & Analytics",
     theme:"Strategic / AI / Data", verticalKey:"retail",
     facilityKeys:["Store / Branch"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:120000, rampType:"strategic",
+    annualBenefit:120000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Item-level RFID data enables demand forecasting, automated replenishment, planogram compliance, and customer analytics",
     evidenceIds:["EV-RET-AI-01"],
     challenge:"Position as the data infrastructure investment that unlocks AI ROI — the sensor layer existing analytics platforms need but can't buy.",
@@ -3020,7 +3189,7 @@ const SCENARIOS = [
   { id:"WH-07", name:"RFID Data Foundation for Warehouse AI & Automation",
     theme:"Strategic / AI / Data", verticalKey:"warehouse",
     facilityKeys:["Warehouse / DC"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:140000, rampType:"strategic",
+    annualBenefit:140000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time location data enables AMR navigation, dynamic slotting, predictive labor scheduling, and AI-driven demand flow",
     evidenceIds:["EV-WH-AI-01"],
     challenge:"Frame as infrastructure that unlocks automation ROI — AMR and WMS investments underperform without real-time location data.",
@@ -3035,7 +3204,7 @@ const SCENARIOS = [
   { id:"HC-08", name:"RFID Data Foundation for Healthcare AI & Predictive Ops",
     theme:"Strategic / AI / Data", verticalKey:"healthcare",
     facilityKeys:["Hospital / Clinic"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:160000, rampType:"strategic",
+    annualBenefit:160000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time asset, patient, and supply data creates the sensor layer for LOS prediction, demand forecasting, and automated compliance",
     evidenceIds:["EV-HC-AI-01"],
     challenge:"Healthcare AI initiatives consistently fail on data quality — RFID is the real-time sensor infrastructure that makes predictive ops viable.",
@@ -3050,7 +3219,7 @@ const SCENARIOS = [
   { id:"GOV-06", name:"Excess & Redundant Procurement Reduction",
     theme:"Operational Efficiency", verticalKey:"government",
     facilityKeys:["Government Facility","Depot / MRO"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:750000, rampType:"hard_cost",
+    annualBenefit:750000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Without asset visibility, agencies procure items already in inventory — DoD GAO-05-277 documented $400M+ in duplicate procurement",
     evidenceIds:["EV-FED-EXCESS-01"],
     challenge:"Procurement avoidance requires asset visibility data to defend — RFID creates the evidence trail for reutilization program participation.",
@@ -3066,7 +3235,7 @@ const SCENARIOS = [
   { id:"MTL-08", name:"RFID Data Foundation for Manufacturing AI & Digital Twin",
     theme:"Strategic / AI / Data", verticalKey:"manufacturing",
     facilityKeys:["Plant / Factory"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:180000, rampType:"strategic",
+    annualBenefit:180000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time item, WIP, and asset location data enables digital twin modeling, AI-driven scheduling, and predictive quality",
     evidenceIds:["EV-MTL-AI-01"],
     challenge:"Digital twin and Industry 4.0 investments stall without real-time physical data — RFID is the sensor layer that makes them viable.",
@@ -3081,7 +3250,7 @@ const SCENARIOS = [
   { id:"HOS-03", name:"Guest Experience & Cashless Revenue — RFID Wristbands",
     theme:"Revenue / Margin", verticalKey:"hospitality",
     facilityKeys:["Store / Branch"], themeKeys:["Revenue / Margin","Operational Efficiency"],
-    annualBenefit:320000, rampType:"revenue",
+    annualBenefit:320000, rampType:"revenue", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID/NFC wristbands increase per-capita ancillary spend 10–20% and improve entry throughput 20–30%",
     evidenceIds:["EV-HOS-GUEST-01"],
     challenge:"Theme parks and resorts have documented this at scale — frame as friction reduction that unlocks spend already intended by guests.",
@@ -3095,7 +3264,7 @@ const SCENARIOS = [
   { id:"HOS-04", name:"Event & Venue Asset Management — Loss & Overtime",
     theme:"Direct Cost & Spend", verticalKey:"hospitality",
     facilityKeys:["Store / Branch"], themeKeys:["Direct Cost & Spend","Labor & Human Capacity"],
-    annualBenefit:155000, rampType:"hard_cost",
+    annualBenefit:155000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"AV and event assets experience 20–35% annual loss — RFID kit tracking cuts loss 25–35% and setup overtime 20–30%",
     evidenceIds:["EV-HOS-ASSET-01"],
     challenge:"Event asset loss is tracked in venue ops — pull from annual equipment replacement and overtime budgets.",
@@ -3110,7 +3279,7 @@ const SCENARIOS = [
   { id:"HOS-05", name:"Security & Access Control — Unauthorized Entry Reduction",
     theme:"Regulatory & Compliance", verticalKey:"hospitality",
     facilityKeys:["Store / Branch"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:120000, rampType:"hard_cost",
+    annualBenefit:120000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"2–5% unauthorized entry rates — RFID anti-passback reduces violations 20–30% and improves security labor efficiency",
     evidenceIds:["EV-HOS-SECURITY-01"],
     challenge:"Unauthorized entry has both revenue leakage and liability dimensions — frame both.",
@@ -3126,7 +3295,7 @@ const SCENARIOS = [
   { id:"HOS-06", name:"Hospitality AI & Guest Personalization Data Foundation",
     theme:"Strategic / AI / Data", verticalKey:"hospitality",
     facilityKeys:["Store / Branch"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:100000, rampType:"strategic",
+    annualBenefit:100000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time linen, F&B, and guest journey data enables predictive demand, personalized offers, and automated inventory management",
     evidenceIds:["EV-HOS-AI-01"],
     challenge:"Hospitality AI platforms need real-time operational data — RFID creates the sensor layer that makes personalization and predictive ops viable.",
@@ -3141,7 +3310,7 @@ const SCENARIOS = [
   { id:"DC-03", name:"Stranded Asset Recovery — Capital Deferral & Capacity",
     theme:"Operational Efficiency", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:350000, rampType:"hard_cost",
+    annualBenefit:350000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"5–15% of data center assets are stranded — RFID sweeps identify orphaned assets for redeployment before new procurement",
     evidenceIds:["EV-DC-STRANDED-01"],
     challenge:"Stranded asset recovery is pure capex avoidance — model as % of annual IT procurement budget.",
@@ -3155,7 +3324,7 @@ const SCENARIOS = [
   { id:"DC-04", name:"Compliance Audit Burden — SOC2, PCI, ISO 27001",
     theme:"Regulatory & Compliance", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:195000, rampType:"hard_labor",
+    annualBenefit:195000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Audit evidence prep takes 40–120 hrs per cycle — RFID digital chain-of-custody cuts prep labor 30–60%",
     evidenceIds:["EV-DC-COMP-01"],
     challenge:"Compliance labor is non-discretionary — the question is whether it's fulfilled manually or automatically.",
@@ -3171,7 +3340,7 @@ const SCENARIOS = [
   { id:"DC-05", name:"Asset Loss & Data Security Risk Reduction",
     theme:"Direct Cost & Spend", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Direct Cost & Spend","Regulatory & Compliance"],
-    annualBenefit:280000, rampType:"hard_cost",
+    annualBenefit:280000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Missing storage devices are the #2 source of physical data breach — RFID chain-of-custody reduces loss 20–40%",
     evidenceIds:["EV-DC-LOSS-01"],
     challenge:"Average cost per missing storage device: $100K–$1M including notification, investigation, and regulatory exposure. Anchor to breach cost calculator.",
@@ -3186,7 +3355,7 @@ const SCENARIOS = [
   { id:"DC-06", name:"Incident Response — Asset Locate Time & MTTR Reduction",
     theme:"Operational Efficiency", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Operational Efficiency","Labor & Human Capacity"],
-    annualBenefit:140000, rampType:"soft",
+    annualBenefit:140000, rampType:"soft", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Locating hardware during incidents extends MTTR — RFID last-seen zone data reduces locate time 20–40%",
     evidenceIds:["EV-DC-INCIDENT-01"],
     challenge:"MTTR reduction has a direct SLA and business continuity value — connect to downtime cost or SLA penalty exposure.",
@@ -3201,7 +3370,7 @@ const SCENARIOS = [
   { id:"DC-07", name:"RFID Data Foundation for DCIM & Capacity Planning",
     theme:"Strategic / AI / Data", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:120000, rampType:"strategic",
+    annualBenefit:120000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time asset location and utilization data enables accurate capacity heatmaps, automated CMDB sync, and procurement deferral analytics",
     evidenceIds:["EV-DC-AI-01"],
     challenge:"DCIM platforms are only as good as their real-time data — RFID is the physical layer that makes capacity planning accurate.",
@@ -3216,7 +3385,7 @@ const SCENARIOS = [
   { id:"CAR-06", name:"Last-Mile Visibility — WISMO Contact Deflection",
     theme:"Operational Efficiency", verticalKey:"carriers",
     facilityKeys:["Terminal / Port"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:175000, rampType:"hard_cost",
+    annualBenefit:175000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID real-time last-mile location reduces WISMO contacts 15–30% — at $3–8 per deflected contact",
     evidenceIds:["EV-CAR-LASTMILE-01"],
     challenge:"WISMO contact volume and cost are tracked in customer service — pull from CRM or contact center data.",
@@ -3230,7 +3399,7 @@ const SCENARIOS = [
   { id:"CAR-07", name:"Regulated Mail & High-Value Parcel Compliance",
     theme:"Regulatory & Compliance", verticalKey:"carriers",
     facilityKeys:["Terminal / Port"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:145000, rampType:"hard_labor",
+    annualBenefit:145000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID reduces compliance documentation labor 40–60% for regulated mail and responds to regulatory inquiries in minutes vs. days",
     evidenceIds:["EV-CAR-POSTAL-01"],
     challenge:"Regulated mail compliance is mandatory — frame as fulfilling an existing obligation at lower labor cost with faster response.",
@@ -3245,7 +3414,7 @@ const SCENARIOS = [
   { id:"CAR-08", name:"RFID Data Foundation for Carrier AI & Network Optimization",
     theme:"Strategic / AI / Data", verticalKey:"carriers",
     facilityKeys:["Terminal / Port"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:130000, rampType:"strategic",
+    annualBenefit:130000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time package location enables AI-driven sortation sequencing, predictive misroute detection, and dynamic route optimization",
     evidenceIds:["EV-CAR-AI-01"],
     challenge:"Carrier AI investments require real-time shipment location data — RFID creates the sensor layer that activates them.",
@@ -3260,7 +3429,7 @@ const SCENARIOS = [
   { id:"TL-02", name:"Routing Guide Compliance — Shipper-Side Visibility",
     theme:"Regulatory & Compliance", verticalKey:"carriers",
     facilityKeys:["Terminal / Port","Warehouse / DC"], themeKeys:["Regulatory & Compliance","Direct Cost & Spend"],
-    annualBenefit:185000, rampType:"hard_cost",
+    annualBenefit:185000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID improves routing guide compliance 10–20% and reduces carrier chargebacks 20–40% through better load tendering",
     evidenceIds:["EV-TL-ROUTING-01"],
     challenge:"Routing guide compliance violations result in chargebacks that are tracked in AP — anchor to actual chargeback data.",
@@ -3275,7 +3444,7 @@ const SCENARIOS = [
   { id:"TL-03", name:"RFID Data Foundation for Logistics AI & Network Optimization",
     theme:"Strategic / AI / Data", verticalKey:"carriers",
     facilityKeys:["Terminal / Port","Warehouse / DC"], themeKeys:["Strategic / AI / Data","Operational Efficiency"],
-    annualBenefit:140000, rampType:"strategic",
+    annualBenefit:140000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time trailer and shipment location data enables predictive ETAs, AI-driven load matching, and dynamic lane pricing",
     evidenceIds:["EV-CAR-AI-01"],
     challenge:"Logistics AI requires real-time asset location data — without RFID, models rely on stale EDI pings that miss actual yard and dock status.",
@@ -3290,7 +3459,7 @@ const SCENARIOS = [
   { id:"IE-04", name:"Oil & Gas Field Materials Management — Shrink & NPT",
     theme:"Direct Cost & Spend", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Direct Cost & Spend","Labor & Human Capacity"],
-    annualBenefit:480000, rampType:"hard_cost",
+    annualBenefit:480000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Field material shrink 8–15% of value — RFID reduces material loss 10–12% and NPT from unavailability 5–12%",
     evidenceIds:["EV-IE-OIL-01"],
     challenge:"NPT cost dwarfs material value — anchor to actual NPT events and hourly rate first, then build the material shrink case.",
@@ -3307,7 +3476,7 @@ const SCENARIOS = [
   { id:"IE-05", name:"Asset Integrity Inspection — Documentation & Compliance",
     theme:"Regulatory & Compliance", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:260000, rampType:"hard_labor",
+    annualBenefit:260000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Inspection programs spend 30–50% of budget on documentation — RFID reduces documentation labor 35–45% and compliance exceptions 25–35%",
     evidenceIds:["EV-IE-INTEGRITY-01"],
     challenge:"Regulatory inspection compliance is mandatory — the labor cost is non-discretionary. RFID reduces it while improving accuracy.",
@@ -3323,7 +3492,7 @@ const SCENARIOS = [
   { id:"IE-06", name:"Rental & High-Value Equipment — Billing Dispute Reduction",
     theme:"Direct Cost & Spend", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Direct Cost & Spend","Operational Efficiency"],
-    annualBenefit:310000, rampType:"hard_cost",
+    annualBenefit:310000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Subsea and rental asset billing disputes reduced ~80% with RFID custody transfer records — rental overages down 10–25%",
     evidenceIds:["EV-IE-RENTAL-01"],
     challenge:"Rental overages and disputes are tracked in AP and vendor management — pull actuals to anchor the model.",
@@ -3339,7 +3508,7 @@ const SCENARIOS = [
   { id:"IE-07", name:"RFID Data Foundation for Energy & Construction AI",
     theme:"Strategic / AI / Data", verticalKey:"energy",
     facilityKeys:["Plant / Factory","Depot / MRO"], themeKeys:["Strategic / AI / Data","Regulatory & Compliance"],
-    annualBenefit:150000, rampType:"strategic",
+    annualBenefit:150000, rampType:"strategic", accessibilityTier:"infrastructure", haircut:0.10,
     oneLiner:"Real-time asset, material, and compliance data enables predictive failure analytics, automated inspection reporting, and AI-driven procurement optimization",
     evidenceIds:["EV-IE-AI-01"],
     challenge:"Predictive maintenance and AI-driven procurement require real-time physical asset data — RFID is the sensor layer.",
@@ -3354,7 +3523,7 @@ const SCENARIOS = [
   { id:"FS-04", name:"Food Recall Traceability — Scope & Response Time",
     theme:"Regulatory & Compliance", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC"], themeKeys:["Regulatory & Compliance","Direct Cost & Spend"],
-    annualBenefit:500000, rampType:"hard_cost",
+    annualBenefit:500000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Average food recall costs $10–30M — RFID lot traceability reduces scope 60–85% and response time 80–90%. FSMA 204 deadline: Jan 2026.",
     evidenceIds:["EV-FS-RECALL-01"],
     challenge:"FSMA Section 204 creates regulatory urgency independent of ROI — anchor to that compliance deadline, then build the cost avoidance case.",
@@ -3368,7 +3537,7 @@ const SCENARIOS = [
   { id:"FS-05", name:"High-Value Inventory Shrink — Proteins, Alcohol, Premiums",
     theme:"Direct Cost & Spend", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC","Store / Branch"], themeKeys:["Direct Cost & Spend"],
-    annualBenefit:195000, rampType:"hard_cost",
+    annualBenefit:195000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Food service shrink 4–8% in high-value categories — RFID chain-of-custody in high-risk zones reduces shrink 15–25%",
     evidenceIds:["EV-FS-SHRINK-01"],
     challenge:"High-value category shrink is already tracked in purchasing vs. sales reconciliation — anchor to the customer's own data.",
@@ -3381,7 +3550,7 @@ const SCENARIOS = [
   { id:"FS-06", name:"Demand Planning & Forecast Accuracy — Prep Waste Reduction",
     theme:"Operational Efficiency", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC","Store / Branch"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:170000, rampType:"soft",
+    annualBenefit:170000, rampType:"soft", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID consumption signals improve forecast accuracy 10–15%, reducing over-prep waste and stockout events",
     evidenceIds:["EV-FS-DEMAND-01"],
     challenge:"Over-prep waste and stockouts both have cost and guest experience dimensions — model the cost side conservatively.",
@@ -3395,7 +3564,7 @@ const SCENARIOS = [
   { id:"FS-07", name:"Order Accuracy & Customer Refund Reduction",
     theme:"Operational Efficiency", verticalKey:"foodservice",
     facilityKeys:["Store / Branch"], themeKeys:["Operational Efficiency","Direct Cost & Spend"],
-    annualBenefit:140000, rampType:"hard_cost",
+    annualBenefit:140000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"QSR RFID order validation reduces refund and credit events 15–30% through kit completeness checks at the pass",
     evidenceIds:["EV-FS-ORDER-01"],
     challenge:"Refund and credit data is tracked in POS — pull actuals and build directly from customer's own numbers.",
@@ -3409,7 +3578,7 @@ const SCENARIOS = [
   { id:"FS-08", name:"ESG & Sustainability Reporting Automation",
     theme:"Regulatory & Compliance", verticalKey:"foodservice",
     facilityKeys:["Warehouse / DC"], themeKeys:["Regulatory & Compliance","Labor & Human Capacity"],
-    annualBenefit:120000, rampType:"hard_labor",
+    annualBenefit:120000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID-automated waste, donation, and cold chain logs reduce ESG audit labor 20–40% and create verifiable sustainability data",
     evidenceIds:["EV-FS-ESG-01"],
     challenge:"ESG reporting requirements are expanding — RFID creates audit-ready records that manual processes cannot reliably produce.",
@@ -3426,7 +3595,7 @@ const SCENARIOS = [
   { id:"DC-08", name:"Ghost Server Carbon Overpurchase Reduction",
     theme:"Direct Cost & Spend", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Direct Cost & Spend","Regulatory & Compliance"],
-    annualBenefit:675000, rampType:"hard_cost",
+    annualBenefit:675000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Ghost server elimination via RFID removes inflated Scope 2 baseline — stopping REC/offset overpurchase",
     evidenceIds:["EV-DC-CARBON-01"],
     challenge:"Your zombie server estimate seems aggressive — DOE/LBNL 2024 and Stanford/Anthesis independently confirmed 30% rate. We model 50% decommission of identified ghosts — conservative net position.",
@@ -3444,7 +3613,7 @@ const SCENARIOS = [
   { id:"DC-09", name:"SEC Scope 2 Disclosure — Assurance Cost & Restatement Risk",
     theme:"Regulatory & Compliance", verticalKey:"datacenter",
     facilityKeys:["Warehouse / DC"], themeKeys:["Regulatory & Compliance","Direct Cost & Spend"],
-    annualBenefit:135000, rampType:"hard_cost",
+    annualBenefit:135000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"RFID-verified asset chain-of-custody reduces Scope 2 assurance cost and restatement exposure for SEC climate filers",
     evidenceIds:["EV-DC-SEC-01"],
     challenge:"Restatement probability is inherently uncertain — we model only the assurance cost reduction, which is contractually deterministic. Restatement risk appears in COI only.",
@@ -3461,7 +3630,7 @@ const SCENARIOS = [
   { id:"AVN-08", name:"CORSIA Carbon Credit Overpurchase Reduction",
     theme:"Direct Cost & Spend", verticalKey:"aviation",
     facilityKeys:["Airport / Terminal"], themeKeys:["Direct Cost & Spend","Regulatory & Compliance"],
-    annualBenefit:315000, rampType:"hard_cost",
+    annualBenefit:315000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Accurate RFID-tracked baggage/cargo data reduces CORSIA offset overpurchase — fixing the activity data before MRV",
     evidenceIds:["EV-AVN-CORSIA-01"],
     challenge:"MRV auditors verify methodology, not raw activity data accuracy. Baggage and cargo weight errors upstream of MRV create systematically inflated baselines — RFID fixes the source data before it enters the MRV process.",
@@ -3653,6 +3822,7 @@ let state = {
   inputs: {},
   benefits: {totAnnual:0, totY1:0, totY2:0, totY3:0, rows:[]},
   costs: {yr0:0, yr1:0, yr2:0},
+  customScenarios: [],
 };
 
 // init inputs
@@ -3671,12 +3841,13 @@ function go(n) {
     else if((n===6||n===7||n===8) && i<5) el.classList.add('done'); // Library pages: keep steps 0-4 as done
   });
   document.getElementById('prog-fill').style.width = Math.min(100, Math.round((Math.min(n,5)/5)*100))+'%';
-  if(n===2) renderDisc();
+  if(n===2) { renderDisc(); renderCustomScenarios(); }
   if(n===3) { syncCost(); }                   // Cost — rebuild from sliders
   if(n===4) { ensureCosts(); renderROI(); }   // ROI
   if(n===5) { ensureCosts(); if(!state.benefits || !state.benefits.totAnnual) renderROI(); renderExec(); }  // Full Analysis
   if(n===6) renderEvidence();
   if(n===8) initForecastSignal();
+  if(n===9) updateComparator();
   document.querySelector('.main').scrollTop = 0;
   syncNav();
 }
@@ -4146,6 +4317,11 @@ function addCostRow() {
 
 // ── SCENARIO CALC ──
 function calcSc(sc) {
+  if (sc.custom === true) {
+    const mech = CUSTOM_MECHANISMS.find(m => m.id === sc.mechanismId);
+    if (!mech) return 0;
+    return Math.max(0, mech.formula(sc.inputs));
+  }
   const p = state.inputs[sc.id];
   try {
     switch(sc.id) {
@@ -4271,12 +4447,580 @@ function ensureCosts() {
     rebuildCostState();
   }
 }
+// ── NRV ENGINE HELPERS ──
+function calcNRV(activeScenarios, costs, wacc) {
+  wacc = wacc || 0.10;
+  const capex = costs.yr0 || 0;
+  const annOpex = costs.yr1 || 0;
+  const attrition = capex * 0.20;
+  const training = 5000;
+  const totalAnnOpex = annOpex + attrition + training;
+
+  const B0 = activeScenarios.reduce((sum, sc) => {
+    return sum + Math.max(0, calcSc(sc));
+  }, 0);
+
+  const yearlyData = [];
+  let cumCF = -capex;
+  let npv = -capex;
+  let fvPositives = 0;
+  let pvNegatives = Math.abs(capex);
+  let paybackMo = null;
+
+  for (let t = 0; t < 5; t++) {
+    const yr = t + 1;
+
+    let netBenefit = activeScenarios.reduce((sum, sc) => {
+      const ann = Math.max(0, calcSc(sc));
+      const ramp = RAMP[sc.rampType].y[t];
+      const access = ACCESS_TIER[sc.accessibilityTier || 'configured'][t];
+      const h = (sc.haircut !== undefined) ? sc.haircut : 0.10;
+      return sum + ann * ramp * access * (1 - h);
+    }, 0);
+
+    const decayAvoided = B0 * (Math.pow(1.035, yr) - 1);
+    netBenefit += decayAvoided;
+
+    const netCF = netBenefit - totalAnnOpex;
+    cumCF += netCF;
+    const discounted = netCF / Math.pow(1 + wacc, yr);
+    npv += discounted;
+
+    if (netCF >= 0) {
+      fvPositives += netCF * Math.pow(1 + wacc, 5 - t);
+    } else {
+      pvNegatives += Math.abs(netCF) / Math.pow(1 + wacc, yr);
+    }
+
+    if (paybackMo === null && cumCF >= 0) {
+      const prevCum = cumCF - netCF;
+      paybackMo = (t * 12) + Math.round((Math.abs(prevCum) / netCF) * 12);
+    }
+
+    yearlyData.push({ year: yr, netBenefit, decayAvoided, netCF, cumCF, discounted });
+  }
+
+  const mirr = pvNegatives > 0
+    ? Math.pow(fvPositives / pvNegatives, 0.2) - 1
+    : null;
+
+  const totalBenefits = yearlyData.reduce((s, y) => s + y.netBenefit, 0);
+  const totalCosts = capex + totalAnnOpex * 5;
+  const bcr = totalCosts > 0 ? totalBenefits / totalCosts : null;
+  const nrv = Math.round(npv);
+  const peakAnnual = Math.max(...yearlyData.map(y => y.netBenefit));
+  const roi5 = totalCosts > 0
+    ? Math.round(((totalBenefits - totalCosts) / totalCosts) * 100)
+    : 0;
+
+  return {
+    nrv, mirr, paybackMo, bcr, peakAnnual, roi5,
+    yearlyData, B0, totalAnnOpex, capex, wacc
+  };
+}
+
+function calcMIRRDisplay(mirr) {
+  if (mirr === null || isNaN(mirr) || !isFinite(mirr)) return 'N/A';
+  return (mirr * 100).toFixed(1) + '%';
+}
+
+function calcDriverWalkdown(sc, result) {
+  const ann = Math.max(0, calcSc(sc));
+  const rows = [];
+  for (let t = 0; t < 5; t++) {
+    const ramp = RAMP[sc.rampType].y[t];
+    const access = ACCESS_TIER[sc.accessibilityTier || 'configured'][t];
+    const h = (sc.haircut !== undefined) ? sc.haircut : 0.10;
+    const afterRamp = ann * ramp;
+    const afterAccess = afterRamp * access;
+    const afterHaircut = afterAccess * (1 - h);
+    rows.push({ year: t + 1, gross: ann, afterRamp, afterAccess, afterHaircut });
+  }
+  return rows;
+}
+
+function renderWalkdownTable(activeScenarios, result) {
+  const el = document.getElementById('nrv-walkdown-body');
+  if (!el) return;
+
+  const rows = activeScenarios.map(sc => {
+    const ann = Math.max(0, calcSc(sc));
+    const h = (sc.haircut !== undefined) ? sc.haircut : 0.10;
+    const tier = sc.accessibilityTier || 'configured';
+    const peakT = 2; // Y3 index
+    const ramp = RAMP[sc.rampType].y[peakT];
+    const access = ACCESS_TIER[tier][peakT];
+    const afterRamp = ann * ramp;
+    const afterAccess = afterRamp * access;
+    const afterHaircut = afterAccess * (1 - h);
+    const isCustom = sc.custom === true;
+    return `<tr${isCustom ? ' style="font-style:italic;opacity:0.8"' : ''}>
+      <td>${sc.id}${isCustom ? ' <span style="font-size:9px;color:var(--muted)">[user]</span>' : ''}</td>
+      <td style="text-align:right">${fmt(Math.round(ann))}</td>
+      <td style="text-align:right">${fmt(Math.round(afterRamp))}</td>
+      <td style="text-align:right">${fmt(Math.round(afterAccess))}</td>
+      <td style="text-align:right">${fmt(Math.round(afterHaircut))}</td>
+      <td style="text-align:center;font-size:10px;color:var(--muted)">${tier}</td>
+    </tr>`;
+  }).join('');
+
+  const decayRow = `<tr style="border-top:1px solid var(--gray-300)">
+    <td colspan="4" style="color:var(--muted);font-size:11px">+ Decay Avoided (status quo growth @ 3.5%/yr)</td>
+    <td style="text-align:right">${fmt(Math.round(result.yearlyData[2].decayAvoided))}</td>
+    <td></td>
+  </tr>`;
+
+  const tcoRow = `<tr>
+    <td colspan="4" style="color:var(--muted);font-size:11px">− Annual TCO (opex + attrition + training)</td>
+    <td style="text-align:right;color:var(--red)">-${fmt(Math.round(result.totalAnnOpex))}</td>
+    <td></td>
+  </tr>`;
+
+  const nrvRow = `<tr style="border-top:2px solid var(--brand-black);font-weight:700">
+    <td colspan="4">NRV (5-yr discounted @ 10% WACC)</td>
+    <td style="text-align:right;color:var(--brand-green)">${fmt(result.nrv)}</td>
+    <td></td>
+  </tr>`;
+
+  el.innerHTML = rows + decayRow + tcoRow + nrvRow;
+}
+
+// ── CUSTOM VALUE SCENARIO BUILDER ──
+const CUSTOM_MECHANISMS = [
+  { id:'labor_recovery',   label:'Labor recovery',
+    vars:[
+      {key:'events_per_week',    label:'Events / week',       default:50},
+      {key:'hours_per_event',    label:'Hours per event',      default:0.5},
+      {key:'loaded_rate',        label:'Fully-loaded rate ($/hr)', default:28},
+      {key:'reduction_pct',      label:'Reduction rate (%)',   default:0.70},
+    ],
+    formula: v => v.events_per_week * v.hours_per_event * v.loaded_rate * v.reduction_pct * 52,
+    rampDefault: 'hard_labor'
+  },
+  { id:'shrink_reduction', label:'Shrink reduction',
+    vars:[
+      {key:'annual_revenue',     label:'Annual revenue ($)',   default:5000000},
+      {key:'shrink_pct',         label:'Shrink rate (%)',       default:0.018},
+      {key:'reduction_pct',      label:'Reduction achieved (%)', default:0.30},
+    ],
+    formula: v => v.annual_revenue * v.shrink_pct * v.reduction_pct,
+    rampDefault: 'hard_cost'
+  },
+  { id:'availability_uplift', label:'Availability / stockout uplift',
+    vars:[
+      {key:'annual_revenue',     label:'Annual revenue ($)',   default:5000000},
+      {key:'oos_baseline_pct',   label:'OOS baseline (%)',      default:0.08},
+      {key:'improvement_pct',    label:'Improvement (%)',       default:0.40},
+      {key:'gm_pct',             label:'Gross margin (%)',      default:0.45},
+    ],
+    formula: v => v.annual_revenue * v.oos_baseline_pct * v.improvement_pct * v.gm_pct,
+    rampDefault: 'revenue'
+  },
+  { id:'safety_stock',     label:'Safety stock / working capital release',
+    vars:[
+      {key:'inventory_value',    label:'Inventory value ($)',   default:2000000},
+      {key:'reduction_pct',      label:'Reduction achieved (%)', default:0.12},
+      {key:'carrying_cost_pct',  label:'Carrying cost rate (%)', default:0.22},
+    ],
+    formula: v => v.inventory_value * v.reduction_pct * v.carrying_cost_pct,
+    rampDefault: 'working_cap'
+  },
+  { id:'compliance_fines', label:'Compliance / chargeback avoidance',
+    vars:[
+      {key:'annual_chargebacks', label:'Annual chargeback value ($)', default:150000},
+      {key:'reduction_pct',      label:'Reduction achieved (%)',      default:0.60},
+    ],
+    formula: v => v.annual_chargebacks * v.reduction_pct,
+    rampDefault: 'hard_cost'
+  },
+  { id:'custom_formula',   label:'Custom — I\'ll enter the annual value directly',
+    vars:[
+      {key:'annual_value',       label:'Annual benefit value ($)',    default:100000},
+    ],
+    formula: v => v.annual_value,
+    rampDefault: 'hard_cost'
+  },
+];
+
+let customIdCounter = 1;
+
+function addCustomScenario() {
+  const id = 'CUSTOM-' + String(customIdCounter++).padStart(2,'0');
+  const sc = {
+    id,
+    name: 'Custom scenario ' + id,
+    custom: true,
+    active: true,
+    mechanismId: 'labor_recovery',
+    rampType: 'hard_labor',
+    accessibilityTier: 'configured',
+    haircut: 0.10,
+    inputs: {},
+  };
+  const mech = CUSTOM_MECHANISMS[0];
+  mech.vars.forEach(v => { sc.inputs[v.key] = v.default; });
+  state.customScenarios.push(sc);
+  renderCustomScenarios();
+}
+
+function renderCustomScenarios() {
+  const el = document.getElementById('custom-scenarios-list');
+  if (!el) return;
+  if (!state.customScenarios.length) { el.innerHTML = ''; return; }
+
+  el.innerHTML = state.customScenarios.map((sc, idx) => {
+    const mech = CUSTOM_MECHANISMS.find(m => m.id === sc.mechanismId) || CUSTOM_MECHANISMS[0];
+    const val = mech.formula(sc.inputs);
+    const mechOptions = CUSTOM_MECHANISMS.map(m =>
+      `<option value="${m.id}"${m.id === sc.mechanismId ? ' selected' : ''}>${m.label}</option>`
+    ).join('');
+    const rampOptions = Object.keys(RAMP).map(k =>
+      `<option value="${k}"${k === sc.rampType ? ' selected' : ''}>${RAMP[k].label}</option>`
+    ).join('');
+    const tierOptions = ['commodity','configured','infrastructure'].map(t =>
+      `<option value="${t}"${t === sc.accessibilityTier ? ' selected' : ''}>${t.charAt(0).toUpperCase()+t.slice(1)}</option>`
+    ).join('');
+
+    const varInputs = mech.vars.map(v => `
+      <div style="margin-bottom:8px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:3px">${v.label}</div>
+        <input type="number" value="${sc.inputs[v.key] !== undefined ? sc.inputs[v.key] : v.default}"
+          style="width:160px;font-size:12px"
+          onchange="updateCustomInput(${idx},'${v.key}',+this.value)">
+      </div>`).join('');
+
+    return `
+      <div style="border:1px dashed var(--gray-300);border-radius:8px;padding:16px;margin-bottom:12px;background:var(--gray-50)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div>
+            <div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:4px">${sc.id}
+              <span style="background:var(--gray-200);color:var(--gray-600);padding:1px 6px;border-radius:8px;font-size:9px;margin-left:6px">
+                NOT VERIFIED BY ZEBRA VE TEAM
+              </span>
+            </div>
+            <input type="text" value="${sc.name}" placeholder="Scenario name"
+              style="font-size:13px;font-weight:600;border:none;background:transparent;width:280px"
+              onchange="updateCustomName(${idx},this.value)">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <label style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px">
+              <input type="checkbox" ${sc.active ? 'checked' : ''}
+                onchange="toggleCustomActive(${idx},this.checked)"> Include in model
+            </label>
+            <button onclick="removeCustomScenario(${idx})"
+              style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer">Remove</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Value mechanism</div>
+            <select style="font-size:12px;width:100%" onchange="updateCustomMechanism(${idx},this.value)">
+              ${mechOptions}
+            </select>
+            <div style="margin-top:12px">${varInputs}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Ramp profile</div>
+            <select style="font-size:12px;width:100%;margin-bottom:8px" onchange="updateCustomProp(${idx},'rampType',this.value)">
+              ${rampOptions}
+            </select>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Accessibility tier</div>
+            <select style="font-size:12px;width:100%;margin-bottom:8px" onchange="updateCustomProp(${idx},'accessibilityTier',this.value)">
+              ${tierOptions}
+            </select>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Covariance haircut</div>
+            <input type="number" min="0" max="1" step="0.01" value="${sc.haircut}"
+              style="font-size:12px;width:100px"
+              onchange="updateCustomProp(${idx},'haircut',+this.value)">
+            <div style="margin-top:14px;padding:10px;background:rgba(80,160,80,.08);border-radius:6px;border:1px solid rgba(80,160,80,.2)">
+              <div style="font-size:10px;color:var(--muted);font-family:var(--mono)">ANNUAL VALUE (GROSS)</div>
+              <div style="font-size:20px;font-weight:700;color:var(--brand-green)">${fmt(Math.round(val))}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">before ramp · before adjustments</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function updateCustomInput(idx, key, val) {
+  state.customScenarios[idx].inputs[key] = val;
+  renderCustomScenarios();
+  if (document.getElementById('kpi-grid')) renderROI();
+}
+
+function updateCustomMechanism(idx, mechId) {
+  const sc = state.customScenarios[idx];
+  sc.mechanismId = mechId;
+  const mech = CUSTOM_MECHANISMS.find(m => m.id === mechId);
+  sc.rampType = mech.rampDefault;
+  sc.inputs = {};
+  mech.vars.forEach(v => { sc.inputs[v.key] = v.default; });
+  renderCustomScenarios();
+  if (document.getElementById('kpi-grid')) renderROI();
+}
+
+function updateCustomProp(idx, key, val) {
+  state.customScenarios[idx][key] = val;
+  renderCustomScenarios();
+  if (document.getElementById('kpi-grid')) renderROI();
+}
+
+function updateCustomName(idx, val) {
+  state.customScenarios[idx].name = val;
+}
+
+function toggleCustomActive(idx, val) {
+  state.customScenarios[idx].active = val;
+  if (document.getElementById('kpi-grid')) renderROI();
+}
+
+function removeCustomScenario(idx) {
+  state.customScenarios.splice(idx, 1);
+  renderCustomScenarios();
+  if (document.getElementById('kpi-grid')) renderROI();
+}
+
+// ── SOLUTION COMPARATOR ──
+const SC_SOLUTIONS = [
+  { name:'Handheld only', short:'HH',      color:'#EB5757',
+    accessTier:'commodity',     capex:18000,  opex:4500,
+    capexScale:0.003, opexScale:0.0005,
+    laborMult:0.20, availMult:0.10, shrinkMult:0.00, omniMult:0.000 },
+  { name:'CP + Handheld', short:'CP+HH',   color:'#F2994A',
+    accessTier:'configured',    capex:60000,  opex:12000,
+    capexScale:0.010, opexScale:0.001,
+    laborMult:0.30, availMult:0.18, shrinkMult:0.20, omniMult:0.000 },
+  { name:'CP + Robot',    short:'CP+Bot',  color:'#2F80ED',
+    accessTier:'configured',    capex:90000,  opex:18000,
+    capexScale:0.015, opexScale:0.0015,
+    laborMult:0.35, availMult:0.22, shrinkMult:0.25, omniMult:0.004 },
+  { name:'Full RTLS',     short:'RTLS',    color:'#6FCF97',
+    accessTier:'infrastructure',capex:185000, opex:32000,
+    capexScale:0.030, opexScale:0.003,
+    laborMult:0.40, availMult:0.28, shrinkMult:0.32, omniMult:0.008 },
+];
+
+const SC_LEVERS = [
+  { name:'Labor — cycle count',     act:['on','on','on','on']   },
+  { name:'Labor — search/locate',   act:['on','on','on','on']   },
+  { name:'Availability / stockout', act:['p','on','on','on']    },
+  { name:'Safety stock reduction',  act:['p','on','on','on']    },
+  { name:'Shrink — exit / POS',     act:['off','on','on','on']  },
+  { name:'Receiving accuracy',      act:['off','on','on','on']  },
+  { name:'Fitting room visibility', act:['off','off','p','on']  },
+  { name:'Zone / area loss',        act:['off','off','p','on']  },
+  { name:'OMS / ATP signal',        act:['off','off','p','on']  },
+  { name:'Real-time alerting',      act:['off','off','off','on']},
+  { name:'Strategic data asset',    act:['off','off','off','on']},
+];
+
+let scChartBar = null, scChartCF = null;
+
+function updateComparator() {
+  const rev    = +document.getElementById('sc-sl-rev').value;
+  const acc    = +document.getElementById('sc-sl-acc').value / 100;
+  const shrink = +document.getElementById('sc-sl-shrink').value / 100;
+  const labor  = +document.getElementById('sc-sl-labor').value;
+  const sqft   = +document.getElementById('sc-sl-sqft').value;
+  const asp    = +document.getElementById('sc-sl-asp').value;
+  const wacc   = +document.getElementById('sc-sl-wacc').value / 100;
+
+  document.getElementById('sc-val-rev').textContent    = fmt(rev);
+  document.getElementById('sc-val-acc').textContent    = Math.round(acc*100) + '%';
+  document.getElementById('sc-val-shrink').textContent = (shrink*100).toFixed(1) + '%';
+  document.getElementById('sc-val-labor').textContent  = labor + ' hrs';
+  document.getElementById('sc-val-sqft').textContent   = sqft >= 1000 ? Math.round(sqft/1000) + 'K' : sqft;
+  document.getElementById('sc-val-asp').textContent    = '$' + asp;
+  document.getElementById('sc-val-wacc').textContent   = Math.round(wacc*100) + '%';
+
+  const laborRate = 21.50;
+  const results = SC_SOLUTIONS.map(sol => {
+    const laborBase  = labor * 52 * laborRate * sol.laborMult;
+    const availBase  = rev * (1 - acc) * sol.availMult;
+    const shrinkBase = rev * shrink * sol.shrinkMult;
+    const omniBase   = rev * sol.omniMult;
+    const grossBen   = laborBase + availBase + shrinkBase + omniBase;
+
+    const capex = sol.capex + rev * sol.capexScale;
+    const opex  = sol.opex  + rev * sol.opexScale;
+    const costs = { yr0: capex, yr1: opex };
+
+    const syntheticSc = [{
+      id: sol.short,
+      name: sol.name,
+      custom: true,
+      mechanismId: 'custom_formula',
+      rampType: 'hard_labor',
+      accessibilityTier: sol.accessTier,
+      haircut: 0.10,
+      inputs: { annual_value: grossBen },
+    }];
+
+    const r = calcNRV(syntheticSc, costs, wacc);
+    return { sol, grossBen, capex, opex, result: r };
+  });
+
+  renderSCCards(results);
+  renderSCLeverMap();
+  renderSCCharts(results, wacc);
+  renderSCTable(results);
+  renderSCDecision(results, sqft, labor, asp, rev);
+}
+
+function renderSCCards(results) {
+  const sorted = [...results].sort((a,b) => b.result.nrv - a.result.nrv);
+  const el = document.getElementById('sc-nrv-cards');
+  el.innerHTML = results.map((r) => {
+    const rank = sorted.findIndex(s => s.sol.short === r.sol.short) + 1;
+    const isBest = rank === 1;
+    const nrvNeg = r.result.nrv < 0;
+    return `
+      <div style="border:1px solid ${isBest ? 'var(--brand-green)' : 'var(--gray-200)'};
+        border-radius:10px;padding:16px;text-align:center;
+        background:${isBest ? 'rgba(167,188,2,.05)' : 'var(--gray-50)'}">
+        ${isBest ? '<div style="font-size:10px;font-weight:700;background:var(--brand-green);color:var(--brand-black);padding:2px 10px;border-radius:20px;display:inline-block;margin-bottom:8px">BEST FIT</div>' : `<div style="font-size:10px;color:var(--muted);margin-bottom:8px">#${rank}</div>`}
+        <div style="font-size:11px;font-weight:700;color:var(--gray-700);margin-bottom:6px">${r.sol.name}</div>
+        <div style="font-size:22px;font-weight:800;color:${nrvNeg ? 'var(--red)' : 'var(--brand-black)'}">${fmt(r.result.nrv)}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">5-yr NRV</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">
+          MIRR: ${calcMIRRDisplay(r.result.mirr)}<br>
+          Payback: ${r.result.paybackMo !== null ? r.result.paybackMo + ' mo' : 'N/A'}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderSCLeverMap() {
+  const el = document.getElementById('sc-lever-map');
+  const headers = `<div style="display:grid;grid-template-columns:160px repeat(4,1fr);gap:4px;margin-bottom:6px">
+    <div style="font-size:9px;color:var(--muted);text-transform:uppercase">Lever</div>
+    ${SC_SOLUTIONS.map(s => `<div style="font-size:9px;color:var(--muted);text-transform:uppercase;text-align:center">${s.short}</div>`).join('')}
+  </div>`;
+  const rows = SC_LEVERS.map(lev => {
+    const cells = lev.act.map(a => {
+      if (a==='on')  return `<div style="height:20px;border-radius:3px;background:rgba(167,188,2,.2);border:1px solid rgba(167,188,2,.4);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--brand-green)">●</div>`;
+      if (a==='p')   return `<div style="height:20px;border-radius:3px;background:rgba(242,153,74,.12);border:1px solid rgba(242,153,74,.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:#c07a30">◐</div>`;
+      return `<div style="height:20px;border-radius:3px;background:var(--gray-100);border:1px solid var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--gray-400)">○</div>`;
+    }).join('');
+    return `<div style="display:grid;grid-template-columns:160px repeat(4,1fr);gap:4px;margin-bottom:4px">
+      <div style="font-size:11px;color:var(--muted);display:flex;align-items:center">${lev.name}</div>
+      ${cells}
+    </div>`;
+  }).join('');
+  el.innerHTML = headers + rows;
+}
+
+function renderSCCharts(results, wacc) {
+  const labels = ['Y1','Y2','Y3','Y4','Y5'];
+  const colors = SC_SOLUTIONS.map(s => s.color);
+
+  if (scChartBar) scChartBar.destroy();
+  const ctxBar = document.getElementById('sc-chart-bar').getContext('2d');
+  scChartBar = new Chart(ctxBar, {
+    type:'bar',
+    data:{
+      labels,
+      datasets: results.map((r,i) => ({
+        label: r.sol.short,
+        data: r.result.yearlyData.map(y => Math.round(y.netBenefit)),
+        backgroundColor: colors[i] + '99',
+        borderColor: colors[i],
+        borderWidth:1,
+      }))
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom', labels:{ font:{size:11} } } },
+      scales:{ y:{ ticks:{ callback: v => fmt(v) } } }
+    }
+  });
+
+  if (scChartCF) scChartCF.destroy();
+  const ctxCF = document.getElementById('sc-chart-cf').getContext('2d');
+  scChartCF = new Chart(ctxCF, {
+    type:'line',
+    data:{
+      labels:['Start','Y1','Y2','Y3','Y4','Y5'],
+      datasets: results.map((r,i) => ({
+        label: r.sol.short,
+        data: [-r.result.capex, ...r.result.yearlyData.map(y => Math.round(y.cumCF))],
+        borderColor: colors[i],
+        backgroundColor: 'transparent',
+        borderWidth:2, pointRadius:3, tension:0.3,
+      }))
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom', labels:{ font:{size:11} } } },
+      scales:{
+        y:{ ticks:{ callback: v => fmt(v) } },
+        x:{}
+      }
+    }
+  });
+}
+
+function renderSCTable(results) {
+  const sorted = [...results].sort((a,b) => b.result.nrv - a.result.nrv);
+  const el = document.getElementById('sc-comp-table');
+  const headers = `<thead><tr style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+    <th style="text-align:left;padding:6px 10px">Solution</th>
+    <th style="text-align:right;padding:6px 10px">Investment</th>
+    <th style="text-align:right;padding:6px 10px">Peak annual NRV</th>
+    <th style="text-align:right;padding:6px 10px">5-yr NRV</th>
+    <th style="text-align:right;padding:6px 10px">MIRR</th>
+    <th style="text-align:right;padding:6px 10px">Payback</th>
+    <th style="text-align:right;padding:6px 10px">5-yr ROI</th>
+  </tr></thead>`;
+  const rows = results.map(r => {
+    const rank = sorted.findIndex(s => s.sol.short === r.sol.short);
+    const isBest = rank === 0;
+    const neg = r.result.nrv < 0;
+    return `<tr style="${isBest ? 'background:rgba(167,188,2,.04);font-weight:600' : ''}">
+      <td style="padding:8px 10px;font-size:12px">${isBest ? '★ ' : ''}${r.sol.name}</td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px">${fmt(Math.round(r.result.capex))}</td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px">${fmt(Math.round(r.result.peakAnnual))}</td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px;color:${neg?'var(--red)':'inherit'}">${fmt(r.result.nrv)}</td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px">${calcMIRRDisplay(r.result.mirr)}</td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px">${r.result.paybackMo !== null ? r.result.paybackMo + ' mo' : 'N/A'}</td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px">${r.result.roi5}%</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = headers + '<tbody>' + rows + '</tbody>';
+}
+
+function renderSCDecision(results, sqft, labor, asp, rev) {
+  const sorted = [...results].sort((a,b) => b.result.nrv - a.result.nrv);
+  const winner = sorted[0];
+  const loser  = sorted[sorted.length-1];
+  let reason = '';
+  if (winner.sol.short === 'RTLS') {
+    if (asp >= 100) reason = `Full RTLS wins on value density — ASP $${asp} means every prevented theft and every BOPIS promise kept has high dollar impact. The infrastructure cost is trivial relative to the per-item value at stake.`;
+    else if (rev >= 50000000) reason = `At ${fmt(rev)} revenue, infrastructure cost is trivial as a percentage of recoverable value. Full RTLS delivers the continuous event stream needed for BOPIS, safety stock, and always-on shrink coverage at this scale.`;
+    else reason = `Full RTLS wins because the combination of store profile parameters makes the always-on event stream worth the infrastructure investment.`;
+  } else if (winner.sol.short === 'CP+Bot') {
+    reason = `CP + Robot wins because ${sqft >= 25000 ? `${Math.round(sqft/1000)}K sq ft floor` : 'the floor size'} combined with ${labor} inventory hours/week means the floor sweep problem is the binding constraint. Fixed readers at choke points cover dock and exit shrink while the robot handles continuous floor coverage.`;
+  } else if (winner.sol.short === 'CP+HH') {
+    reason = `CP + Handheld is the right balance for this profile. The store is manageable with handheld floor coverage while fixed readers at choke points activate the shrink and receiving accuracy levers that HH-only misses.`;
+  } else {
+    reason = `Handheld only is the ceiling for this profile. ${asp <= 30 ? `At $${asp} ASP, tag economics make RFID infrastructure cost unsustainable — the lifetime recoverable value cannot justify fixed reader investment.` : 'The value levers activated by fixed infrastructure do not offset their cost at this store size and profile.'}`;
+  }
+  if (loser.result.nrv < 0) {
+    reason += ` ${loser.sol.name} produces negative NRV — infrastructure cost exceeds lifetime recoverable value at this profile.`;
+  }
+  document.getElementById('sc-decision-text').textContent = reason;
+}
+
 // ── STEP 5: ROI & VALUE CASE ──
 function renderROI() {
-  const active = SCENARIOS.filter(s=>state.selectedIds.has(s.id));
-  if(!active.length) { document.getElementById('kpi-grid').innerHTML='<div class="muted">No scenarios selected.</div>'; return; }
+  const active = SCENARIOS.filter(s => state.selectedIds.has(s.id))
+    .concat((state.customScenarios || []).filter(s => s.active));
+  if (!active.length) {
+    document.getElementById('kpi-grid').innerHTML = '<div class="muted">No scenarios selected.</div>';
+    return;
+  }
 
-  // ── NRV toolbar state (drives the math) ──
+  // ── NRV toolbar state (kept for chart rendering below) ──
   const _waccEl = document.getElementById('nrv-wacc');
   const wacc    = _waccEl ? +_waccEl.value : 0.10;
   const gRate   = +(document.getElementById('nrv-g')?.value ?? 0.035);
@@ -4288,110 +5032,85 @@ function renderROI() {
   _setSv('nrv-g-v',    (gRate*100).toFixed(1)+'%');
   _setSv('nrv-fin-v',  (finRate*100).toFixed(1)+'%');
 
-  let totAnnual=0;
-  // byYear arrays index 0..4 represent years 1..5
-  const grossByYear = [0,0,0,0,0];
-  const rows = active.map(sc => {
-    const ann = Math.max(0, calcSc(sc));
-    let byYear;
-    let cfg = null;
-    if (nrvOn) {
-      cfg = nrvCfg(sc);
-      const rp = NRV_RAMPS[cfg.profile].y;
-      const ax = NRV_ACCESS[cfg.access].y;
-      byYear = rp.map((r,i) => ann * r * ax[i] * (1 - cfg.h));
-    } else {
-      // Raw ramp (Y1/Y2 from RAMP, Y3-Y5 flat at Y3)
-      const r = RAMP[sc.rampType];
-      byYear = [ann*r.y1, ann*r.y2, ann*r.y3, ann*r.y3, ann*r.y3];
-    }
-    totAnnual += ann;
-    byYear.forEach((v,i)=> grossByYear[i] += v);
-    return { sc, ann, cfg, byYear, y1:byYear[0], y2:byYear[1], y3:byYear[2], y4:byYear[3], y5:byYear[4] };
-  });
-  const totY1 = grossByYear[0], totY2 = grossByYear[1], totY3 = grossByYear[2];
-  const totY4 = grossByYear[3], totY5 = grossByYear[4];
-  const peakAnnual = Math.max(...grossByYear);
-  state.benefits = {totAnnual, totY1, totY2, totY3, totY4, totY5, peakAnnual, rows};
-
-  // Decay_Avoided(t) at baseline growth g
-  const decayAvoided = [0,0,0,0,0];
-  if (nrvOn && useDecay && gRate > 0 && totAnnual > 0) {
-    let cum = 0;
-    for (let k = 1; k <= 5; k++) {
-      cum += totAnnual * (Math.pow(1+gRate, k) - 1);
-      decayAvoided[k-1] = cum;
-    }
-  }
-  state.benefits.decayAvoided = decayAvoided;
-
+  ensureCosts();
   const c = state.costs;
-  // Net cash flow per year (t=0..5). Year 0 = upfront; Y1 = totY1 + decay - yr1; Y2-5 = grossByYear + decay - yr2.
-  const tcoBy = [c.yr0||0, c.yr1||0, c.yr2||0, c.yr2||0, c.yr2||0, c.yr2||0];
-  const ncf = [
-    -(tcoBy[0]),
-    totY1 + decayAvoided[0] - tcoBy[1],
-    totY2 + decayAvoided[1] - tcoBy[2],
-    totY3 + decayAvoided[2] - tcoBy[3],
-    totY4 + decayAvoided[3] - tcoBy[4],
-    totY5 + decayAvoided[4] - tcoBy[5],
-  ];
-  state.benefits.ncf = ncf;
+  const result = calcNRV(active, c, 0.10);
+  const { nrv, mirr, paybackMo, bcr, peakAnnual, roi5, yearlyData } = result;
 
-  // NPV at WACC, all 5 years
-  let npv5 = 0;
-  ncf.forEach((v,t)=>{ npv5 += v / Math.pow(1+wacc, t); });
-  npv5 = Math.round(npv5);
+  state.nrvResult = result;
+  state.benefits = {
+    totAnnual: peakAnnual,
+    totY1: yearlyData[0].netBenefit,
+    totY2: yearlyData[1].netBenefit,
+    totY3: yearlyData[2].netBenefit,
+    rows: active.map(sc => {
+      const ann = Math.max(0, calcSc(sc));
+      return {
+        sc, ann,
+        y1: ann * RAMP[sc.rampType].y[0],
+        y2: ann * RAMP[sc.rampType].y[1],
+        y3: ann * RAMP[sc.rampType].y[2],
+        y4: ann * RAMP[sc.rampType].y[3],
+        y5: ann * RAMP[sc.rampType].y[4],
+      };
+    })
+  };
 
-  // Discounted payback (months)
-  let _cum = 0, payback = null;
-  for (let t=0; t<=5; t++) {
-    const disc = ncf[t] / Math.pow(1+wacc, t);
-    const prev = _cum; _cum += disc;
-    if (prev < 0 && _cum >= 0) { payback = Math.round((t - 1 + (-prev/(_cum-prev))) * 12 * 10) / 10; break; }
-  }
-
-  // MIRR (preferred) and IRR (kept for reference)
-  let fvPos=0, pvNeg=0;
-  ncf.forEach((v,t)=>{
-    if (v>0) fvPos += v * Math.pow(1+wacc, 5-t);
-    else if (v<0) pvNeg += -v / Math.pow(1+finRate, t);
-  });
-  const mirr = (fvPos>0 && pvNeg>0) ? (Math.pow(fvPos/pvNeg, 1/5) - 1) : null;
-  const irr = estimateIRR(ncf);
-
-  // BCR (undiscounted) and 5-yr Net ROI
-  const totBen  = grossByYear.reduce((a,v)=>a+v,0) + decayAvoided.reduce((a,v)=>a+v,0);
-  const totCost = tcoBy.reduce((a,v)=>a+v,0);
-  const bcr  = totCost>0 ? totBen/totCost : null;
-  const roi5 = totCost>0 ? Math.round(((totBen - totCost)/totCost)*100) : 0;
+  // Reconstruct legacy chart variables from NRV result for SVG charts below
+  const rows = state.benefits.rows;
+  const totAnnual = state.benefits.totAnnual;
+  const totY1 = yearlyData[0].netBenefit, totY2 = yearlyData[1].netBenefit;
+  const totY3 = yearlyData[2].netBenefit, totY4 = yearlyData[3].netBenefit, totY5 = yearlyData[4].netBenefit;
+  const grossByYear = yearlyData.map(y => y.netBenefit);
+  const decayAvoided = yearlyData.map(y => y.decayAvoided);
+  const tcoBy = [result.capex, result.totalAnnOpex, result.totalAnnOpex, result.totalAnnOpex, result.totalAnnOpex, result.totalAnnOpex];
+  const ncf = [-result.capex, ...yearlyData.map(y => y.netCF)];
+  const npv5 = result.nrv;
+  const irr = typeof estimateIRR === 'function' ? estimateIRR(ncf) : '—';
   const bcrWarn = bcr !== null && bcr > 10;
 
-  // BCR cap flag
+  const bcrFlag = bcrWarn;
+
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi kgreen hero-kpi">
+      <div class="kpi-label">NRV Peak Annual</div>
+      <div class="kpi-val">${fmt(Math.round(peakAnnual))}</div>
+      <div class="kpi-sub">Peak NRV (Yr 3) · decay-adjusted</div>
+    </div>
+    <div class="kpi kblue hero-kpi">
+      <div class="kpi-label">Payback Period</div>
+      <div class="kpi-val">${paybackMo !== null ? paybackMo : '—'}<span style="font-size:15px;font-weight:400"> mo</span></div>
+      <div class="kpi-sub">discounted at 10% WACC</div>
+    </div>
+    <div class="kpi kamber hero-kpi">
+      <div class="kpi-label">NRV (5-yr NPV)</div>
+      <div class="kpi-val">${fmt(nrv)}</div>
+      <div class="kpi-sub">discounted at 10% · normalized</div>
+    </div>
+    <div class="kpi kgold hero-kpi">
+      <div class="kpi-label">5-Year Net ROI</div>
+      <div class="kpi-val">${roi5}<span style="font-size:15px">%</span></div>
+      <div class="kpi-sub">NRV-normalized · decay applied</div>
+    </div>`;
+
+  document.getElementById('kpi-secondary').innerHTML = `
+    <div class="kpi-sec"><div class="ks-label">Year 1 Ramped Value</div><div class="ks-val">${fmt(Math.round(yearlyData[0].netBenefit))}</div></div>
+    <div class="kpi-sec"><div class="ks-label">Year 2 Ramped Value</div><div class="ks-val">${fmt(Math.round(yearlyData[1].netBenefit))}</div></div>
+    <div class="kpi-sec"><div class="ks-label">Benefit:Cost (5-yr)</div><div class="ks-val">${bcr !== null ? bcr.toFixed(1) + 'x' : '—'}</div></div>
+    <div class="kpi-sec"><div class="ks-label">Monthly at Peak</div><div class="ks-val">${fmt(Math.round(peakAnnual / 12))}</div></div>`;
+
+  const bcrBanner = document.getElementById('bcr-banner');
+  if (bcrBanner) {
+    bcrBanner.style.display = bcrFlag ? 'block' : 'none';
+    if (bcrFlag) bcrBanner.innerHTML = `&#9651; BCR above 10x (${bcr.toFixed(1)}x). Per the NRV SOP this requires mandatory review before the model leaves your hands. Audit covariance haircuts and challenge top-3 drivers at ~20% before exporting.`;
+  }
   const flagEl = document.getElementById('nrv-bcr-flag-host');
   if (flagEl) flagEl.innerHTML = bcrWarn
     ? `<div class="nrv-bcr-flag"><strong>⚠ BCR above 10x (${bcr.toFixed(1)}x).</strong> Per the NRV SOP this requires mandatory review before the model leaves your hands. Audit covariance haircuts and challenge top-3 drivers at &minus;20% before exporting.</div>`
     : '';
 
-  // KPIs — 4 primary heroes + 4 secondary supporting
-  const pbTxt = payback === null ? 'Beyond 5 yr' : payback.toFixed(1)+' mo';
-  const peakLbl = nrvOn ? `Peak NRV (Yr ${grossByYear.indexOf(peakAnnual)+1})` : 'Year 3 steady state';
-  document.getElementById('kpi-grid').innerHTML = `
-    <div class="kpi kgreen hero-kpi"><div class="kpi-label">${nrvOn?'NRV Peak Annual':'Full Annual Benefit'}</div><div class="kpi-val">${fmt(Math.round(peakAnnual))}</div><div class="kpi-sub">${peakLbl}${nrvOn?' · decay-adjusted':''}</div></div>
-    <div class="kpi kblue hero-kpi"><div class="kpi-label">Payback Period</div><div class="kpi-val">${payback===null?'>5 yr':payback}${payback!==null?'<span style="font-size:15px;font-weight:400"> mo</span>':''}</div><div class="kpi-sub">${nrvOn?'discounted at '+(wacc*100).toFixed(0)+'% WACC':'months to recover investment'}</div></div>
-    <div class="kpi kamber hero-kpi"><div class="kpi-label">${nrvOn?'NRV (5-yr NPV)':'5-Year NPV'}</div><div class="kpi-val">${fmt(npv5)}</div><div class="kpi-sub">discounted at ${(wacc*100).toFixed(0)}%${nrvOn?' · normalized':''}</div></div>
-    <div class="kpi kgold hero-kpi"><div class="kpi-label">5-Year Net ROI</div><div class="kpi-val">${roi5}<span style="font-size:15px">%</span></div><div class="kpi-sub">${nrvOn?'NRV-normalized · decay applied':'benefit less total cost'}</div></div>`;
-  document.getElementById('kpi-secondary').innerHTML = `
-    <div class="kpi-sec"><div class="ks-label">Year 1 Ramped Value</div><div class="ks-val">${fmt(Math.round(totY1))}</div></div>
-    <div class="kpi-sec"><div class="ks-label">Year 2 Ramped Value</div><div class="ks-val">${fmt(Math.round(totY2))}</div></div>
-    <div class="kpi-sec"><div class="ks-label">Benefit : Cost (5-yr)</div><div class="ks-val ${bcrWarn?'warn':''}">${bcr===null?'—':bcr.toFixed(1)+'x'}</div></div>
-    <div class="kpi-sec"><div class="ks-label">Monthly at Peak</div><div class="ks-val">${fmt(Math.round(peakAnnual/12))}</div></div>`;
-
-  // Delay slider
+  renderWalkdownTable(active, result);
   syncDelay();
-
-  // Missed value — rendered by syncDelay so delay slider drives both cards
-  // (syncDelay is called below)
 
   // ── SVG Horizontal Bar Chart — absolute scale, grouped, proper axis ──
   (function(){
@@ -4643,31 +5362,12 @@ function renderROI() {
 
   // Detail table — expandable rows with mini analytics panel
   const _totAnnForPct = totAnnual || 1;
-  const _profOpts = Object.entries(NRV_RAMPS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
-  const _accOpts  = Object.entries(NRV_ACCESS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
   document.getElementById('vtbl-body').innerHTML = rows.map(r=>{
     const rInfo = RAMP[r.sc.rampType];
     const pct = Math.round((r.ann / _totAnnForPct) * 100);
     const monthly = Math.round(r.ann / 12);
     const monthlyY1 = Math.round(r.y1 / 12);
     const shortName = r.sc.name.length>30 ? r.sc.name.substring(0,28)+'…' : r.sc.name;
-    const cfg = r.cfg || { profile:'behavior', access:'configured', h:0 };
-    const profSel = nrvOn
-      ? _profOpts.replace(`value="${cfg.profile}"`,`value="${cfg.profile}" selected`)
-      : _profOpts;
-    const accSel  = nrvOn
-      ? _accOpts.replace(`value="${cfg.access}"`,`value="${cfg.access}" selected`)
-      : _accOpts;
-    const decayCtl = nrvOn
-      ? `<div class="nrv-mini" onclick="event.stopPropagation()">
-          <span class="nrv-mini-lbl">profile</span>
-          <select onchange="nrvSet('${r.sc.id}','profile',this.value)">${profSel}</select>
-          <span class="nrv-mini-lbl">tier</span>
-          <select onchange="nrvSet('${r.sc.id}','access',this.value)">${accSel}</select>
-          <span class="nrv-mini-lbl">h</span>
-          <input type="number" min="0" max="0.95" step="0.05" value="${cfg.h}" onchange="nrvSet('${r.sc.id}','h',this.value)">
-        </div>`
-      : '';
     return `
     <tr class="sc-data-row" onclick="toggleScExpand('${r.sc.id}')">
       <td style="max-width:220px"><div style="font-size:12px;font-weight:600;color:var(--brand-black);line-height:1.4">${shortName}</div><div style="font-family:var(--mono);font-size:9px;color:var(--muted)">${r.sc.id}</div></td>
@@ -4677,7 +5377,7 @@ function renderROI() {
       <td class="r mono" style="color:var(--gray-700)">${fmt(Math.round(r.y3))}</td>
       <td class="r mono" style="color:var(--gray-700)">${fmt(Math.round(r.y4))}</td>
       <td class="r mono" style="color:var(--gray-700)">${fmt(Math.round(r.y5))}</td>
-      <td><span class="ramp-tag" style="background:${rampColors[r.sc.rampType]?.bg||'#f0f0f0'};color:${rampColors[r.sc.rampType]?.fg||'#555'}">${rInfo.label}</span>${decayCtl}</td>
+      <td><span class="ramp-tag" style="background:${rampColors[r.sc.rampType]?.bg||'#f0f0f0'};color:${rampColors[r.sc.rampType]?.fg||'#555'}">${rInfo.label}</span></td>
     </tr>
     <tr class="sc-expand-panel" id="scexp-${r.sc.id}">
       <td colspan="8" style="padding:0!important;border-bottom:2px solid var(--gray-200)">
@@ -4736,52 +5436,41 @@ function renderROI() {
 function syncDelay() {
   const months = +sliderVal('sl-delay');
   const svEl = document.getElementById('sv-delay');
-  if(svEl) svEl.textContent = months+' mo';
-  // Ensure benefits are calculated
-  if(!state.benefits || !state.benefits.totAnnual) {
-    ensureCosts();
-    const active = SCENARIOS.filter(s=>state.selectedIds.has(s.id));
-    let totAnnual=0, totY1=0, totY2=0, totY3=0;
-    const rows = active.map(sc => {
-      const ann = Math.max(0, calcSc(sc));
-      const r = RAMP[sc.rampType];
-      const y1=ann*r.y1, y2=ann*r.y2, y3=ann*r.y3;
-      totAnnual+=ann; totY1+=y1; totY2+=y2; totY3+=y3;
-      return {sc, ann, y1, y2, y3};
-    });
-    state.benefits = {totAnnual, totY1, totY2, totY3, rows};
-  }
-  const b = state.benefits;
-  const monthly = b.totY1>0 ? Math.round(b.totY1/12) : Math.round((b.totAnnual||0)*0.50/12);
-  const delayed = monthly*months;
+  if (svEl) svEl.textContent = months + ' mo';
 
-  // Delay output card
+  if (!state.nrvResult) { ensureCosts(); renderROI(); return; }
+  const r = state.nrvResult;
+  const b = state.benefits;
+
+  const monthly = Math.round(r.yearlyData[0].netBenefit / 12);
+  const delayed = monthly * months;
+
   const el = document.getElementById('delay-output');
-  if(el) el.innerHTML = `
+  if (el) el.innerHTML = `
     <div style="text-align:center;padding:12px;background:rgba(235,87,87,.07);border-radius:8px;border:1px solid rgba(235,87,87,.2)">
       <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">VALUE FOREGONE — ${months} MONTH DELAY</div>
       <div style="font-family:var(--head);font-size:28px;font-weight:800;color:var(--red)">${fmt(delayed)}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">${fmt(monthly)}/mo at Year 1 ramp</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${fmt(monthly)}/mo at Year 1 NRV ramp</div>
     </div>`;
 
-  // Cost of Doing Nothing — summary total + per-scenario items
   const missed = document.getElementById('missed-items');
-  if(missed && b.rows) {
-    const totalMissed = b.rows.reduce((sum, r) => {
-      return sum + Math.round(r.ann * (RAMP[r.sc.rampType]?.y1||0.5) / 12) * months;
+  if (missed && b && b.rows) {
+    const totalMissed = b.rows.reduce((sum, row) => {
+      return sum + Math.round(row.y1 / 12) * months;
     }, 0);
-    const summaryHeader = `<div style="text-align:center;padding:12px;background:rgba(235,87,87,.07);border-radius:8px;border:1px solid rgba(235,87,87,.2);margin-bottom:10px">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">TOTAL VALUE LOST — ${months} MONTH DELAY</div>
-      <div style="font-family:var(--head);font-size:28px;font-weight:800;color:var(--red)">-${fmt(totalMissed)}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">across ${b.rows.length} scenario${b.rows.length!==1?'s':''}</div>
-    </div>`;
-    const rows = b.rows.map(r => {
-      const monthlyLoss = Math.round(r.ann * (RAMP[r.sc.rampType]?.y1||0.5) / 12);
+    const summaryHeader = `
+      <div style="text-align:center;padding:12px;background:rgba(235,87,87,.07);border-radius:8px;border:1px solid rgba(235,87,87,.2);margin-bottom:10px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">TOTAL VALUE LOST — ${months} MONTH DELAY</div>
+        <div style="font-family:var(--head);font-size:28px;font-weight:800;color:var(--red)">-${fmt(totalMissed)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">across ${b.rows.length} scenario${b.rows.length !== 1 ? 's' : ''}</div>
+      </div>`;
+    const rows = b.rows.map(row => {
+      const monthlyLoss = Math.round(row.y1 / 12);
       const totalLoss = monthlyLoss * months;
-      const pct = totalMissed>0 ? Math.round((totalLoss/totalMissed)*100) : 0;
+      const pct = totalMissed > 0 ? Math.round((totalLoss / totalMissed) * 100) : 0;
       return `<div class="missed-item" style="flex-direction:column;align-items:flex-start;gap:3px;padding:8px 12px">
         <div style="display:flex;justify-content:space-between;width:100%">
-          <div class="mi-label" style="font-size:11px">${r.sc.id} — ${r.sc.name.length>24?r.sc.name.substring(0,22)+'…':r.sc.name}</div>
+          <div class="mi-label" style="font-size:11px">${row.sc.id} — ${row.sc.name.length > 24 ? row.sc.name.substring(0,22) + '…' : row.sc.name}</div>
           <div class="mi-val" style="font-size:11px;color:var(--red)">-${fmt(totalLoss)}</div>
         </div>
         <div style="width:100%;height:3px;background:rgba(235,87,87,.15);border-radius:2px">
@@ -4824,30 +5513,21 @@ function renderExec() {
   const totY1 = state.benefits.totY1||0;
   const totY2 = state.benefits.totY2||0;
   const totY3 = state.benefits.totY3||0;
-  const payback = c.yr0>0&&totAnnual>0 ? Math.round(c.yr0/(totAnnual/12)) : '—';
-  // NRV-aware NPV from the same cashflow renderROI built
-  const wacc = +(document.getElementById('nrv-wacc')?.value ?? 0.10);
-  const ncf  = state.benefits.ncf;
-  let npv5;
-  if (Array.isArray(ncf) && ncf.length === 6) {
-    let _n = 0; ncf.forEach((v,t)=>{ _n += v/Math.pow(1+wacc,t); }); npv5 = Math.round(_n);
-  } else {
-    const yr1net = totY1-(c.yr1||0);
-    const yr2net = totY2-(c.yr2||0);
-    const yr3net = totY3-(c.yr2||0);
-    npv5 = Math.round((yr1net/1.1)+(yr2net/1.21)+(yr3net/1.331)+(yr3net/1.464)+(yr3net/1.611));
-  }
+  const nrvRes = state.nrvResult;
+  const npv5   = nrvRes ? nrvRes.nrv   : (c.yr0 > 0 ? Math.round(((totY1-(c.yr1||0))/1.1)+((totY2-(c.yr2||0))/1.21)+((totY3-(c.yr2||0))/1.331)+((totY3-(c.yr2||0))/1.464)+((totY3-(c.yr2||0))/1.611)) : 0);
+  const roi5   = nrvRes ? nrvRes.roi5  : 0;
+  const paybackMo = nrvRes ? nrvRes.paybackMo : (c.yr0>0&&totAnnual>0 ? Math.round(c.yr0/(totAnnual/12)) : null);
+  const payback = paybackMo !== null ? paybackMo : '—';
 
   document.getElementById('exec-heading').textContent = title + ' — ' + co;
   document.getElementById('exec-sub').textContent = `Prepared by ${seller} · Parties & Partners: ${partners} · Discovery KPIs: ${document.getElementById('i-pain')?.value||'—'}`;
   const dateDisplay = document.getElementById('exec-date-display');
   if(dateDisplay) dateDisplay.textContent = new Date().toLocaleDateString();
-  const roi3pct = c.yr0>0 ? Math.round(((totY1+totY2+totY3-(c.yr0+c.yr1+c.yr2+c.yr2))/(c.yr0+c.yr1+c.yr2+c.yr2))*100) : 0;
   document.getElementById('exec-kpis').innerHTML=`
     <div class="ek"><div class="ek-val">${fmt(totAnnual)}</div><div class="ek-lab">FULL ANNUAL VALUE</div></div>
     <div class="ek"><div class="ek-val">${typeof payback==='number'?payback+' mo':payback}</div><div class="ek-lab">PAYBACK PERIOD</div></div>
-    <div class="ek"><div class="ek-val">${fmt(npv5)}</div><div class="ek-lab">5-YEAR NPV</div></div>
-    <div class="ek"><div class="ek-val">${roi3pct}%</div><div class="ek-lab">3-YEAR NET ROI</div></div>`;
+    <div class="ek"><div class="ek-val">${fmt(npv5)}</div><div class="ek-lab">NRV (5-YEAR NPV)</div></div>
+    <div class="ek"><div class="ek-val">${roi5}%</div><div class="ek-lab">5-YEAR NET ROI</div></div>`;
 
   const active = SCENARIOS.filter(s=>state.selectedIds.has(s.id));
   const hardRows = (b.rows||[]).filter(r=>['hard_labor','hard_cost'].includes(r.sc?.rampType));
@@ -4866,7 +5546,7 @@ function renderExec() {
   const hardY1N    = hardRowsN.reduce((a,r)=>a+(r.y1||0),0);
   const revY1N     = revRowsN.reduce((a,r)=>a+(r.y1||0),0);
   // Payback context
-  const pbText = typeof payback==='number' ? `<strong>${payback} months</strong>` : '&#8212;';
+  const pbText = typeof payback==='number' ? `<strong>${payback} months</strong>` : (paybackMo !== null ? `<strong>${paybackMo} months</strong>` : '&#8212;');
   // Ramp methodology sentence — only list types actually present
   const rampLines = [];
   if(hardRowsN.length) rampLines.push(`Hard Labor &amp; Cost scenarios at <strong>50% Year 1 &#8594; 100% Year 3</strong>`);
@@ -4878,7 +5558,7 @@ function renderExec() {
   // Hard case % of total
   const hardPct = totAnnual>0 ? Math.round((hardAnn/totAnnual)*100) : 0;
   document.getElementById('exec-narrative').innerHTML=`
-    <p>Based on analysis of <strong>${co}</strong>'s operations, deploying Zebra RFID Technology delivers <strong>${fmt(totAnnual)} in full annual value</strong> across ${active.length} quantified scenarios. The investment pays back in ${pbText}, with a <strong>3-year net ROI of ${roi3pct}%</strong> and a <strong>5-year NPV of ${fmt(npv5)}</strong>.</p>
+    <p>Based on analysis of <strong>${co}</strong>'s operations, deploying Zebra RFID Technology delivers <strong>${fmt(totAnnual)} in full annual value</strong> across ${active.length} quantified scenarios. The investment pays back in ${pbText}, with a <strong>5-year net ROI of ${roi5}%</strong> and a <strong>NRV (5-year NPV) of ${fmt(npv5)}</strong>.</p>
     <p>${rampSentence}These curves are grounded in GS1 US deployment guidance and peer-reviewed adoption data from the Auburn RFID Lab, ensuring the model is conservative and defensible at the finance level.</p>
     <p>The Year 1 business case is anchored in Hard Labor and Hard Cost scenarios, which require no demand-side assumptions and are credited at 100% by finance teams. ${hardRowsN.length>0?`These ${hardRowsN.length} scenario${hardRowsN.length>1?'s':''} represent <strong>${hardPct}% of total annual value</strong> and deliver <strong>${fmt(hardY1N)} in Year 1</strong> &#8212; the floor of the financial case.`:''} ${revRowsN.length>0?`Revenue uplift scenarios contribute an additional <strong>${fmt(revAnn)}</strong> at full realization (Year 3), modeled conservatively at ${fmt(revY1N)} in Year 1 (30% ramp) and presented as validated upside, not the anchor.`:''}</p>
     <p>Total Yr 0 investment: <strong>${fmt(c.yr0)}</strong> one-time; <strong>${fmt(c.yr1)}</strong> Yr 1 ongoing; <strong>${fmt(c.yr2)}</strong>/yr from Yr 2. All quantified values reference Tier 1&#8211;3 evidence published by Auburn University RFID Lab, GS1 US, the National Retail Federation, ECR Retail Loss, and Zebra Technologies / VDC Research. Evidence identifiers are cited inline for each scenario.</p>`;
@@ -5090,7 +5770,7 @@ function exportExecSummary() {
     +'<style>'+popCSS+'</style>'
     +'</head><body>'
     +'<div class="cover-bar"></div>'
-    +'<div style="font-size:8pt;color:#999;font-family:Courier New;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Executive Summary · Zebra RFID Value Accelerator</div>'
+    +'<div style="font-size:8pt;color:#999;font-family:Courier New;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Executive Summary · Zebra Value Accelerator</div>'
     +'<div style="font-size:20pt;font-weight:700;margin-bottom:2px">'+title+' — '+co+'</div>'
     +'<div style="font-size:9pt;color:#757575;margin-bottom:16px">'+new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})+'</div>'
     +'<hr>'
@@ -5123,11 +5803,12 @@ function exportFullPDF() {
   const paybackMo = moAvg>0 && yr0>0 ? yr0/moAvg : null;
   const ben3yr = totY1+totY2+totY3;
   const investTot = yr0+yr1+yr2*2;
-  const roi3 = investTot>0 ? Math.round(((ben3yr-investTot)/investTot)*100) : 0;
+  const _nrvRes = state.nrvResult;
+  const roi3 = _nrvRes ? _nrvRes.roi5 : (investTot>0 ? Math.round(((ben3yr-investTot)/investTot)*100) : 0);
   const invRatio = yr0>0 ? (ben3yr/yr0).toFixed(2) : '—';
   const yr0net=-(yr0), yr1net=totY1-yr1, yr2net=totY2-yr2, yr3net=totY3-yr2;
-  const npv5 = Math.round((yr1net/1.1)+(yr2net/1.21)+(yr3net/1.331)+(yr3net/1.464)+(yr3net/1.611));
-  const irrVal = estimateIRR([yr0net,yr1net,yr2net,yr3net,yr3net]);
+  const npv5 = _nrvRes ? _nrvRes.nrv : Math.round((yr1net/1.1)+(yr2net/1.21)+(yr3net/1.331)+(yr3net/1.464)+(yr3net/1.611));
+  const irrVal = _nrvRes ? calcMIRRDisplay(_nrvRes.mirr) : estimateIRR([yr0net,yr1net,yr2net,yr3net,yr3net]);
 
   // Monthly DCF table (60 months, 5 years)
   const discRateMo = Math.pow(1.10,1/12)-1;
@@ -5445,7 +6126,7 @@ function exportFullPDF() {
           return '<div class="sc-block">'
             // Header row
             +'<div style="display:grid;grid-template-columns:1fr auto;align-items:start;margin-bottom:6px">'
-            +'<div><h3 style="margin:0 0 1px">'+sc.name+' <span style="font-weight:400;color:#999;font-size:9pt">['+sc.id+']</span></h3>'
+            +'<div><h3 style="margin:0 0 1px">'+sc.name+' <span style="font-weight:400;color:#999;font-size:9pt">['+sc.id+']</span>'+(sc.custom===true?' <span style="font-weight:400;color:#999;font-size:9pt;font-style:italic">(user-generated)</span>':'')+'</h3>'
             +(sc.oneLiner?'<p style="color:#757575;font-size:8.5pt;margin:0;font-style:italic">'+sc.oneLiner+'</p>':'')+'</div>'
             +'<div style="text-align:center;padding-left:10px">'
             +'<div style="font-size:7.5pt;text-transform:uppercase;letter-spacing:.5px;color:#999;font-family:Courier New;margin-bottom:2px">Share of Total</div>'
@@ -5529,7 +6210,7 @@ function exportFullPDF() {
   // ── Assemble full document ───────────────────────────────────────────────
   const html = `<!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
-    <title>${co} — RFID Investment Appraisal</title>
+    <title>${co} — Zebra Value Accelerator · Investment Appraisal</title>
     <style>${CSS}</style>
   </head><body>
 
@@ -5549,7 +6230,7 @@ function exportFullPDF() {
     <div class="cover pb">
       <div class="cover-hero">
         <div class="cover-stripe"></div>
-        <div class="cover-tag">RFID Investment Appraisal · Confidential</div>
+        <div class="cover-tag">Zebra Value Accelerator · Investment Appraisal · Confidential</div>
         <div class="cover-title">Investment Appraisal<br>for ${co}</div>
         <div class="cover-sub">${titleS}</div>
         <div class="cover-meta">
@@ -5561,20 +6242,24 @@ function exportFullPDF() {
         <!-- KPI strip -->
         <div class="cover-kpi-strip" style="background:#fff">
           <div class="ck" style="background:#1A1A1A">
-            <div class="ck-val" style="color:#A8F931">${F(totAnnual)}</div>
-            <div class="ck-lbl" style="color:rgba(255,255,255,.5)">Full Annual Value</div>
+            <div class="ck-val" style="color:#A8F931">${state.nrvResult ? F(Math.round(state.nrvResult.peakAnnual)) : F(totAnnual)}</div>
+            <div class="ck-lbl" style="color:rgba(255,255,255,.5)">Peak Annual Value (Y3)</div>
           </div>
           <div class="ck">
-            <div class="ck-val">${pb}</div>
+            <div class="ck-val">${state.nrvResult && state.nrvResult.paybackMo ? state.nrvResult.paybackMo + ' mo' : pb}</div>
             <div class="ck-lbl">Payback Period</div>
           </div>
           <div class="ck">
-            <div class="ck-val">${F(npv5)}</div>
-            <div class="ck-lbl">5-Year NPV</div>
+            <div class="ck-val">${state.nrvResult ? F(state.nrvResult.nrv) : F(npv5)}</div>
+            <div class="ck-lbl">NRV (5-Yr NPV)</div>
           </div>
           <div class="ck">
-            <div class="ck-val">${roi3}%</div>
-            <div class="ck-lbl">3-Year Net ROI (benefit less cost)</div>
+            <div class="ck-val">${state.nrvResult ? calcMIRRDisplay(state.nrvResult.mirr) : '—'}</div>
+            <div class="ck-lbl">MIRR (replaces IRR)</div>
+          </div>
+          <div class="ck">
+            <div class="ck-val">${state.nrvResult ? state.nrvResult.roi5 + '%' : roi3 + '%'}</div>
+            <div class="ck-lbl">5-Year Net ROI</div>
           </div>
         </div>
         <!-- Scenario pills -->
@@ -5598,11 +6283,11 @@ function exportFullPDF() {
     ${seller&&seller!=='—'?`<p>This appraisal has been prepared by <b>${seller}</b> in collaboration with ${partners}. It should be cross-referred to the sales proposal submitted separately.</p>`:''}
     <p>The following appraisal methods have been used:</p>
 
-    <h2>Net Present Value</h2>
-    <p>A financial measure of whether a proposal delivers a "profit" or a "loss" using an annual cost of money applied to the timing of spend and savings. It includes the initial cost of the equipment and services, the monthly cost of maintenance, compared to the financial benefits accruing. The result is the change in shareholder value to be anticipated from project acceptance.</p>
+    <h2>Net Realization Value (NRV) — 5-Year NPV</h2>
+    <p>The headline financial measure used throughout this appraisal. NRV is the net present value of all projected benefits across 5 years, after adjustment for: type-specific adoption ramp (Y1–Y5 with post-peak decay), accessibility tier modifier (commodity / configured / infrastructure), covariance haircut (10% default per driver), and Decay Avoided (cost of the status quo growing at 3.5%/yr). Benefits are discounted at the customer's WACC (10% baseline).</p>
 
-    <h2>Internal Rate of Return (IRR) — Modeled, Illustrative, Pre-Tax</h2>
-    <p>The return rate per year to <b>${co}</b> taking into account: initial cost of the equipment and services, monthly cost of maintenance, and comparing these to the timing of benefits identified as a result of implementing the project.</p>
+    <h2>MIRR — Modified Internal Rate of Return (replaces IRR)</h2>
+    <p>Return metric: MIRR (Modified Internal Rate of Return), not IRR. MIRR uses WACC as the reinvestment rate, producing a more conservative and accurate return estimate for operational technology investments. All benefits are adjusted using the NRV methodology: type-specific ramp profiles (Y1–Y5 including post-peak decay), accessibility tier modifiers, covariance haircuts, and Decay Avoided. Sources available on request.</p>
 
     <h2>Payback</h2>
     <p>A comparison of the initial outlay to buy equipment or services, against the time taken for the savings to cover the initial outlay. This derives an answer which is a time measure, usually quoted in months / years.</p>
@@ -5635,6 +6320,47 @@ function exportFullPDF() {
 
     <div class="pb"></div>
 
+    <!-- ── NRV WALK-DOWN ── -->
+    <h1>NRV Walk-Down — Per-Driver Decomposition (Y3 Peak)</h1><hr class="rule-heavy">
+    <p>The walk-down below shows, for each scenario, how the gross annual benefit is adjusted through the NRV methodology to arrive at the discounted final value. Columns: gross annual → after adoption ramp (Y3) → after accessibility tier A(t) → after covariance haircut.</p>
+    ${(() => {
+      const r = state.nrvResult;
+      if (!r) return '<p style="color:#999;font-style:italic">NRV walk-down unavailable — model has not been computed.</p>';
+      const peakT = 2;
+      const wkRows = active.map(sc => {
+        const ann = Math.max(0, calcSc(sc));
+        const h = (sc.haircut !== undefined) ? sc.haircut : 0.10;
+        const tier = sc.accessibilityTier || 'configured';
+        const ramp = RAMP[sc.rampType].y[peakT];
+        const access = ACCESS_TIER[tier][peakT];
+        const afterRamp = ann * ramp;
+        const afterAccess = afterRamp * access;
+        const afterHaircut = afterAccess * (1 - h);
+        const isCustom = sc.custom === true;
+        return `<tr${isCustom ? ' style="font-style:italic;color:#555"' : ''}>
+          <td>${sc.id}${isCustom ? ' <span style="color:#999">(user-generated)</span>' : ''} — ${sc.name}</td>
+          <td class="r">${F(Math.round(ann))}</td>
+          <td class="r">${F(Math.round(afterRamp))}</td>
+          <td class="r">${F(Math.round(afterAccess))}</td>
+          <td class="r">${F(Math.round(afterHaircut))}</td>
+          <td class="r" style="font-size:9pt;color:#757575">${tier}</td>
+        </tr>`;
+      }).join('');
+      const decayRow = `<tr style="background:#f7f7f7"><td colspan="4" style="font-style:italic;color:#555">+ Decay Avoided (status-quo growth @ 3.5%/yr)</td><td class="r">${F(Math.round(r.yearlyData[2].decayAvoided))}</td><td></td></tr>`;
+      const tcoRow = `<tr style="background:#f7f7f7"><td colspan="4" style="font-style:italic;color:#555">− Annual TCO (opex + attrition + training)</td><td class="r" style="color:#c8330e">-${F(Math.round(r.totalAnnOpex))}</td><td></td></tr>`;
+      const nrvRow = `<tr class="total-row"><td colspan="4"><b>NRV (5-yr discounted @ 10% WACC)</b></td><td class="r"><b style="color:#3a7a00">${F(r.nrv)}</b></td><td></td></tr>`;
+      return `<table>
+        <thead><tr><th>Scenario</th><th class="r">Gross annual</th><th class="r">After ramp (Y3)</th><th class="r">After A(t)</th><th class="r">After haircut</th><th class="r">Tier</th></tr></thead>
+        <tbody>${wkRows}${decayRow}${tcoRow}${nrvRow}</tbody>
+      </table>`;
+    })()}
+    ${active.some(sc => sc.custom === true) ? `
+      <div style="margin-top:14px;padding:10px 14px;background:#fff8e6;border:1px solid #ffd577;border-left:3px solid #d97706;border-radius:3px;font-size:9.5pt;color:#7a3a05;line-height:1.5">
+        <b>Custom scenario notice:</b> One or more scenarios in this model are user-generated and have not been reviewed or verified by the Zebra Value Engineering team. These scenarios are included for completeness but should be treated as directional estimates pending internal validation.
+      </div>` : ''}
+
+    <div class="pb"></div>
+
     <!-- ── BENEFITS EVALUATION ── -->
     <h1>Benefits Evaluation</h1><hr class="rule-heavy">
     <div class="section-strip">
@@ -5662,8 +6388,8 @@ function exportFullPDF() {
       <div style="font-size:8pt;font-family:Courier New;text-transform:uppercase;letter-spacing:1px;color:#757575;margin-bottom:10px">Investment Ratio</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center">
         <div><div style="font-size:20pt;font-weight:700">$1 : $${invRatio}</div><div style="font-size:8pt;color:#757575;font-family:Courier New;text-transform:uppercase">Return per $1 invested</div></div>
-        <div><div style="font-size:20pt;font-weight:700">${F(npv5)}</div><div style="font-size:8pt;color:#757575;font-family:Courier New;text-transform:uppercase">5-Year NPV</div></div>
-        <div><div style="font-size:20pt;font-weight:700">${roi3}%</div><div style="font-size:8pt;color:#757575;font-family:Courier New;text-transform:uppercase">3-Year Net ROI (benefit less total cost)</div></div>
+        <div><div style="font-size:20pt;font-weight:700">${F(npv5)}</div><div style="font-size:8pt;color:#757575;font-family:Courier New;text-transform:uppercase">NRV (5-Yr)</div></div>
+        <div><div style="font-size:20pt;font-weight:700">${roi3}%</div><div style="font-size:8pt;color:#757575;font-family:Courier New;text-transform:uppercase">5-Year Net ROI</div></div>
       </div>
     </div>
 
@@ -5690,7 +6416,7 @@ function exportFullPDF() {
       <tbody>
         <tr class="total-row"><td><b>Net Benefits</b></td><td class="r"><b>${F(totAnnual-yr0)}</b></td></tr>
         <tr><td><b>Investment Ratio*</b></td><td class="r"><b>$1.00 : $${invRatio}</b></td></tr>
-        <tr><td><b>3-Year ROI</b></td><td class="r"><b>${roi3}%</b></td></tr>
+        <tr><td><b>5-Year ROI</b></td><td class="r"><b>${roi3}%</b></td></tr>
       </tbody>
     </table>
     <p style="font-size:8.5pt;color:#757575;margin-top:6px">*The ratio between the investment cost and the benefit returned. For every $1.00 spent, $${invRatio} is returned.</p>
@@ -5716,15 +6442,15 @@ function exportFullPDF() {
     <div class="pb"></div>
 
     <div style="margin-bottom:16px;max-width:680px">${makeRampSVG(cfPts)}</div>
-    <div class="chart-cap">NPV Cumulative Discounted Cashflow ${F(npv5)}</div>
+    <div class="chart-cap">NRV Cumulative Discounted Cashflow ${F(npv5)}</div>
 
-    <h2 style="margin-top:24px">Internal Rate of Return (IRR) — Modeled, Illustrative, Pre-Tax</h2>
+    <h2 style="margin-top:24px">MIRR (replaces IRR) — Reinvested at WACC</h2>
     <table style="width:60%">
       <tbody>
         <tr><td>Review period (months)</td><td class="r">60</td></tr>
         <tr><td>Non-recurring costs</td><td class="r">${F(yr0)}</td></tr>
         <tr><td>Average monthly benefits</td><td class="r">${F(moAvg)}</td></tr>
-        <tr class="total-row"><td><b>IRR</b></td><td class="r"><b>${irrVal==='N/A'?'N/A':irrVal+'%'}</b></td></tr>
+        <tr class="total-row"><td><b>MIRR</b></td><td class="r"><b>${irrVal==='N/A'?'N/A':irrVal+(typeof irrVal==='string'&&irrVal.indexOf('%')>=0?'':'%')}</b></td></tr>
       </tbody>
     </table>
 
@@ -5759,14 +6485,14 @@ function exportFullPDF() {
       <div class="tile"><div class="tile-val">60 months</div><div class="tile-lbl">Review period</div></div>
       <div class="tile"><div class="tile-val">${F(moAvg)}</div><div class="tile-lbl">Average monthly benefits</div></div>
       <div class="tile"><div class="tile-val">${F(npv5)}</div><div class="tile-lbl">Net Present Value (5-year)</div></div>
-      <div class="tile"><div class="tile-val">${irrVal==='N/A'?'N/A':irrVal+'%'}</div><div class="tile-lbl">Modeled Unlevered IRR (illustrative, pre-tax)</div></div>
+      <div class="tile"><div class="tile-val">${irrVal==='N/A'?'N/A':irrVal+(typeof irrVal==='string'&&irrVal.indexOf('%')>=0?'':'%')}</div><div class="tile-lbl">MIRR — replaces IRR · reinvested at WACC</div></div>
       <div class="tile"><div class="tile-val">${pb}</div><div class="tile-lbl">Payback period</div></div>
-      <div class="tile"><div class="tile-val">${roi3}%</div><div class="tile-lbl">3-Year Net ROI (benefit less total cost, conservative ramps)</div></div>
+      <div class="tile"><div class="tile-val">${roi3}%</div><div class="tile-lbl">5-Year Net ROI · NRV-normalized</div></div>
       <div class="tile"><div class="tile-val">10%</div><div class="tile-lbl">Assumed cost of capital</div></div>
       <div class="tile"><div class="tile-val">$1 : $${invRatio}</div><div class="tile-lbl">Investment ratio</div></div>
     </div>
     <p style="margin-top:16px">The Investment Appraisal outlined above is based upon identified benefits that would accrue to <b>${co}</b> as a result of project acceptance.</p>
-    <p>The investment evaluation has been completed using the Zebra RFID Value Accelerator. The output from this tool is fully visible and can be audited by ${co} if so required.</p>
+    <p>The investment evaluation has been completed using the Zebra Value Accelerator. The output from this tool is fully visible and can be audited by ${co} if so required.</p>
     <p>This indicative analysis stands separately from the contractual elements of the Zebra Technologies solution and is necessarily dependent upon the benefits identified jointly with ${co}.</p>
 
     <div class="disclaimer"><b>Modeling Disclaimer:</b> Financial estimates are illustrative projections generated from benchmark data and the parameters provided. Actual results depend on deployment scope, operational execution, system integration, and market conditions. Zebra Technologies makes no guarantee of specific outcomes. This model supports internal business case development and pre-sale discovery — not a contractual commitment.</div>
@@ -5808,10 +6534,11 @@ async function exportPPTX() {
   const totAnnual= b.totAnnual||0;
   const yr0=c.yr0||0, yr1=c.yr1||0, yr2=c.yr2||0;
   const moAvg = totAnnual/12;
-  const paybackMo = moAvg>0&&yr0>0 ? Math.round(yr0/moAvg) : null;
+  const _popNrv = state.nrvResult;
+  const paybackMo = _popNrv ? _popNrv.paybackMo : (moAvg>0&&yr0>0 ? Math.round(yr0/moAvg) : null);
   const pb = paybackMo ? paybackMo+' months' : '—';
-  const npv5 = Math.round(((b.totY1-(yr1))/(1.1))+((b.totY2-(yr2))/(1.21))+((b.totY3-(yr2))/(1.331))+((b.totY3-(yr2))/(1.464))+((b.totY3-(yr2))/(1.611)));
-  const roi3 = yr0>0 ? Math.round(((b.totY1+b.totY2+b.totY3-(yr0+yr1+yr2*2))/(yr0+yr1+yr2*2))*100) : 0;
+  const npv5 = _popNrv ? _popNrv.nrv : Math.round(((b.totY1-(yr1))/(1.1))+((b.totY2-(yr2))/(1.21))+((b.totY3-(yr2))/(1.331))+((b.totY3-(yr2))/(1.464))+((b.totY3-(yr2))/(1.611)));
+  const roi3 = _popNrv ? _popNrv.roi5 : (yr0>0 ? Math.round(((b.totY1+b.totY2+b.totY3-(yr0+yr1+yr2*2))/(yr0+yr1+yr2*2))*100) : 0);
   const invRatio = yr0>0 ? ((b.totY1+b.totY2+b.totY3)/yr0).toFixed(2) : '—';
   const F = v => v==null?'—':'$'+Math.round(v).toLocaleString();
   const pct = v => Math.round((v||0)*100)+'%';
@@ -5830,7 +6557,7 @@ async function exportPPTX() {
         <div class="slide-num">${num} / ${total}</div>
         ${content}
         <div class="slide-footer" style="color:${dark?'rgba(255,255,255,.3)':'#BDBDBD'}">
-          <span>ZEBRA TECHNOLOGIES · RFID VALUE ACCELERATOR</span>
+          <span>ZEBRA TECHNOLOGIES · ZEBRA VALUE ACCELERATOR</span>
           <span>${co} · ${dateStr}</span>
         </div>
       </div>
@@ -5900,7 +6627,7 @@ async function exportPPTX() {
     <div style="display:grid;grid-template-columns:1fr 280px;gap:32px;height:100%">
       <div style="display:flex;flex-direction:column;justify-content:center">
         <div class="cover-bar"></div>
-        <div class="cover-tag">RFID Investment Appraisal · Confidential</div>
+        <div class="cover-tag">Zebra Value Accelerator · Investment Appraisal · Confidential</div>
         <div class="cover-title">${titleS}</div>
         <div class="cover-co">${co}</div>
         <div class="cover-meta">
@@ -5915,8 +6642,8 @@ async function exportPPTX() {
         <div class="cover-kpi-row" style="grid-template-columns:1fr 1fr">
           <div class="ck"><div class="ck-v">${F(totAnnual)}</div><div class="ck-l">Annual Value</div></div>
           <div class="ck"><div class="ck-v">${pb}</div><div class="ck-l">Payback</div></div>
-          <div class="ck"><div class="ck-v">${F(npv5)}</div><div class="ck-l">5-Yr NPV</div></div>
-          <div class="ck"><div class="ck-v">${roi3}%</div><div class="ck-l">3-Yr ROI</div></div>
+          <div class="ck"><div class="ck-v">${F(npv5)}</div><div class="ck-l">NRV (5-Yr)</div></div>
+          <div class="ck"><div class="ck-v">${roi3}%</div><div class="ck-l">5-Yr ROI</div></div>
         </div>
         <div style="margin-top:8px;border-top:1px solid rgba(255,255,255,.08);padding-top:8px">
           ${active.slice(0,6).map(sc=>`<div style="font-size:7px;font-family:Courier New;color:rgba(255,255,255,.3);padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05)">${sc.id} · ${sc.name}</div>`).join('')}
@@ -5935,8 +6662,8 @@ async function exportPPTX() {
         <div class="kpi4">
           <div class="k4"><div class="k4v" style="color:#1A1A1A">${F(totAnnual)}</div><div class="k4l">Full Annual Value</div></div>
           <div class="k4"><div class="k4v">${pb}</div><div class="k4l">Payback Period</div></div>
-          <div class="k4"><div class="k4v">${F(npv5)}</div><div class="k4l">5-Year NPV</div></div>
-          <div class="k4"><div class="k4v">${roi3}%</div><div class="k4l">3-Year ROI</div></div>
+          <div class="k4"><div class="k4v">${F(npv5)}</div><div class="k4l">NRV (5-Yr)</div></div>
+          <div class="k4"><div class="k4v">${roi3}%</div><div class="k4l">5-Year ROI</div></div>
         </div>
         <div class="slide-sub" style="margin-top:14px">Investment Profile</div>
         <div class="kpi4">
@@ -6119,8 +6846,8 @@ async function exportPPTX() {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
       <div>
         <div class="kpi4" style="grid-template-columns:repeat(2,1fr)">
-          <div class="k4"><div class="k4v">${F(npv5)}</div><div class="k4l">5-Year NPV</div></div>
-          <div class="k4"><div class="k4v">${roi3}%</div><div class="k4l">3-Yr Net ROI</div></div>
+          <div class="k4"><div class="k4v">${F(npv5)}</div><div class="k4l">NRV (5-Yr)</div></div>
+          <div class="k4"><div class="k4v">${roi3}%</div><div class="k4l">5-Yr Net ROI</div></div>
           <div class="k4"><div class="k4v">${pb}</div><div class="k4l">Payback</div></div>
           <div class="k4" style="background:#F0FAE4;border-color:#D4EFA8"><div class="k4v" style="color:#2E7D32">$1:$${invRatio}</div><div class="k4l">Return Ratio</div></div>
         </div>
@@ -6179,7 +6906,7 @@ async function exportPPTX() {
             <div style="font-size:8px"><span style="color:#999">Scenarios:</span> <strong>${active.length}</strong></div>
             <div style="font-size:8px"><span style="color:#999">Annual Value:</span> <strong>${F(totAnnual)}</strong></div>
             <div style="font-size:8px"><span style="color:#999">Payback:</span> <strong>${pb}</strong></div>
-            <div style="font-size:8px"><span style="color:#999">5-Yr NPV:</span> <strong>${F(npv5)}</strong></div>
+            <div style="font-size:8px"><span style="color:#999">NRV (5-Yr):</span> <strong>${F(npv5)}</strong></div>
           </div>
         </div>
       </div>
@@ -6306,14 +7033,15 @@ async function runPPTXDownload(callerBtn) {
     const FN      = BRAND.fonts; // font names
 
     // ── Colors — ALL-DARK PALETTE ──────────────────────────────────────────
-    const payback  = b.totAnnual>0 ? Math.round((c.yr0/(b.totAnnual/12))*10)/10 : 99;
+    const _pptxNrv = state.nrvResult;
+    const payback  = _pptxNrv ? (_pptxNrv.paybackMo || 99) : (b.totAnnual>0 ? Math.round((c.yr0/(b.totAnnual/12))*10)/10 : 99);
     const yr0net   = -(c.yr0||0);
     const yr1net   = (b.totY1||0)-(c.yr1||0);
     const yr2net   = (b.totY2||0)-(c.yr2||0);
     const yr3net   = (b.totAnnual||0)-(c.yr2||0);
-    const npv5     = Math.round((yr1net/1.1)+(yr2net/1.21)+(yr3net/1.331)+(yr3net/1.464)+(yr3net/1.611));
-    const irr      = typeof estimateIRR==='function' ? estimateIRR([yr0net,yr1net,yr2net,yr3net,yr3net]) : '—';
-    const roi3     = c.yr0>0 ? Math.round(((b.totY1+b.totY2+b.totAnnual-(c.yr0+c.yr1+c.yr2+c.yr2))/(c.yr0+c.yr1+c.yr2+c.yr2))*100) : 0;
+    const npv5     = _pptxNrv ? _pptxNrv.nrv : Math.round((yr1net/1.1)+(yr2net/1.21)+(yr3net/1.331)+(yr3net/1.464)+(yr3net/1.611));
+    const irr      = _pptxNrv ? calcMIRRDisplay(_pptxNrv.mirr) : (typeof estimateIRR==='function' ? estimateIRR([yr0net,yr1net,yr2net,yr3net,yr3net]) : '—');
+    const roi3     = _pptxNrv ? _pptxNrv.roi5 : (c.yr0>0 ? Math.round(((b.totY1+b.totY2+b.totAnnual-(c.yr0+c.yr1+c.yr2+c.yr2))/(c.yr0+c.yr1+c.yr2+c.yr2))*100) : 0);
     const bc3      = c.yr2>0 ? (b.totAnnual/c.yr2).toFixed(1)+'x' : '—';
     const groups   = {};
     active.forEach(sc=>{ const k=sc.vertical||sc.theme||'Other'; if(!groups[k]) groups[k]=[]; groups[k].push(sc); });
@@ -6429,7 +7157,7 @@ async function runPPTXDownload(callerBtn) {
     s.addText('Presented by '+partners+'  ·  '+dateStr,{x:0.9,y:5.1,w:11,h:0.26,fontSize:9,color:'555555',fontFace:FN.pptxBody});
     // KPI row — simple, no dark box
     s.addShape(pres.shapes.RECTANGLE,{x:0.9,y:5.9,w:11.5,h:0.02,fill:{color:'333333'},line:{color:'333333',width:0}});
-    [[fmt$(b.totAnnual),'ANNUAL BENEFIT'],[payback+'mo','PAYBACK'],[fmt$(npv5),'5-YR NPV'],[roi3+'%','3-YR ROI']].forEach(([v,l],i)=>{
+    [[fmt$(b.totAnnual),'ANNUAL BENEFIT'],[payback+'mo','PAYBACK'],[fmt$(npv5),'NRV (5-YR)'],[roi3+'%','5-YR ROI']].forEach(([v,l],i)=>{
       const sx=0.9+i*2.88;
       if(i>0) s.addShape(pres.shapes.RECTANGLE,{x:sx,y:5.96,w:0.01,h:1.1,fill:{color:'333333'},line:{color:'333333',width:0}});
       s.addText(v,{x:sx+0.12,y:5.96,w:2.7,h:0.62,fontSize:22,color:Z.GREEN,fontFace:FN.pptxHead,bold:true,align:'center',autoFit:true});
@@ -6476,13 +7204,14 @@ async function runPPTXDownload(callerBtn) {
     const kW=2.0, kH=1.38, kGap=0.13;
     const kX0=0.5;
     const roi5 = c.yr0>0 ? Math.round(((b.totY1+b.totY2+b.totAnnual+b.totAnnual+b.totAnnual-(c.yr0+c.yr1+c.yr2*4))/(c.yr0+c.yr1+c.yr2*4))*100) : 0;
+    const _pptxR = state.nrvResult;
     [
-      [fmt$(b.totAnnual),'ANNUAL BENEFIT','yr 3 steady state',Z.GREEN],
-      [payback+'mo',     'PAYBACK',       'months to recover yr 0',Z.INK],
-      [fmt$(npv5),       '5-YEAR NPV',    'at 10% discount rate',Z.TEAL],
-      [irr+'%',          'IRR',           'unlevered pre-tax',Z.BLUE],
-      [roi3+'%',         '3-YEAR ROI',    'net return on investment',Z.AMBER],
-      [roi5+'%',         '5-YEAR ROI',    'net return on investment',Z.BLUE],
+      [_pptxR ? fmt$(Math.round(_pptxR.peakAnnual)) : fmt$(b.totAnnual), 'PEAK ANNUAL NRV', 'Year 3 · decay-adjusted',Z.GREEN],
+      [_pptxR && _pptxR.paybackMo ? _pptxR.paybackMo+'mo' : payback+'mo', 'PAYBACK', 'discounted at 10% WACC',Z.INK],
+      [_pptxR ? fmt$(_pptxR.nrv) : fmt$(npv5), 'NRV (5-YR)', '5-yr NPV · 10% WACC',Z.TEAL],
+      [_pptxR ? calcMIRRDisplay(_pptxR.mirr) : irr+'%', 'MIRR', 'replaces IRR · reinvested at WACC',Z.BLUE],
+      [_pptxR ? _pptxR.roi5+'%' : roi3+'%', '5-YEAR ROI', 'NRV-normalized · decay applied',Z.AMBER],
+      [_pptxR && _pptxR.bcr ? _pptxR.bcr.toFixed(1)+'x' : '—', 'B:C RATIO', '5-yr benefit ÷ total cost',Z.BLUE],
     ].forEach(([v,l,sub,ac],i)=>mTile(s,kX0+i*(kW+kGap),1.1,kW,kH,l,v,sub,ac));
 
     // ── ROW 2 LEFT: Project summary panel ───────────────────────────────
@@ -6696,7 +7425,7 @@ async function runPPTXDownload(callerBtn) {
       const row=b.rows?.find(r=>r.sc.id===sc.id);
       const ann=row?.ann||sc.annualBenefit;
       const rt=RAMP[sc.rampType]||RAMP.hard_labor;
-      const y1=ann*rt.y1,y2=ann*rt.y2,y3=ann*rt.y3;
+      const y1=ann*rt.y[0],y2=ann*rt.y[1],y3=ann*rt.y[2];
       const rAc='#'+(rampAcMap[sc.rampType]||'374151');
 
       s=pres.addSlide(); s.background={color:Z.BG};
@@ -6735,11 +7464,11 @@ async function runPPTXDownload(callerBtn) {
         s.addShape(pres.shapes.RECTANGLE,{x:9.4,y:ty,w:3.5,h:0.76,fill:{color:i===2?'1A2E0A':'111111'},line:{color:'2A2A2A',width:0}});
         s.addText(lbl,{x:9.6,y:ty+0.06,w:3.1,h:0.18,fontSize:6.5,color:i===2?Z.GREEN:'888888',fontFace:FN.pptxMono,charSpacing:1});
         s.addText(fmt$(v),{x:9.6,y:ty+0.26,w:3.1,h:0.4,fontSize:17,color:i===2?Z.GREEN:Z.WHITE,fontFace:FN.pptxMono,bold:i===2,autoFit:true});
-        const rp=i===0?rt.y1:i===1?rt.y2:rt.y3;
+        const rp=i===0?rt.y[0]:i===1?rt.y[1]:rt.y[2];
         s.addShape(pres.shapes.RECTANGLE,{x:9.48,y:ty+0.68,w:3.34,h:0.05,fill:{color:'222222'},line:{color:'222222',width:0}});
         s.addShape(pres.shapes.RECTANGLE,{x:9.48,y:ty+0.68,w:3.34*rp,h:0.05,fill:{color:Z.GREEN,transparency:i===2?0:40},line:{color:Z.GREEN,width:0}});
       });
-      s.addText(Math.round(rt.y1*100)+'% · '+Math.round(rt.y2*100)+'% · '+Math.round(rt.y3*100)+'%  (YR1 · YR2 · YR3)',
+      s.addText(Math.round(rt.y[0]*100)+'% · '+Math.round(rt.y[1]*100)+'% · '+Math.round(rt.y[2]*100)+'%  (YR1 · YR2 · YR3)',
         {x:9.6,y:4.76,w:3.1,h:0.2,fontSize:7,color:'555555',fontFace:FN.pptxMono,align:'center'});
 
       addFooter(s,sc.id+' · '+sc.name.substring(0,40));
@@ -6767,7 +7496,8 @@ async function runPPTXDownload(callerBtn) {
       const ry=1.44+i*0.38,bg=i%2===0?Z.CARD:Z.BG;
       const rAc='#'+(rampAcMap[sc.rampType]||'374151');
       scx=sumXOff;
-      [sc.name,'',fmt$(ann*rt.y1),fmt$(ann*rt.y2),fmt$(ann*rt.y3),fmt$(ann)].forEach((v,j)=>{
+      const _scName = sc.custom === true ? sc.name + ' *' : sc.name;
+      [_scName,'',fmt$(ann*rt.y[0]),fmt$(ann*rt.y[1]),fmt$(ann*rt.y[2]),fmt$(ann)].forEach((v,j)=>{
         s.addShape(pres.shapes.RECTANGLE,{x:scx,y:ry,w:sumCols[j].w,h:0.34,fill:{color:bg},line:{color:Z.BORDER,width:0.5}});
         if(j===1){
           s.addShape(pres.shapes.RECTANGLE,{x:scx+0.06,y:ry+0.05,w:sumCols[1].w-0.12,h:0.22,fill:{color:Z.BG},line:{color:rAc,width:0.5}});
@@ -6785,6 +7515,11 @@ async function runPPTXDownload(callerBtn) {
       if(v) s.addText(v,{x:scx+0.06,y:totY+0.08,w:sumCols[j].w-0.12,h:0.28,fontSize:j===0?9.5:8.5,color:j>=2?Z.GREEN:Z.WHITE,fontFace:FN.pptxMono,bold:true,align:j>=2?'right':'left'});
       scx+=sumCols[j].w+0.04;
     });
+    const _hasCustomActive = active.some(sc=>sc.custom===true);
+    if (_hasCustomActive) {
+      s.addText('* User-generated scenario — not verified by Zebra Value Engineering team',
+        {x:0.5, y:7.05, w:12.33, h:0.22, fontSize:8, color:Z.MUTED||Z.BODY, fontFace:FN.pptxMono, italic:true});
+    }
     addFooter(s,co+' — Scenario Summary');
 
     // ══════════════════════════════════════════════════════════════════════
@@ -6823,8 +7558,8 @@ async function runPPTXDownload(callerBtn) {
     // RAMP METHODOLOGY
     s=pres.addSlide(); s.background={color:Z.BG};
     hdr(s,'METHODOLOGY','Benefit Realization Framework',co); addLogo(s);
-    s.addText('Adoption curves calibrated to operational change velocity — GS1 US and Auburn University RFID Lab guidance.',
-      {x:0.5,y:1.08,w:12.4,h:0.24,fontSize:9,color:Z.MUTED,fontFace:FN.pptxBody});
+    s.addText('NRV Methodology: Benefits adjusted for adoption ramp (Y1–Y5 with post-peak decay), accessibility tier (commodity/configured/infrastructure), covariance haircut (10% default), and Decay Avoided (3.5%/yr baseline growth). MIRR used as return metric — reinvests at WACC. 5-year model, 10% discount rate. Sources: Auburn RFID Lab, GS1 US, ECR Retail Loss Group, McKinsey Retail Operations.',
+      {x:0.5,y:1.08,w:12.4,h:0.42,fontSize:8.5,color:Z.MUTED,fontFace:FN.pptxBody,autoFit:true});
     [{key:'hard_labor',label:'Hard Labor',rates:'50 → 85 → 100%',rationale:'Direct labor hours freed at go-live. Process change lag only — not technical risk.',ac:'0F766E'},
      {key:'hard_cost',label:'Hard Cost',rates:'50 → 85 → 100%',rationale:'Direct P&L cost avoidance confirmed through audits.',ac:'065F46'},
      {key:'revenue',label:'Revenue Uplift',rates:'30 → 70 → 100%',rationale:'Demand-side variability requires integration ramp. Lead as upside.',ac:'1D4ED8'},
@@ -6845,14 +7580,14 @@ async function runPPTXDownload(callerBtn) {
     // BASIS OF PREPARATION
     s=pres.addSlide(); s.background={color:Z.BG};
     hdr(s,'BASIS OF PREPARATION','Model Inputs & Methods',co); addLogo(s);
-    [['Discount Rate','10% per annum (cost of capital assumption)'],
-     ['Horizon','60 months (5 years)'],
-     ['NPV Method','Discounted cash flow — benefits net of investment'],
-     ['IRR','Unlevered, pre-tax, illustrative model output'],
-     ['ROI Framing','3-year net ROI: cumulative benefit less total cost'],
-     ['Benefit Ramps','Hard labor/cost: 3–12 month ramp. Revenue: 6–18 month ramp. Working capital: 6–12 month ramp.'],
+    [['Discount Rate','10% WACC per annum (cost of capital assumption)'],
+     ['Horizon','60 months (5 years) · NRV method'],
+     ['NRV Method','Discounted cash flow with adoption ramp, accessibility tier, covariance haircut, and Decay Avoided'],
+     ['MIRR (not IRR)','Reinvests positive flows at WACC — more conservative and accurate for operational technology investments'],
+     ['ROI Framing','5-year net ROI: cumulative NRV benefit less total cost'],
+     ['Benefit Ramps','Type-specific Y1–Y5 curves with post-peak decay (hard_labor, hard_cost, revenue, soft, working_cap, strategic)'],
      ['Scenarios',''+active.length+' scenarios across '+Object.keys(groups).length+' value theme(s)'],
-     ['Inputs','Benchmark defaults from published studies; replace with customer data where available'],
+     ['Inputs','Benchmark defaults from Auburn RFID Lab, GS1 US, ECR Retail Loss Group; replace with customer data where available'],
     ].forEach((row,i)=>{
       const ry=1.18+i*0.46,bg=i%2===0?Z.CARD:Z.BG;
       s.addShape(pres.shapes.RECTANGLE,{x:0.5,y:ry,w:5.5,h:0.4,fill:{color:bg},line:{color:Z.BORDER,width:0.5}});
@@ -6924,10 +7659,10 @@ async function runPPTXDownload(callerBtn) {
     s.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:13.33,h:0.04,fill:{color:Z.GREEN},line:{color:Z.GREEN,width:0}});
     s.addShape(pres.shapes.RECTANGLE,{x:0,y:7.46,w:13.33,h:0.04,fill:{color:Z.GREEN},line:{color:Z.GREEN,width:0}});
     s.addImage({data:PPTX_LOGO_DARK_BG,x:10.5,y:0.1,w:2.6,h:0.8});
-    s.addText('ZEBRA TECHNOLOGIES  ·  RFID VALUE CASE',{x:1.0,y:1.1,w:10.5,h:0.28,fontSize:9,color:Z.GREEN,fontFace:FN.pptxMono,charSpacing:5,bold:true});
+    s.addText('ZEBRA TECHNOLOGIES  ·  ZEBRA VALUE ACCELERATOR',{x:1.0,y:1.1,w:10.5,h:0.28,fontSize:9,color:Z.GREEN,fontFace:FN.pptxMono,charSpacing:5,bold:true});
     s.addText('Thank You.',{x:1.0,y:1.52,w:8.5,h:2.2,fontSize:72,color:Z.WHITE,fontFace:FN.pptxHead,bold:true,autoFit:true});
     s.addText("Questions, next steps, or a live walk-through — we're ready.",{x:1.0,y:3.86,w:8.5,h:0.38,fontSize:12,color:"888888",fontFace:FN.pptxBody});
-    [[fmt$(b.totAnnual),'Annual Benefit'],[active.length+' Scenarios','Quantified'],[payback+'mo','Payback'],[fmt$(npv5),'5-Yr NPV']].forEach(([v,l],i)=>{
+    [[fmt$(b.totAnnual),'Annual Benefit'],[active.length+' Scenarios','Quantified'],[payback+'mo','Payback'],[fmt$(npv5),'NRV (5-Yr)']].forEach(([v,l],i)=>{
       const sx=1.0+i*2.88;
       if(i>0) s.addShape(pres.shapes.RECTANGLE,{x:sx,y:4.86,w:0.015,h:0.7,fill:{color:'333333'},line:{color:'333333',width:0}});
       s.addText(v,{x:sx+0.1,y:4.84,w:2.7,h:0.32,fontSize:12,color:Z.GREEN,fontFace:FN.pptxHead,bold:true,align:'center',autoFit:true});
@@ -7069,16 +7804,19 @@ function exportLLMPrompt() {
 
     const fmt  = v => v == null ? '—' : '$' + Math.round(v).toLocaleString();
     const pct  = v => Math.round((v||0)*100) + '%';
+    const _aiNrv = state.nrvResult;
+    const r = _aiNrv;
+    const hasCustom = (state.customScenarios||[]).some(s=>s.active);
     const moAvg = (b.totAnnual||0)/12;
-    const paybackMo = moAvg>0 && (c.yr0||0)>0 ? Math.round((c.yr0||0)/moAvg) : null;
-    const npv5 = Math.round(
+    const paybackMo = _aiNrv ? _aiNrv.paybackMo : (moAvg>0 && (c.yr0||0)>0 ? Math.round((c.yr0||0)/moAvg) : null);
+    const npv5 = _aiNrv ? _aiNrv.nrv : Math.round(
       ((b.totY1-(c.yr1||0))/1.1) + ((b.totY2-(c.yr2||0))/1.21) +
       ((b.totY3-(c.yr2||0))/1.331) + ((b.totY3-(c.yr2||0))/1.464) +
       ((b.totY3-(c.yr2||0))/1.611)
     );
-    const roi3 = (c.yr0||0)>0
+    const roi3 = _aiNrv ? _aiNrv.roi5 : ((c.yr0||0)>0
       ? Math.round(((b.totY1+b.totY2+b.totY3 - (c.yr0+c.yr1+(c.yr2||0)*2)) / (c.yr0+c.yr1+(c.yr2||0)*2))*100)
-      : 0;
+      : 0);
 
     // Evidence used across active scenarios
     const usedEvidenceIds = [...new Set(active.flatMap(s => s.evidenceIds||[]))];
@@ -7128,29 +7866,14 @@ Evidence IDs: ${evIds||'—'}`;
     }).join('\n');
 
     // Modeling methodology note
-    const methodNote = `MODELING METHODOLOGY
-────────────────────
-• Ramp Types:
-    hard_labor    — Year 1: 50%, Year 2: 85%, Year 3: 100%
-    hard_cost     — Year 1: 50%, Year 2: 85%, Year 3: 100%
-    revenue       — Year 1: 30%, Year 2: 65%, Year 3: 100%
-    working_cap   — Year 1: 40%, Year 2: 75%, Year 3: 100%
-    soft          — Year 1: 20%, Year 2: 55%, Year 3: 85%
-
-• Financial model assumptions:
-    – Cost of capital (discount rate): 10% per annum
-    – NPV calculated over 5 years (Years 1–5); Years 4–5 carry Year 3 steady-state benefits
-    – Yr0 investment is fully expensed in period 0 (not discounted)
-    – Recurring OpEx (yr1, yr2) deducted from benefits before discounting
-    – Payback = Yr0 investment ÷ (Annual steady-state benefit ÷ 12), expressed in months
-    – ROI (3-year) = ((Total 3-yr benefits − Total 3-yr cost) ÷ Total 3-yr cost) × 100%
-    – Only quantified direct benefits are included; strategic/soft benefits are noted but excluded from totals
-
-• Input defaults are conservative end-of-range benchmarks from:
-    GS1 US RFID Implementation Guidelines (2022)
-    Auburn University RFID Lab Item-Level RFID Initiative benchmarks
-    NRF National Retail Security Survey (2023)
-    ECR Community Retail Out-of-Stock Study`;
+    const methodNote = `Methodology note: Financial model uses Net Realization Value (NRV) methodology.
+Benefits are adjusted for type-specific adoption ramps (Y1–Y5 including post-peak
+decay), accessibility tier compression (commodity / configured / infrastructure),
+covariance haircut (default 10% per driver), and Decay Avoided (baseline cost
+growing at 3.5%/yr). Return metric is MIRR (not IRR) — reinvested at WACC.
+Model period: 5 years. Discount rate: 10% WACC.
+Sources: Auburn University RFID Lab · GS1 US · ECR Retail Loss Group ·
+McKinsey Retail Operations · NRV SOP v1 (Alt Meridian Value Engineering).`;
 
     const prompt = `SUGGESTED CHAT TITLE: ${co} — RFID Value Analysis (${dateStr})
 ─────────────────────────────────────────────────────────────────────
@@ -7159,7 +7882,7 @@ Copy the title above to name this chat, then paste everything below.
 
 You are a strategic value engineering advisor specializing in enterprise RFID deployments. You have deep knowledge of operational ROI modeling, CFO-level financial framing, and RFID use cases across retail, warehouse, healthcare, manufacturing, T&L, government, and other verticals.
 
-The seller has used the Zebra RFID Value Accelerator to build an initial business case. Your job is NOT to summarize what they've entered — they already know that. Your job is to be a thinking partner: help them see what they might be missing, stress-test the framing, and deepen the value story.
+The seller has used the Zebra Value Accelerator to build an initial business case. Your job is NOT to summarize what they've entered — they already know that. Your job is to be a thinking partner: help them see what they might be missing, stress-test the framing, and deepen the value story.
 
 Start by doing three things in order:
 
@@ -7211,15 +7934,19 @@ Pain Signal:        ${pain || '(not entered)'}
 ════════════════════════════════════════════════════════════════════
 KEY FINANCIAL KPIs
 ════════════════════════════════════════════════════════════════════
-Annual Benefit (steady-state):   ${fmt(b.totAnnual)}
-  Year 1:                        ${fmt(b.totY1)}
-  Year 2:                        ${fmt(b.totY2)}
-  Year 3+:                       ${fmt(b.totAnnual)}
-Initial Investment (Yr0):        ${fmt(c.yr0)}
-Payback Period:                  ${paybackMo ? paybackMo + ' months' : '—'}
-3-Year ROI:                      ${roi3}%
-5-Year NPV (10% discount rate):  ${fmt(npv5)}
-B:C Ratio (3-yr):                ${(c.yr2||0)>0 ? (((b.totY1+b.totY2+b.totAnnual)/(c.yr0+c.yr1+(c.yr2||0)*2)).toFixed(1)+'x') : '—'}
+Annual Benefit (steady-state):                 ${fmt(b.totAnnual)}
+  Year 1:                                      ${fmt(b.totY1)}
+  Year 2:                                      ${fmt(b.totY2)}
+  Year 3+:                                     ${fmt(b.totAnnual)}
+Initial Investment (Yr0):                      ${fmt(c.yr0)}
+NRV (5-year, discounted at 10% WACC):          ${r ? fmt(r.nrv) : '—'}
+MIRR:                                          ${r ? calcMIRRDisplay(r.mirr) : '—'}
+Peak Annual NRV (Year 3):                      ${r ? fmt(Math.round(r.peakAnnual)) : '—'}
+Payback Period:                                ${r && r.paybackMo ? r.paybackMo + ' months' : '—'}
+5-Year Net ROI:                                ${r ? r.roi5 + '%' : '—'}
+Benefit-Cost Ratio:                            ${r && r.bcr ? r.bcr.toFixed(1) + 'x' : '—'}
+${r && r.bcr > 10 ? 'NOTE: BCR exceeds 10x — per NRV SOP, top-3 drivers should be stress-tested at -20% before presenting.' : ''}
+${hasCustom ? '\nNOTE: This model includes user-generated custom scenarios that have not been verified by the Zebra Value Engineering team. These are flagged in the scenario list above.' : ''}
 
 ════════════════════════════════════════════════════════════════════
 SCENARIOS SELECTED (${active.length})
