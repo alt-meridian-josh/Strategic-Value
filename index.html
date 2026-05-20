@@ -4277,12 +4277,112 @@ function ensureCosts() {
     rebuildCostState();
   }
 }
+// ── NRV ENGINE HELPERS ──
+function calcNRV(activeScenarios, costs, wacc) {
+  wacc = wacc || 0.10;
+  const capex = costs.yr0 || 0;
+  const annOpex = costs.yr1 || 0;
+  const attrition = capex * 0.20;
+  const training = 5000;
+  const totalAnnOpex = annOpex + attrition + training;
+
+  const B0 = activeScenarios.reduce((sum, sc) => {
+    return sum + Math.max(0, calcSc(sc));
+  }, 0);
+
+  const yearlyData = [];
+  let cumCF = -capex;
+  let npv = -capex;
+  let fvPositives = 0;
+  let pvNegatives = Math.abs(capex);
+  let paybackMo = null;
+
+  for (let t = 0; t < 5; t++) {
+    const yr = t + 1;
+
+    let netBenefit = activeScenarios.reduce((sum, sc) => {
+      const ann = Math.max(0, calcSc(sc));
+      const ramp = RAMP[sc.rampType].y[t];
+      const access = ACCESS_TIER[sc.accessibilityTier || 'configured'][t];
+      const h = (sc.haircut !== undefined) ? sc.haircut : 0.10;
+      return sum + ann * ramp * access * (1 - h);
+    }, 0);
+
+    const decayAvoided = B0 * (Math.pow(1.035, yr) - 1);
+    netBenefit += decayAvoided;
+
+    const netCF = netBenefit - totalAnnOpex;
+    cumCF += netCF;
+    const discounted = netCF / Math.pow(1 + wacc, yr);
+    npv += discounted;
+
+    if (netCF >= 0) {
+      fvPositives += netCF * Math.pow(1 + wacc, 5 - t);
+    } else {
+      pvNegatives += Math.abs(netCF) / Math.pow(1 + wacc, yr);
+    }
+
+    if (paybackMo === null && cumCF >= 0) {
+      const prevCum = cumCF - netCF;
+      paybackMo = (t * 12) + Math.round((Math.abs(prevCum) / netCF) * 12);
+    }
+
+    yearlyData.push({ year: yr, netBenefit, decayAvoided, netCF, cumCF, discounted });
+  }
+
+  const mirr = pvNegatives > 0
+    ? Math.pow(fvPositives / pvNegatives, 0.2) - 1
+    : null;
+
+  const totalBenefits = yearlyData.reduce((s, y) => s + y.netBenefit, 0);
+  const totalCosts = capex + totalAnnOpex * 5;
+  const bcr = totalCosts > 0 ? totalBenefits / totalCosts : null;
+  const nrv = Math.round(npv);
+  const peakAnnual = Math.max(...yearlyData.map(y => y.netBenefit));
+  const roi5 = totalCosts > 0
+    ? Math.round(((totalBenefits - totalCosts) / totalCosts) * 100)
+    : 0;
+
+  return {
+    nrv, mirr, paybackMo, bcr, peakAnnual, roi5,
+    yearlyData, B0, totalAnnOpex, capex, wacc
+  };
+}
+
+function calcMIRRDisplay(mirr) {
+  if (mirr === null || isNaN(mirr) || !isFinite(mirr)) return 'N/A';
+  return (mirr * 100).toFixed(1) + '%';
+}
+
+function calcDriverWalkdown(sc, result) {
+  const ann = Math.max(0, calcSc(sc));
+  const rows = [];
+  for (let t = 0; t < 5; t++) {
+    const ramp = RAMP[sc.rampType].y[t];
+    const access = ACCESS_TIER[sc.accessibilityTier || 'configured'][t];
+    const h = (sc.haircut !== undefined) ? sc.haircut : 0.10;
+    const afterRamp = ann * ramp;
+    const afterAccess = afterRamp * access;
+    const afterHaircut = afterAccess * (1 - h);
+    rows.push({ year: t + 1, gross: ann, afterRamp, afterAccess, afterHaircut });
+  }
+  return rows;
+}
+
+function renderWalkdownTable(activeScenarios, result) {
+  // Placeholder — full walkdown rendering is wired in a later task
+}
+
 // ── STEP 5: ROI & VALUE CASE ──
 function renderROI() {
-  const active = SCENARIOS.filter(s=>state.selectedIds.has(s.id));
-  if(!active.length) { document.getElementById('kpi-grid').innerHTML='<div class="muted">No scenarios selected.</div>'; return; }
+  const active = SCENARIOS.filter(s => state.selectedIds.has(s.id))
+    .concat((state.customScenarios || []).filter(s => s.active));
+  if (!active.length) {
+    document.getElementById('kpi-grid').innerHTML = '<div class="muted">No scenarios selected.</div>';
+    return;
+  }
 
-  // ── NRV toolbar state (drives the math) ──
+  // ── NRV toolbar state (kept for chart rendering below) ──
   const _waccEl = document.getElementById('nrv-wacc');
   const wacc    = _waccEl ? +_waccEl.value : 0.10;
   const gRate   = +(document.getElementById('nrv-g')?.value ?? 0.035);
@@ -4294,110 +4394,85 @@ function renderROI() {
   _setSv('nrv-g-v',    (gRate*100).toFixed(1)+'%');
   _setSv('nrv-fin-v',  (finRate*100).toFixed(1)+'%');
 
-  let totAnnual=0;
-  // byYear arrays index 0..4 represent years 1..5
-  const grossByYear = [0,0,0,0,0];
-  const rows = active.map(sc => {
-    const ann = Math.max(0, calcSc(sc));
-    let byYear;
-    let cfg = null;
-    if (nrvOn) {
-      cfg = nrvCfg(sc);
-      const rp = NRV_RAMPS[cfg.profile].y;
-      const ax = NRV_ACCESS[cfg.access].y;
-      byYear = rp.map((r,i) => ann * r * ax[i] * (1 - cfg.h));
-    } else {
-      // Raw ramp (5-year curve from RAMP)
-      const r = RAMP[sc.rampType];
-      byYear = [ann*r.y[0], ann*r.y[1], ann*r.y[2], ann*r.y[3], ann*r.y[4]];
-    }
-    totAnnual += ann;
-    byYear.forEach((v,i)=> grossByYear[i] += v);
-    return { sc, ann, cfg, byYear, y1:byYear[0], y2:byYear[1], y3:byYear[2], y4:byYear[3], y5:byYear[4] };
-  });
-  const totY1 = grossByYear[0], totY2 = grossByYear[1], totY3 = grossByYear[2];
-  const totY4 = grossByYear[3], totY5 = grossByYear[4];
-  const peakAnnual = Math.max(...grossByYear);
-  state.benefits = {totAnnual, totY1, totY2, totY3, totY4, totY5, peakAnnual, rows};
-
-  // Decay_Avoided(t) at baseline growth g
-  const decayAvoided = [0,0,0,0,0];
-  if (nrvOn && useDecay && gRate > 0 && totAnnual > 0) {
-    let cum = 0;
-    for (let k = 1; k <= 5; k++) {
-      cum += totAnnual * (Math.pow(1+gRate, k) - 1);
-      decayAvoided[k-1] = cum;
-    }
-  }
-  state.benefits.decayAvoided = decayAvoided;
-
+  ensureCosts();
   const c = state.costs;
-  // Net cash flow per year (t=0..5). Year 0 = upfront; Y1 = totY1 + decay - yr1; Y2-5 = grossByYear + decay - yr2.
-  const tcoBy = [c.yr0||0, c.yr1||0, c.yr2||0, c.yr2||0, c.yr2||0, c.yr2||0];
-  const ncf = [
-    -(tcoBy[0]),
-    totY1 + decayAvoided[0] - tcoBy[1],
-    totY2 + decayAvoided[1] - tcoBy[2],
-    totY3 + decayAvoided[2] - tcoBy[3],
-    totY4 + decayAvoided[3] - tcoBy[4],
-    totY5 + decayAvoided[4] - tcoBy[5],
-  ];
-  state.benefits.ncf = ncf;
+  const result = calcNRV(active, c, 0.10);
+  const { nrv, mirr, paybackMo, bcr, peakAnnual, roi5, yearlyData } = result;
 
-  // NPV at WACC, all 5 years
-  let npv5 = 0;
-  ncf.forEach((v,t)=>{ npv5 += v / Math.pow(1+wacc, t); });
-  npv5 = Math.round(npv5);
+  state.nrvResult = result;
+  state.benefits = {
+    totAnnual: peakAnnual,
+    totY1: yearlyData[0].netBenefit,
+    totY2: yearlyData[1].netBenefit,
+    totY3: yearlyData[2].netBenefit,
+    rows: active.map(sc => {
+      const ann = Math.max(0, calcSc(sc));
+      return {
+        sc, ann,
+        y1: ann * RAMP[sc.rampType].y[0],
+        y2: ann * RAMP[sc.rampType].y[1],
+        y3: ann * RAMP[sc.rampType].y[2],
+        y4: ann * RAMP[sc.rampType].y[3],
+        y5: ann * RAMP[sc.rampType].y[4],
+      };
+    })
+  };
 
-  // Discounted payback (months)
-  let _cum = 0, payback = null;
-  for (let t=0; t<=5; t++) {
-    const disc = ncf[t] / Math.pow(1+wacc, t);
-    const prev = _cum; _cum += disc;
-    if (prev < 0 && _cum >= 0) { payback = Math.round((t - 1 + (-prev/(_cum-prev))) * 12 * 10) / 10; break; }
-  }
-
-  // MIRR (preferred) and IRR (kept for reference)
-  let fvPos=0, pvNeg=0;
-  ncf.forEach((v,t)=>{
-    if (v>0) fvPos += v * Math.pow(1+wacc, 5-t);
-    else if (v<0) pvNeg += -v / Math.pow(1+finRate, t);
-  });
-  const mirr = (fvPos>0 && pvNeg>0) ? (Math.pow(fvPos/pvNeg, 1/5) - 1) : null;
-  const irr = estimateIRR(ncf);
-
-  // BCR (undiscounted) and 5-yr Net ROI
-  const totBen  = grossByYear.reduce((a,v)=>a+v,0) + decayAvoided.reduce((a,v)=>a+v,0);
-  const totCost = tcoBy.reduce((a,v)=>a+v,0);
-  const bcr  = totCost>0 ? totBen/totCost : null;
-  const roi5 = totCost>0 ? Math.round(((totBen - totCost)/totCost)*100) : 0;
+  // Reconstruct legacy chart variables from NRV result for SVG charts below
+  const rows = state.benefits.rows;
+  const totAnnual = state.benefits.totAnnual;
+  const totY1 = yearlyData[0].netBenefit, totY2 = yearlyData[1].netBenefit;
+  const totY3 = yearlyData[2].netBenefit, totY4 = yearlyData[3].netBenefit, totY5 = yearlyData[4].netBenefit;
+  const grossByYear = yearlyData.map(y => y.netBenefit);
+  const decayAvoided = yearlyData.map(y => y.decayAvoided);
+  const tcoBy = [result.capex, result.totalAnnOpex, result.totalAnnOpex, result.totalAnnOpex, result.totalAnnOpex, result.totalAnnOpex];
+  const ncf = [-result.capex, ...yearlyData.map(y => y.netCF)];
+  const npv5 = result.nrv;
+  const irr = typeof estimateIRR === 'function' ? estimateIRR(ncf) : '—';
   const bcrWarn = bcr !== null && bcr > 10;
 
-  // BCR cap flag
+  const bcrFlag = bcrWarn;
+
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi kgreen hero-kpi">
+      <div class="kpi-label">NRV Peak Annual</div>
+      <div class="kpi-val">${fmt(Math.round(peakAnnual))}</div>
+      <div class="kpi-sub">Peak NRV (Yr 3) · decay-adjusted</div>
+    </div>
+    <div class="kpi kblue hero-kpi">
+      <div class="kpi-label">Payback Period</div>
+      <div class="kpi-val">${paybackMo !== null ? paybackMo : '—'}<span style="font-size:15px;font-weight:400"> mo</span></div>
+      <div class="kpi-sub">discounted at 10% WACC</div>
+    </div>
+    <div class="kpi kamber hero-kpi">
+      <div class="kpi-label">NRV (5-yr NPV)</div>
+      <div class="kpi-val">${fmt(nrv)}</div>
+      <div class="kpi-sub">discounted at 10% · normalized</div>
+    </div>
+    <div class="kpi kgold hero-kpi">
+      <div class="kpi-label">5-Year Net ROI</div>
+      <div class="kpi-val">${roi5}<span style="font-size:15px">%</span></div>
+      <div class="kpi-sub">NRV-normalized · decay applied</div>
+    </div>`;
+
+  document.getElementById('kpi-secondary').innerHTML = `
+    <div class="kpi-sec"><div class="ks-label">Year 1 Ramped Value</div><div class="ks-val">${fmt(Math.round(yearlyData[0].netBenefit))}</div></div>
+    <div class="kpi-sec"><div class="ks-label">Year 2 Ramped Value</div><div class="ks-val">${fmt(Math.round(yearlyData[1].netBenefit))}</div></div>
+    <div class="kpi-sec"><div class="ks-label">Benefit:Cost (5-yr)</div><div class="ks-val">${bcr !== null ? bcr.toFixed(1) + 'x' : '—'}</div></div>
+    <div class="kpi-sec"><div class="ks-label">Monthly at Peak</div><div class="ks-val">${fmt(Math.round(peakAnnual / 12))}</div></div>`;
+
+  const bcrBanner = document.getElementById('bcr-banner');
+  if (bcrBanner) {
+    bcrBanner.style.display = bcrFlag ? 'block' : 'none';
+    if (bcrFlag) bcrBanner.innerHTML = `&#9651; BCR above 10x (${bcr.toFixed(1)}x). Per the NRV SOP this requires mandatory review before the model leaves your hands. Audit covariance haircuts and challenge top-3 drivers at ~20% before exporting.`;
+  }
   const flagEl = document.getElementById('nrv-bcr-flag-host');
   if (flagEl) flagEl.innerHTML = bcrWarn
     ? `<div class="nrv-bcr-flag"><strong>⚠ BCR above 10x (${bcr.toFixed(1)}x).</strong> Per the NRV SOP this requires mandatory review before the model leaves your hands. Audit covariance haircuts and challenge top-3 drivers at &minus;20% before exporting.</div>`
     : '';
 
-  // KPIs — 4 primary heroes + 4 secondary supporting
-  const pbTxt = payback === null ? 'Beyond 5 yr' : payback.toFixed(1)+' mo';
-  const peakLbl = nrvOn ? `Peak NRV (Yr ${grossByYear.indexOf(peakAnnual)+1})` : 'Year 3 steady state';
-  document.getElementById('kpi-grid').innerHTML = `
-    <div class="kpi kgreen hero-kpi"><div class="kpi-label">${nrvOn?'NRV Peak Annual':'Full Annual Benefit'}</div><div class="kpi-val">${fmt(Math.round(peakAnnual))}</div><div class="kpi-sub">${peakLbl}${nrvOn?' · decay-adjusted':''}</div></div>
-    <div class="kpi kblue hero-kpi"><div class="kpi-label">Payback Period</div><div class="kpi-val">${payback===null?'>5 yr':payback}${payback!==null?'<span style="font-size:15px;font-weight:400"> mo</span>':''}</div><div class="kpi-sub">${nrvOn?'discounted at '+(wacc*100).toFixed(0)+'% WACC':'months to recover investment'}</div></div>
-    <div class="kpi kamber hero-kpi"><div class="kpi-label">${nrvOn?'NRV (5-yr NPV)':'5-Year NPV'}</div><div class="kpi-val">${fmt(npv5)}</div><div class="kpi-sub">discounted at ${(wacc*100).toFixed(0)}%${nrvOn?' · normalized':''}</div></div>
-    <div class="kpi kgold hero-kpi"><div class="kpi-label">5-Year Net ROI</div><div class="kpi-val">${roi5}<span style="font-size:15px">%</span></div><div class="kpi-sub">${nrvOn?'NRV-normalized · decay applied':'benefit less total cost'}</div></div>`;
-  document.getElementById('kpi-secondary').innerHTML = `
-    <div class="kpi-sec"><div class="ks-label">Year 1 Ramped Value</div><div class="ks-val">${fmt(Math.round(totY1))}</div></div>
-    <div class="kpi-sec"><div class="ks-label">Year 2 Ramped Value</div><div class="ks-val">${fmt(Math.round(totY2))}</div></div>
-    <div class="kpi-sec"><div class="ks-label">Benefit : Cost (5-yr)</div><div class="ks-val ${bcrWarn?'warn':''}">${bcr===null?'—':bcr.toFixed(1)+'x'}</div></div>
-    <div class="kpi-sec"><div class="ks-label">Monthly at Peak</div><div class="ks-val">${fmt(Math.round(peakAnnual/12))}</div></div>`;
-
-  // Delay slider
+  renderWalkdownTable(active, result);
   syncDelay();
-
-  // Missed value — rendered by syncDelay so delay slider drives both cards
-  // (syncDelay is called below)
 
   // ── SVG Horizontal Bar Chart — absolute scale, grouped, proper axis ──
   (function(){
@@ -4742,52 +4817,41 @@ function renderROI() {
 function syncDelay() {
   const months = +sliderVal('sl-delay');
   const svEl = document.getElementById('sv-delay');
-  if(svEl) svEl.textContent = months+' mo';
-  // Ensure benefits are calculated
-  if(!state.benefits || !state.benefits.totAnnual) {
-    ensureCosts();
-    const active = SCENARIOS.filter(s=>state.selectedIds.has(s.id));
-    let totAnnual=0, totY1=0, totY2=0, totY3=0;
-    const rows = active.map(sc => {
-      const ann = Math.max(0, calcSc(sc));
-      const r = RAMP[sc.rampType];
-      const y1=ann*r.y[0], y2=ann*r.y[1], y3=ann*r.y[2];
-      totAnnual+=ann; totY1+=y1; totY2+=y2; totY3+=y3;
-      return {sc, ann, y1, y2, y3};
-    });
-    state.benefits = {totAnnual, totY1, totY2, totY3, rows};
-  }
-  const b = state.benefits;
-  const monthly = b.totY1>0 ? Math.round(b.totY1/12) : Math.round((b.totAnnual||0)*0.50/12);
-  const delayed = monthly*months;
+  if (svEl) svEl.textContent = months + ' mo';
 
-  // Delay output card
+  if (!state.nrvResult) { ensureCosts(); renderROI(); return; }
+  const r = state.nrvResult;
+  const b = state.benefits;
+
+  const monthly = Math.round(r.yearlyData[0].netBenefit / 12);
+  const delayed = monthly * months;
+
   const el = document.getElementById('delay-output');
-  if(el) el.innerHTML = `
+  if (el) el.innerHTML = `
     <div style="text-align:center;padding:12px;background:rgba(235,87,87,.07);border-radius:8px;border:1px solid rgba(235,87,87,.2)">
       <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">VALUE FOREGONE — ${months} MONTH DELAY</div>
       <div style="font-family:var(--head);font-size:28px;font-weight:800;color:var(--red)">${fmt(delayed)}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">${fmt(monthly)}/mo at Year 1 ramp</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${fmt(monthly)}/mo at Year 1 NRV ramp</div>
     </div>`;
 
-  // Cost of Doing Nothing — summary total + per-scenario items
   const missed = document.getElementById('missed-items');
-  if(missed && b.rows) {
-    const totalMissed = b.rows.reduce((sum, r) => {
-      return sum + Math.round(r.ann * (RAMP[r.sc.rampType]?.y[0]||0.5) / 12) * months;
+  if (missed && b && b.rows) {
+    const totalMissed = b.rows.reduce((sum, row) => {
+      return sum + Math.round(row.y1 / 12) * months;
     }, 0);
-    const summaryHeader = `<div style="text-align:center;padding:12px;background:rgba(235,87,87,.07);border-radius:8px;border:1px solid rgba(235,87,87,.2);margin-bottom:10px">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">TOTAL VALUE LOST — ${months} MONTH DELAY</div>
-      <div style="font-family:var(--head);font-size:28px;font-weight:800;color:var(--red)">-${fmt(totalMissed)}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">across ${b.rows.length} scenario${b.rows.length!==1?'s':''}</div>
-    </div>`;
-    const rows = b.rows.map(r => {
-      const monthlyLoss = Math.round(r.ann * (RAMP[r.sc.rampType]?.y[0]||0.5) / 12);
+    const summaryHeader = `
+      <div style="text-align:center;padding:12px;background:rgba(235,87,87,.07);border-radius:8px;border:1px solid rgba(235,87,87,.2);margin-bottom:10px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">TOTAL VALUE LOST — ${months} MONTH DELAY</div>
+        <div style="font-family:var(--head);font-size:28px;font-weight:800;color:var(--red)">-${fmt(totalMissed)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">across ${b.rows.length} scenario${b.rows.length !== 1 ? 's' : ''}</div>
+      </div>`;
+    const rows = b.rows.map(row => {
+      const monthlyLoss = Math.round(row.y1 / 12);
       const totalLoss = monthlyLoss * months;
-      const pct = totalMissed>0 ? Math.round((totalLoss/totalMissed)*100) : 0;
+      const pct = totalMissed > 0 ? Math.round((totalLoss / totalMissed) * 100) : 0;
       return `<div class="missed-item" style="flex-direction:column;align-items:flex-start;gap:3px;padding:8px 12px">
         <div style="display:flex;justify-content:space-between;width:100%">
-          <div class="mi-label" style="font-size:11px">${r.sc.id} — ${r.sc.name.length>24?r.sc.name.substring(0,22)+'…':r.sc.name}</div>
+          <div class="mi-label" style="font-size:11px">${row.sc.id} — ${row.sc.name.length > 24 ? row.sc.name.substring(0,22) + '…' : row.sc.name}</div>
           <div class="mi-val" style="font-size:11px;color:var(--red)">-${fmt(totalLoss)}</div>
         </div>
         <div style="width:100%;height:3px;background:rgba(235,87,87,.15);border-radius:2px">
@@ -4830,30 +4894,21 @@ function renderExec() {
   const totY1 = state.benefits.totY1||0;
   const totY2 = state.benefits.totY2||0;
   const totY3 = state.benefits.totY3||0;
-  const payback = c.yr0>0&&totAnnual>0 ? Math.round(c.yr0/(totAnnual/12)) : '—';
-  // NRV-aware NPV from the same cashflow renderROI built
-  const wacc = +(document.getElementById('nrv-wacc')?.value ?? 0.10);
-  const ncf  = state.benefits.ncf;
-  let npv5;
-  if (Array.isArray(ncf) && ncf.length === 6) {
-    let _n = 0; ncf.forEach((v,t)=>{ _n += v/Math.pow(1+wacc,t); }); npv5 = Math.round(_n);
-  } else {
-    const yr1net = totY1-(c.yr1||0);
-    const yr2net = totY2-(c.yr2||0);
-    const yr3net = totY3-(c.yr2||0);
-    npv5 = Math.round((yr1net/1.1)+(yr2net/1.21)+(yr3net/1.331)+(yr3net/1.464)+(yr3net/1.611));
-  }
+  const nrvRes = state.nrvResult;
+  const npv5   = nrvRes ? nrvRes.nrv   : (c.yr0 > 0 ? Math.round(((totY1-(c.yr1||0))/1.1)+((totY2-(c.yr2||0))/1.21)+((totY3-(c.yr2||0))/1.331)+((totY3-(c.yr2||0))/1.464)+((totY3-(c.yr2||0))/1.611)) : 0);
+  const roi5   = nrvRes ? nrvRes.roi5  : 0;
+  const paybackMo = nrvRes ? nrvRes.paybackMo : (c.yr0>0&&totAnnual>0 ? Math.round(c.yr0/(totAnnual/12)) : null);
+  const payback = paybackMo !== null ? paybackMo : '—';
 
   document.getElementById('exec-heading').textContent = title + ' — ' + co;
   document.getElementById('exec-sub').textContent = `Prepared by ${seller} · Parties & Partners: ${partners} · Discovery KPIs: ${document.getElementById('i-pain')?.value||'—'}`;
   const dateDisplay = document.getElementById('exec-date-display');
   if(dateDisplay) dateDisplay.textContent = new Date().toLocaleDateString();
-  const roi3pct = c.yr0>0 ? Math.round(((totY1+totY2+totY3-(c.yr0+c.yr1+c.yr2+c.yr2))/(c.yr0+c.yr1+c.yr2+c.yr2))*100) : 0;
   document.getElementById('exec-kpis').innerHTML=`
     <div class="ek"><div class="ek-val">${fmt(totAnnual)}</div><div class="ek-lab">FULL ANNUAL VALUE</div></div>
     <div class="ek"><div class="ek-val">${typeof payback==='number'?payback+' mo':payback}</div><div class="ek-lab">PAYBACK PERIOD</div></div>
-    <div class="ek"><div class="ek-val">${fmt(npv5)}</div><div class="ek-lab">5-YEAR NPV</div></div>
-    <div class="ek"><div class="ek-val">${roi3pct}%</div><div class="ek-lab">3-YEAR NET ROI</div></div>`;
+    <div class="ek"><div class="ek-val">${fmt(npv5)}</div><div class="ek-lab">NRV (5-YEAR NPV)</div></div>
+    <div class="ek"><div class="ek-val">${roi5}%</div><div class="ek-lab">5-YEAR NET ROI</div></div>`;
 
   const active = SCENARIOS.filter(s=>state.selectedIds.has(s.id));
   const hardRows = (b.rows||[]).filter(r=>['hard_labor','hard_cost'].includes(r.sc?.rampType));
@@ -4872,7 +4927,7 @@ function renderExec() {
   const hardY1N    = hardRowsN.reduce((a,r)=>a+(r.y1||0),0);
   const revY1N     = revRowsN.reduce((a,r)=>a+(r.y1||0),0);
   // Payback context
-  const pbText = typeof payback==='number' ? `<strong>${payback} months</strong>` : '&#8212;';
+  const pbText = typeof payback==='number' ? `<strong>${payback} months</strong>` : (paybackMo !== null ? `<strong>${paybackMo} months</strong>` : '&#8212;');
   // Ramp methodology sentence — only list types actually present
   const rampLines = [];
   if(hardRowsN.length) rampLines.push(`Hard Labor &amp; Cost scenarios at <strong>50% Year 1 &#8594; 100% Year 3</strong>`);
@@ -4884,7 +4939,7 @@ function renderExec() {
   // Hard case % of total
   const hardPct = totAnnual>0 ? Math.round((hardAnn/totAnnual)*100) : 0;
   document.getElementById('exec-narrative').innerHTML=`
-    <p>Based on analysis of <strong>${co}</strong>'s operations, deploying Zebra RFID Technology delivers <strong>${fmt(totAnnual)} in full annual value</strong> across ${active.length} quantified scenarios. The investment pays back in ${pbText}, with a <strong>3-year net ROI of ${roi3pct}%</strong> and a <strong>5-year NPV of ${fmt(npv5)}</strong>.</p>
+    <p>Based on analysis of <strong>${co}</strong>'s operations, deploying Zebra RFID Technology delivers <strong>${fmt(totAnnual)} in full annual value</strong> across ${active.length} quantified scenarios. The investment pays back in ${pbText}, with a <strong>5-year net ROI of ${roi5}%</strong> and a <strong>NRV (5-year NPV) of ${fmt(npv5)}</strong>.</p>
     <p>${rampSentence}These curves are grounded in GS1 US deployment guidance and peer-reviewed adoption data from the Auburn RFID Lab, ensuring the model is conservative and defensible at the finance level.</p>
     <p>The Year 1 business case is anchored in Hard Labor and Hard Cost scenarios, which require no demand-side assumptions and are credited at 100% by finance teams. ${hardRowsN.length>0?`These ${hardRowsN.length} scenario${hardRowsN.length>1?'s':''} represent <strong>${hardPct}% of total annual value</strong> and deliver <strong>${fmt(hardY1N)} in Year 1</strong> &#8212; the floor of the financial case.`:''} ${revRowsN.length>0?`Revenue uplift scenarios contribute an additional <strong>${fmt(revAnn)}</strong> at full realization (Year 3), modeled conservatively at ${fmt(revY1N)} in Year 1 (30% ramp) and presented as validated upside, not the anchor.`:''}</p>
     <p>Total Yr 0 investment: <strong>${fmt(c.yr0)}</strong> one-time; <strong>${fmt(c.yr1)}</strong> Yr 1 ongoing; <strong>${fmt(c.yr2)}</strong>/yr from Yr 2. All quantified values reference Tier 1&#8211;3 evidence published by Auburn University RFID Lab, GS1 US, the National Retail Federation, ECR Retail Loss, and Zebra Technologies / VDC Research. Evidence identifiers are cited inline for each scenario.</p>`;
@@ -5129,11 +5184,12 @@ function exportFullPDF() {
   const paybackMo = moAvg>0 && yr0>0 ? yr0/moAvg : null;
   const ben3yr = totY1+totY2+totY3;
   const investTot = yr0+yr1+yr2*2;
-  const roi3 = investTot>0 ? Math.round(((ben3yr-investTot)/investTot)*100) : 0;
+  const _nrvRes = state.nrvResult;
+  const roi3 = _nrvRes ? _nrvRes.roi5 : (investTot>0 ? Math.round(((ben3yr-investTot)/investTot)*100) : 0);
   const invRatio = yr0>0 ? (ben3yr/yr0).toFixed(2) : '—';
   const yr0net=-(yr0), yr1net=totY1-yr1, yr2net=totY2-yr2, yr3net=totY3-yr2;
-  const npv5 = Math.round((yr1net/1.1)+(yr2net/1.21)+(yr3net/1.331)+(yr3net/1.464)+(yr3net/1.611));
-  const irrVal = estimateIRR([yr0net,yr1net,yr2net,yr3net,yr3net]);
+  const npv5 = _nrvRes ? _nrvRes.nrv : Math.round((yr1net/1.1)+(yr2net/1.21)+(yr3net/1.331)+(yr3net/1.464)+(yr3net/1.611));
+  const irrVal = _nrvRes ? calcMIRRDisplay(_nrvRes.mirr) : estimateIRR([yr0net,yr1net,yr2net,yr3net,yr3net]);
 
   // Monthly DCF table (60 months, 5 years)
   const discRateMo = Math.pow(1.10,1/12)-1;
@@ -5814,10 +5870,11 @@ async function exportPPTX() {
   const totAnnual= b.totAnnual||0;
   const yr0=c.yr0||0, yr1=c.yr1||0, yr2=c.yr2||0;
   const moAvg = totAnnual/12;
-  const paybackMo = moAvg>0&&yr0>0 ? Math.round(yr0/moAvg) : null;
+  const _popNrv = state.nrvResult;
+  const paybackMo = _popNrv ? _popNrv.paybackMo : (moAvg>0&&yr0>0 ? Math.round(yr0/moAvg) : null);
   const pb = paybackMo ? paybackMo+' months' : '—';
-  const npv5 = Math.round(((b.totY1-(yr1))/(1.1))+((b.totY2-(yr2))/(1.21))+((b.totY3-(yr2))/(1.331))+((b.totY3-(yr2))/(1.464))+((b.totY3-(yr2))/(1.611)));
-  const roi3 = yr0>0 ? Math.round(((b.totY1+b.totY2+b.totY3-(yr0+yr1+yr2*2))/(yr0+yr1+yr2*2))*100) : 0;
+  const npv5 = _popNrv ? _popNrv.nrv : Math.round(((b.totY1-(yr1))/(1.1))+((b.totY2-(yr2))/(1.21))+((b.totY3-(yr2))/(1.331))+((b.totY3-(yr2))/(1.464))+((b.totY3-(yr2))/(1.611)));
+  const roi3 = _popNrv ? _popNrv.roi5 : (yr0>0 ? Math.round(((b.totY1+b.totY2+b.totY3-(yr0+yr1+yr2*2))/(yr0+yr1+yr2*2))*100) : 0);
   const invRatio = yr0>0 ? ((b.totY1+b.totY2+b.totY3)/yr0).toFixed(2) : '—';
   const F = v => v==null?'—':'$'+Math.round(v).toLocaleString();
   const pct = v => Math.round((v||0)*100)+'%';
@@ -6312,14 +6369,15 @@ async function runPPTXDownload(callerBtn) {
     const FN      = BRAND.fonts; // font names
 
     // ── Colors — ALL-DARK PALETTE ──────────────────────────────────────────
-    const payback  = b.totAnnual>0 ? Math.round((c.yr0/(b.totAnnual/12))*10)/10 : 99;
+    const _pptxNrv = state.nrvResult;
+    const payback  = _pptxNrv ? (_pptxNrv.paybackMo || 99) : (b.totAnnual>0 ? Math.round((c.yr0/(b.totAnnual/12))*10)/10 : 99);
     const yr0net   = -(c.yr0||0);
     const yr1net   = (b.totY1||0)-(c.yr1||0);
     const yr2net   = (b.totY2||0)-(c.yr2||0);
     const yr3net   = (b.totAnnual||0)-(c.yr2||0);
-    const npv5     = Math.round((yr1net/1.1)+(yr2net/1.21)+(yr3net/1.331)+(yr3net/1.464)+(yr3net/1.611));
-    const irr      = typeof estimateIRR==='function' ? estimateIRR([yr0net,yr1net,yr2net,yr3net,yr3net]) : '—';
-    const roi3     = c.yr0>0 ? Math.round(((b.totY1+b.totY2+b.totAnnual-(c.yr0+c.yr1+c.yr2+c.yr2))/(c.yr0+c.yr1+c.yr2+c.yr2))*100) : 0;
+    const npv5     = _pptxNrv ? _pptxNrv.nrv : Math.round((yr1net/1.1)+(yr2net/1.21)+(yr3net/1.331)+(yr3net/1.464)+(yr3net/1.611));
+    const irr      = _pptxNrv ? calcMIRRDisplay(_pptxNrv.mirr) : (typeof estimateIRR==='function' ? estimateIRR([yr0net,yr1net,yr2net,yr3net,yr3net]) : '—');
+    const roi3     = _pptxNrv ? _pptxNrv.roi5 : (c.yr0>0 ? Math.round(((b.totY1+b.totY2+b.totAnnual-(c.yr0+c.yr1+c.yr2+c.yr2))/(c.yr0+c.yr1+c.yr2+c.yr2))*100) : 0);
     const bc3      = c.yr2>0 ? (b.totAnnual/c.yr2).toFixed(1)+'x' : '—';
     const groups   = {};
     active.forEach(sc=>{ const k=sc.vertical||sc.theme||'Other'; if(!groups[k]) groups[k]=[]; groups[k].push(sc); });
@@ -7075,16 +7133,17 @@ function exportLLMPrompt() {
 
     const fmt  = v => v == null ? '—' : '$' + Math.round(v).toLocaleString();
     const pct  = v => Math.round((v||0)*100) + '%';
+    const _aiNrv = state.nrvResult;
     const moAvg = (b.totAnnual||0)/12;
-    const paybackMo = moAvg>0 && (c.yr0||0)>0 ? Math.round((c.yr0||0)/moAvg) : null;
-    const npv5 = Math.round(
+    const paybackMo = _aiNrv ? _aiNrv.paybackMo : (moAvg>0 && (c.yr0||0)>0 ? Math.round((c.yr0||0)/moAvg) : null);
+    const npv5 = _aiNrv ? _aiNrv.nrv : Math.round(
       ((b.totY1-(c.yr1||0))/1.1) + ((b.totY2-(c.yr2||0))/1.21) +
       ((b.totY3-(c.yr2||0))/1.331) + ((b.totY3-(c.yr2||0))/1.464) +
       ((b.totY3-(c.yr2||0))/1.611)
     );
-    const roi3 = (c.yr0||0)>0
+    const roi3 = _aiNrv ? _aiNrv.roi5 : ((c.yr0||0)>0
       ? Math.round(((b.totY1+b.totY2+b.totY3 - (c.yr0+c.yr1+(c.yr2||0)*2)) / (c.yr0+c.yr1+(c.yr2||0)*2))*100)
-      : 0;
+      : 0);
 
     // Evidence used across active scenarios
     const usedEvidenceIds = [...new Set(active.flatMap(s => s.evidenceIds||[]))];
