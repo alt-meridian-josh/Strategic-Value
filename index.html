@@ -1102,7 +1102,7 @@ svg{max-width:100%;height:auto}
 <div class="panel" id="panel-4">
   <div class="step-eyebrow">Step 5 of 6</div>
   <div class="step-title">ROI & Value Case</div>
-  <div class="step-desc">Full financial model with type-driven benefit realization ramps. Hard Labor &amp; Cost: 50&#8594;85&#8594;100%. Revenue: 30&#8594;70&#8594;100%. Soft Productivity: 25&#8594;65&#8594;100%. Working Capital: 20&#8594;60&#8594;100%. Strategic: 0&#8594;20&#8594;60%. Each ramp reflects operational change velocity, not technical risk. <strong>Scroll past the headline KPIs to the <span style="color:var(--brand-black)">NRV — Net Realization Value</span> card</strong> for the normalized, decay-aware view (5-yr ramp with post-peak erosion, accessibility tier, covariance haircut, MIRR, WACC sensitivity).</div>
+  <div class="step-desc">Full financial model using the NRV (Net Realization Value) methodology. Every benefit is adjusted for adoption ramp, accessibility decay, and covariance haircut before discounting. Decay Avoided captures the growing cost of the status quo. MIRR replaces IRR &#8212; reinvesting at WACC, not at the internal rate. Scroll past the headline KPIs to the <strong>NRV Walk-Down</strong> for the full per-driver decomposition.</div>
 
   <div class="alert a-strategy" style="margin-bottom:18px">
     <span>⬡</span>
@@ -1150,6 +1150,27 @@ svg{max-width:100%;height:auto}
 
   <div class="kpi-grid" id="kpi-grid"></div>
   <div class="kpi-secondary-row" id="kpi-secondary"></div>
+  <details style="margin:20px 0" id="walkdown-details">
+    <summary style="cursor:pointer;font-size:12px;font-family:var(--mono);color:var(--muted);
+      text-transform:uppercase;letter-spacing:.06em;padding:8px 0;border-bottom:1px solid var(--gray-200)">
+      NRV Walk-Down — how each adjustment is applied (Y3 peak)
+    </summary>
+    <div style="overflow-x:auto;margin-top:12px">
+      <table style="width:100%;font-size:12px;border-collapse:collapse">
+        <thead>
+          <tr style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">
+            <th style="text-align:left;padding:4px 8px">Scenario</th>
+            <th style="text-align:right;padding:4px 8px">Gross annual</th>
+            <th style="text-align:right;padding:4px 8px">After ramp</th>
+            <th style="text-align:right;padding:4px 8px">After A(t)</th>
+            <th style="text-align:right;padding:4px 8px">After haircut</th>
+            <th style="text-align:center;padding:4px 8px">Tier</th>
+          </tr>
+        </thead>
+        <tbody id="nrv-walkdown-body"></tbody>
+      </table>
+    </div>
+  </details>
   <div id="nrv-bcr-flag-host"></div>
 
   <!-- Delay + Missed Value side by side -->
@@ -1557,8 +1578,8 @@ svg{max-width:100%;height:auto}
       Net Present Value discounted at 10%. Positive NPV = value creation above cost of capital. This is the primary metric for finance committee approval.
     </div>
     <div style="padding:10px 12px;background:var(--gray-50);border-radius:6px;border:1px solid var(--gray-100)">
-      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">IRR</div>
-      The discount rate at which NPV = 0. If IRR exceeds the customer's hurdle rate (typically 8–15%), the investment passes finance review at the headline level.
+      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">MIRR (replaces IRR)</div>
+      The discount rate at which NPV = 0. If the rate exceeds the customer's hurdle rate (typically 8–15%), the investment passes finance review at the headline level. <strong>MIRR is used in place of IRR throughout this tool. MIRR uses WACC as the reinvestment rate, which is more conservative and more accurate for operational technology investments.</strong>
     </div>
     <div style="padding:10px 12px;background:var(--gray-50);border-radius:6px;border:1px solid var(--gray-100)">
       <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Cost of Delay</div>
@@ -4370,7 +4391,49 @@ function calcDriverWalkdown(sc, result) {
 }
 
 function renderWalkdownTable(activeScenarios, result) {
-  // Placeholder — full walkdown rendering is wired in a later task
+  const el = document.getElementById('nrv-walkdown-body');
+  if (!el) return;
+
+  const rows = activeScenarios.map(sc => {
+    const ann = Math.max(0, calcSc(sc));
+    const h = (sc.haircut !== undefined) ? sc.haircut : 0.10;
+    const tier = sc.accessibilityTier || 'configured';
+    const peakT = 2; // Y3 index
+    const ramp = RAMP[sc.rampType].y[peakT];
+    const access = ACCESS_TIER[tier][peakT];
+    const afterRamp = ann * ramp;
+    const afterAccess = afterRamp * access;
+    const afterHaircut = afterAccess * (1 - h);
+    const isCustom = sc.custom === true;
+    return `<tr${isCustom ? ' style="font-style:italic;opacity:0.8"' : ''}>
+      <td>${sc.id}${isCustom ? ' <span style="font-size:9px;color:var(--muted)">[user]</span>' : ''}</td>
+      <td style="text-align:right">${fmt(Math.round(ann))}</td>
+      <td style="text-align:right">${fmt(Math.round(afterRamp))}</td>
+      <td style="text-align:right">${fmt(Math.round(afterAccess))}</td>
+      <td style="text-align:right">${fmt(Math.round(afterHaircut))}</td>
+      <td style="text-align:center;font-size:10px;color:var(--muted)">${tier}</td>
+    </tr>`;
+  }).join('');
+
+  const decayRow = `<tr style="border-top:1px solid var(--gray-300)">
+    <td colspan="4" style="color:var(--muted);font-size:11px">+ Decay Avoided (status quo growth @ 3.5%/yr)</td>
+    <td style="text-align:right">${fmt(Math.round(result.yearlyData[2].decayAvoided))}</td>
+    <td></td>
+  </tr>`;
+
+  const tcoRow = `<tr>
+    <td colspan="4" style="color:var(--muted);font-size:11px">− Annual TCO (opex + attrition + training)</td>
+    <td style="text-align:right;color:var(--red)">-${fmt(Math.round(result.totalAnnOpex))}</td>
+    <td></td>
+  </tr>`;
+
+  const nrvRow = `<tr style="border-top:2px solid var(--brand-black);font-weight:700">
+    <td colspan="4">NRV (5-yr discounted @ 10% WACC)</td>
+    <td style="text-align:right;color:var(--brand-green)">${fmt(result.nrv)}</td>
+    <td></td>
+  </tr>`;
+
+  el.innerHTML = rows + decayRow + tcoRow + nrvRow;
 }
 
 // ── STEP 5: ROI & VALUE CASE ──
