@@ -5425,7 +5425,7 @@ function renderROI() {
       ${['Yr 0','Yr 1','Yr 2','Yr 3','Yr 4','Yr 5'].map((l,i)=>`<text x="${toX(i)}" y="${H-8}" text-anchor="middle" font-size="9" font-family="Courier New" fill="#757575" text-transform="uppercase">${l}</text>`).join('')}
       <!-- Payback annotation — label flips right/left to stay inside chart bounds -->
       ${(pbX && isFinite(pbX)) ? (()=>{
-        const pbMo = Math.round(typeof payback==='number'?payback:parseFloat(payback)||0);
+        const pbMo = Math.round(typeof paybackMo==='number'?paybackMo:parseFloat(paybackMo)||0);
         const pbLabel = 'PAYBACK  ' + pbMo + ' MO';
         const labelW = 96, labelH = 22, labelY = PT + 5;
         const flipLeft = pbX > (PL + iW * 0.55);
@@ -5554,11 +5554,13 @@ function renderROI() {
             <!-- Key inputs used in calculation -->
             <div class="sc-snap-inputs">
               ${Object.entries(r.sc.inputs).slice(0,4).map(([k,v])=>{
+                // Library scenarios store inputs as {label,unit,value}; custom levers store flat key:value
+                const structured = v && typeof v === 'object';
                 const used = state.inputs[r.sc.id]?.[k];
-                const val = used !== undefined ? used : v.value;
+                const val = used !== undefined ? used : (structured ? v.value : v);
                 return `<div class="sc-snap-input-row">
-                  <span class="sc-snap-input-key">${v.label}</span>
-                  <span class="sc-snap-input-val">${fmtVal(val, v.unit)}</span>
+                  <span class="sc-snap-input-key">${structured ? v.label : k}</span>
+                  <span class="sc-snap-input-val">${fmtVal(val, structured ? v.unit : '')}</span>
                 </div>`;
               }).join('')}
             </div>
@@ -5843,6 +5845,7 @@ function fmt(n) {
   return sign+'$'+Math.round(abs).toLocaleString();
 }
 function fmtVal(v,unit) {
+  if(v===undefined||v===null) return '—';
   if(unit==='$') return '$'+(v>=1000?v.toLocaleString():v);
   if(unit==='%') return (v*100).toFixed(1)+'%';
   if(unit==='$/hr') return '$'+v+'/hr';
