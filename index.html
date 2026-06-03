@@ -3882,6 +3882,16 @@ const PRESETS = {
       'RET-07': { h:0.60 }
     },
     wacc: 0.10,
+    // 5 strategic enablers (the one-pager's ★ use cases): operationally significant
+    // but excluded from the financial total. Carried as $0 "strategic" levers so they
+    // appear in the value case without inflating the numbers.
+    customScenarios: [
+      { id:'SE-1', name:'Workcloud Sync — comms + tasks (UC8)',        custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
+      { id:'SE-2', name:'Unified TC5x associate device (UC3)',          custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
+      { id:'SE-3', name:'RFID-enabled Smart Exits (UC4)',               custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
+      { id:'SE-4', name:'Merchandising + planogram + NPI (UC9)',        custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
+      { id:'SE-5', name:'Real-time sales coaching via Sync (UC11)',     custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } }
+    ],
     // Company-wide cost model — $100K/store all-in. Yr-0 rows sum to ~$41.2M; the
     // tool's automatic 7% contingency brings the all-in Yr-0 to ≈ $44.1M. Recurring
     // ≈ $11.0M/yr (Workcloud SaaS $2.0M + tags + support).
@@ -3935,6 +3945,11 @@ function loadPreset(key) {
     nrvOverrides[scId] = Object.assign(nrvOverrides[scId]||{}, o);
   });
 
+  // 5b) Strategic enablers / custom levers (deep-copied so the preset stays pristine)
+  if(Array.isArray(p.customScenarios)) {
+    state.customScenarios = p.customScenarios.map(sc => Object.assign({}, sc, { inputs: Object.assign({}, sc.inputs) }));
+  }
+
   // 6) WACC
   if(p.wacc != null) setVal('nrv-wacc', p.wacc);
 
@@ -3948,7 +3963,7 @@ function loadPreset(key) {
   // 8) Re-render whatever may already be on screen
   if(p.engagement) setVal('sv-sites', p.engagement.sites);
   try { renderLeverGrid(); } catch(e){}
-  if(document.getElementById('panel-2')?.classList.contains('active')) { try { renderDisc(); } catch(e){} }
+  if(document.getElementById('panel-2')?.classList.contains('active')) { try { renderDisc(); renderCustomScenarios(); } catch(e){} }
   if(document.getElementById('panel-3')?.classList.contains('active')) { try { renderCost(); } catch(e){} }
   if(document.getElementById('panel-4')?.classList.contains('active')) { try { ensureCosts(); renderROI(); } catch(e){} }
   console.log('Loaded example preset:', key);
