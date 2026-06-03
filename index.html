@@ -1098,7 +1098,7 @@ svg{max-width:100%;height:auto}
 
   <div id="cost-edit-hint" style="display:none;align-items:center;gap:10px;padding:8px 14px;background:#FFF8E1;border:1px solid rgba(242,153,74,.3);border-radius:6px;margin-bottom:8px;font-size:11px;color:#7a4a10">
     <span>⚠</span>
-    <span>You have manual edits in the cost table. Sliders will only update the auto-calculated rows. <button onclick="costRowsEdited=false;syncCost()" style="margin-left:8px;font-size:10px;padding:2px 8px;border:1px solid #c8830a;border-radius:3px;background:transparent;color:#7a4a10;cursor:pointer;font-family:var(--mono)">↺ Reset &amp; Recalc All</button></span>
+    <span>You have manual edits in the cost table. Sliders will only update the auto-calculated rows. <button onclick="costRowsEdited=false;costRowsPreset=false;syncCost()" style="margin-left:8px;font-size:10px;padding:2px 8px;border:1px solid #c8830a;border-radius:3px;background:transparent;color:#7a4a10;cursor:pointer;font-family:var(--mono)">↺ Reset &amp; Recalc All</button></span>
   </div>
   <div class="card">
     <div class="card-title">Cost Line Items <span class="badge b-green">EDITABLE &#8212; CLICK ANY VALUE</span></div>
@@ -3882,23 +3882,24 @@ const PRESETS = {
       'RET-07': { h:0.60 }
     },
     wacc: 0.10,
-    // 5 strategic enablers (the one-pager's ★ use cases): operationally significant
-    // but excluded from the financial total. Carried as $0 "strategic" levers so they
-    // appear in the value case without inflating the numbers.
+    // 5 strategic enablers: operationally significant but excluded from the financial
+    // total. Carried as $0 "strategic" levers so they appear in the value case without
+    // inflating the numbers.
     customScenarios: [
-      { id:'SE-1', name:'Workcloud Sync — comms + tasks (UC8)',        custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
-      { id:'SE-2', name:'Unified TC5x associate device (UC3)',          custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
-      { id:'SE-3', name:'RFID-enabled Smart Exits (UC4)',               custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
-      { id:'SE-4', name:'Merchandising + planogram + NPI (UC9)',        custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
-      { id:'SE-5', name:'Real-time sales coaching via Sync (UC11)',     custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } }
+      { id:'SE-1', name:'Workcloud Sync — comms + tasks',          custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
+      { id:'SE-2', name:'Unified TC5x associate device',           custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
+      { id:'SE-3', name:'RFID-enabled Smart Exits',                custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
+      { id:'SE-4', name:'Merchandising + planogram + NPI',         custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
+      { id:'SE-5', name:'Real-time sales coaching via Sync',       custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } }
     ],
-    // Company-wide cost model — $100K/store all-in. Yr-0 rows sum to ~$41.2M; the
-    // tool's automatic 7% contingency brings the all-in Yr-0 to ≈ $44.1M. Recurring
-    // ≈ $11.0M/yr (Workcloud SaaS $2.0M + tags + support).
+    // Company-wide cost model — $100K/store all-in. Hardware + install is the doc's
+    // $80K/store; tags + services bring the Yr-0 subtotal to ~$41.2M, and the tool's
+    // automatic 7% contingency lands the all-in Yr-0 at ≈ $44.1M. Recurring ≈ $11.0M/yr
+    // (Workcloud SaaS $2.0M + tags + support).
     costRows: [
-      { label:'RFID readers, handhelds & install (TC5x / fixed portals)', qty:441, unitCost:68000,   cadence:'one-time', yr0:29988000, yr1:0,       yr2:0       },
-      { label:'Initial RFID tag deployment & fixtures',                   qty:441, unitCost:14000,   cadence:'one-time', yr0:6174000,  yr1:0,       yr2:0       },
-      { label:'Professional services, training & program management',     qty:441, unitCost:11500,   cadence:'one-time', yr0:5071500,  yr1:0,       yr2:0       },
+      { label:'RFID readers, handhelds & install (TC5x / fixed portals)', qty:441, unitCost:80000,   cadence:'one-time', yr0:35280000, yr1:0,       yr2:0       },
+      { label:'Initial RFID tag deployment & fixtures',                   qty:441, unitCost:8000,    cadence:'one-time', yr0:3528000,  yr1:0,       yr2:0       },
+      { label:'Professional services, training & program management',     qty:441, unitCost:5500,    cadence:'one-time', yr0:2425500,  yr1:0,       yr2:0       },
       { label:'Workcloud SaaS platform license',                         qty:1,   unitCost:2000000, cadence:'annual',   yr0:0,        yr1:2000000, yr2:2000000 },
       { label:'Annual RFID tag replenishment',                           qty:1,   unitCost:6500000, cadence:'annual',   yr0:0,        yr1:6500000, yr2:6500000 },
       { label:'Support, managed services & optimization',                qty:1,   unitCost:2500000, cadence:'annual',   yr0:0,        yr1:2500000, yr2:2500000 },
@@ -3957,11 +3958,12 @@ function loadPreset(key) {
   if(Array.isArray(p.costRows)) {
     costRows = p.costRows.map(r => Object.assign({}, r));
     costRowsEdited = true;
+    costRowsPreset = true;
     rebuildCostState();
   }
 
   // 8) Re-render whatever may already be on screen
-  if(p.engagement) setVal('sv-sites', p.engagement.sites);
+  if(p.engagement && p.engagement.sites != null) { setVal('sl-sites', p.engagement.sites); setVal('sv-sites', p.engagement.sites); }
   try { renderLeverGrid(); } catch(e){}
   if(document.getElementById('panel-2')?.classList.contains('active')) { try { renderDisc(); renderCustomScenarios(); } catch(e){} }
   if(document.getElementById('panel-3')?.classList.contains('active')) { try { renderCost(); } catch(e){} }
@@ -4297,6 +4299,7 @@ function syncCostFromProfile() {
 }
 
 let costRowsEdited = false; // track if user has manually edited rows
+let costRowsPreset = false; // an example preset supplied an explicit cost model — don't merge in slider defaults
 
 function syncCost() {
   const s = +sliderVal('sl-sites'), items = +sliderVal('sl-items');
@@ -4308,6 +4311,14 @@ function syncCost() {
   setSv('sv-saas', '$'+saas.toLocaleString());
   setSv('sv-tag', '$'+parseFloat(tagUnit).toFixed(2));
   setSv('sv-readers', readers);
+  // An example preset owns the whole cost model — keep its rows verbatim, never
+  // merge in the slider-derived default rows. (Reset & Recalc clears this flag.)
+  if(costRowsPreset && costRows && costRows.length > 0) {
+    costRows.forEach(r=>{ if(!r.contingency) applyBuckets(r); });
+    rebuildCostState();
+    renderCost();
+    return;
+  }
   // If user has manually edited rows, only update the auto-calc rows (first 8)
   // rather than wiping all edits
   if(costRowsEdited && costRows && costRows.length > 0) {
@@ -4332,6 +4343,8 @@ function syncCost() {
 function setSv(id,v) { const el=document.getElementById(id); if(el) el.textContent=v; }
 
 function resetCost() {
+  costRowsEdited = false;
+  costRowsPreset = false;
   setSliderDefaults([...activeIndustries][0] || 'retail');
   syncCost();
 }
