@@ -3831,6 +3831,153 @@ SCENARIOS.forEach(sc => {
   Object.entries(sc.inputs).forEach(([k,v]) => { state.inputs[sc.id][k] = v.value; });
 });
 
+// ── EXAMPLE PRESETS ───────────────────────────────────────────────────────────
+// Real-world engagements expressed as pure data, mapped onto the existing scenario
+// library. These are loaded ON DEMAND via the ?example=<key> URL parameter — they
+// are never the default state and never hard-coded into the tool's defaults. To add
+// another example, append a new key here; no other code changes are required.
+//
+// "macys" — Macy's, Inc. RFID + Workcloud (Zebra Strategic Value one-pager).
+//   441 stores · $13.044B revenue · 39.7% GM. The 8 quantified value levers are
+//   mapped to the retail scenarios; discovery inputs are anchored to Macy's own
+//   numbers so Step 3 stays fully live/editable. Revenue-recovery levers carry the
+//   doc's 40% "Finance Credit" as an NRV haircut (h = 0.60 → 40% credited). The two
+//   levers with no native scenario (AP investigation labor; the 5 strategic
+//   enablers incl. Workcloud Sync) are surfaced in the discovery signal rather than
+//   the financial total — exactly how the one-pager treats them.
+const PRESETS = {
+  macys: {
+    engagement: {
+      company:  'Zebra Technologies',
+      customer: "Macy's, Inc.",
+      title:    "Macy's RFID + Workcloud — Strategic Value Analysis",
+      sites:    441,
+      partners: 'Zebra / Workcloud',
+      pain:     "On-shelf availability gaps risking ~$258.9M in margin; $187.1M reported shrink; $2.1B markdown spend; ~$10.8M cycle-count labor pool; BOPIS cancellations ~6%. Strategic enablers (excluded from the financial total): Workcloud Sync comms + tasks, unified TC5x associate device, RFID Smart Exits, merchandising/planogram/NPI, real-time sales coaching."
+    },
+    verticals: ['retail'],
+    // 8 quantified levers → retail scenarios (RET-06 productivity & RET-08 safety
+    // stock are out of scope for Macy's; RET-05 captures BOTH receiving labor and
+    // vendor chargeback).
+    selectedIds: ['RET-01','RET-02','RET-03','RET-04','RET-05','RET-07'],
+    inputs: {
+      // Cycle-count labor — ~70% of a ~$10.8M count pool ≈ $7.6M
+      'RET-01': { total_sku_locations:646000, hours_per_sku_manual:0.05, hours_per_sku_rfid:0.015, loaded_rate:28, annual_count_cycles:12 },
+      // On-shelf availability — 30% of $258.9M margin at risk ≈ $77.7M
+      'RET-02': { annual_store_revenue:13044000000, out_of_stock_baseline_pct:0.05, osa_improvement_pct:0.30, gross_margin_pct:0.397 },
+      // Shrink — 10% of $187.1M reported shrink ≈ $18.7M
+      'RET-03': { annual_store_revenue:13044000000, shrink_pct_baseline:0.01434, shrink_reduction_pct:0.10 },
+      // Markdown — 1.5% of $2.1B markdown spend ≈ $31.5M
+      'RET-04': { annual_markdown_spend:2100000000, markdown_reduction_pct:0.15, gm_recovery_pct:0.10 },
+      // Receiving labor ($4.2M) + vendor chargeback ($3.8M) ≈ $8.0M
+      'RET-05': { annual_receiving_labor_hours:1000000, labor_reduction_pct:0.15, loaded_rate:28, annual_vendor_disputes:10133, avg_dispute_resolution_cost:625 },
+      // BOPIS / omnichannel accuracy — 50% of $15.5M at risk ≈ $7.8M
+      'RET-07': { annual_omni_orders:6522000, cancellation_rate_baseline:0.06, cancellation_reduction_pct:0.50, avg_order_value:100, gm_pct:0.397 }
+    },
+    // Finance Credit: revenue-recovery levers taken to finance at 40% of modeled
+    // benefit → NRV haircut h = 0.60 (benefit multiplied by 1 − h = 0.40).
+    nrvOverrides: {
+      'RET-02': { h:0.60 },
+      'RET-04': { h:0.60 },
+      'RET-07': { h:0.60 }
+    },
+    wacc: 0.10,
+    // 5 strategic enablers (the one-pager's ★ use cases): operationally significant
+    // but excluded from the financial total. Carried as $0 "strategic" levers so they
+    // appear in the value case without inflating the numbers.
+    customScenarios: [
+      { id:'SE-1', name:'Workcloud Sync — comms + tasks (UC8)',        custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
+      { id:'SE-2', name:'Unified TC5x associate device (UC3)',          custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
+      { id:'SE-3', name:'RFID-enabled Smart Exits (UC4)',               custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
+      { id:'SE-4', name:'Merchandising + planogram + NPI (UC9)',        custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
+      { id:'SE-5', name:'Real-time sales coaching via Sync (UC11)',     custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } }
+    ],
+    // Company-wide cost model — $100K/store all-in. Yr-0 rows sum to ~$41.2M; the
+    // tool's automatic 7% contingency brings the all-in Yr-0 to ≈ $44.1M. Recurring
+    // ≈ $11.0M/yr (Workcloud SaaS $2.0M + tags + support).
+    costRows: [
+      { label:'RFID readers, handhelds & install (TC5x / fixed portals)', qty:441, unitCost:68000,   cadence:'one-time', yr0:29988000, yr1:0,       yr2:0       },
+      { label:'Initial RFID tag deployment & fixtures',                   qty:441, unitCost:14000,   cadence:'one-time', yr0:6174000,  yr1:0,       yr2:0       },
+      { label:'Professional services, training & program management',     qty:441, unitCost:11500,   cadence:'one-time', yr0:5071500,  yr1:0,       yr2:0       },
+      { label:'Workcloud SaaS platform license',                         qty:1,   unitCost:2000000, cadence:'annual',   yr0:0,        yr1:2000000, yr2:2000000 },
+      { label:'Annual RFID tag replenishment',                           qty:1,   unitCost:6500000, cadence:'annual',   yr0:0,        yr1:6500000, yr2:6500000 },
+      { label:'Support, managed services & optimization',                qty:1,   unitCost:2500000, cadence:'annual',   yr0:0,        yr1:2500000, yr2:2500000 },
+      { label:'Contingency (7%)', qty:'', unitCost:'', cadence:'one-time', yr0:0, yr1:0, yr2:0, contingency:true }
+    ]
+  }
+};
+
+// Apply a preset onto live state + DOM, then re-render. Inverse of exportJSON().
+function loadPreset(key) {
+  const p = PRESETS[key];
+  if(!p) { console.warn('Unknown example preset:', key); return false; }
+
+  // 1) Engagement fields
+  const setVal = (id,v) => { const el = document.getElementById(id); if(el && v!=null) el.value = v; };
+  if(p.engagement) {
+    setVal('i-company',  p.engagement.company);
+    setVal('i-customer', p.engagement.customer);
+    setVal('i-title',    p.engagement.title);
+    setVal('i-sites',    p.engagement.sites);
+    setVal('i-partners', p.engagement.partners);
+    setVal('i-pain',     p.engagement.pain);
+  }
+
+  // 2) Industries — sync the Set and the vertical-button visual state
+  if(Array.isArray(p.verticals) && p.verticals.length) {
+    activeIndustries.clear();
+    p.verticals.forEach(v => activeIndustries.add(v));
+    document.querySelectorAll('.vbtn').forEach(b => b.classList.toggle('active', activeIndustries.has(b.dataset.v)));
+    setSliderDefaults(p.verticals[0]);
+  }
+
+  // 3) Selected levers
+  if(Array.isArray(p.selectedIds)) state.selectedIds = new Set(p.selectedIds);
+
+  // 4) Discovery inputs — merge overrides onto the benchmark defaults
+  if(p.inputs) Object.entries(p.inputs).forEach(([scId, vals]) => {
+    if(!state.inputs[scId]) state.inputs[scId] = {};
+    Object.assign(state.inputs[scId], vals);
+  });
+
+  // 5) Per-lever NRV overrides (e.g. Finance Credit haircut)
+  if(p.nrvOverrides) Object.entries(p.nrvOverrides).forEach(([scId, o]) => {
+    nrvOverrides[scId] = Object.assign(nrvOverrides[scId]||{}, o);
+  });
+
+  // 5b) Strategic enablers / custom levers (deep-copied so the preset stays pristine)
+  if(Array.isArray(p.customScenarios)) {
+    state.customScenarios = p.customScenarios.map(sc => Object.assign({}, sc, { inputs: Object.assign({}, sc.inputs) }));
+  }
+
+  // 6) WACC
+  if(p.wacc != null) setVal('nrv-wacc', p.wacc);
+
+  // 7) Cost model — explicit rows, flagged user-edited so sliders won't overwrite
+  if(Array.isArray(p.costRows)) {
+    costRows = p.costRows.map(r => Object.assign({}, r));
+    costRowsEdited = true;
+    rebuildCostState();
+  }
+
+  // 8) Re-render whatever may already be on screen
+  if(p.engagement) setVal('sv-sites', p.engagement.sites);
+  try { renderLeverGrid(); } catch(e){}
+  if(document.getElementById('panel-2')?.classList.contains('active')) { try { renderDisc(); renderCustomScenarios(); } catch(e){} }
+  if(document.getElementById('panel-3')?.classList.contains('active')) { try { renderCost(); } catch(e){} }
+  if(document.getElementById('panel-4')?.classList.contains('active')) { try { ensureCosts(); renderROI(); } catch(e){} }
+  console.log('Loaded example preset:', key);
+  return true;
+}
+
+// Opt-in: load an example from ?example=<key> on first paint. Never the default.
+function checkExampleParam() {
+  try {
+    const key = new URLSearchParams(window.location.search).get('example');
+    if(key) loadPreset(key.trim().toLowerCase());
+  } catch(e) { console.warn('example param error:', e); }
+}
+
 // ── NAV ──
 function go(n) {
   document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===n));
@@ -8118,6 +8265,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Init cost state from slider defaults (sliders have value= attrs so this works)
   costRows = defaultCostRows();
   rebuildCostState();
+  checkExampleParam(); // opt-in ?example=<key> — applied after defaults so it wins
   syncNav();
 });
 
