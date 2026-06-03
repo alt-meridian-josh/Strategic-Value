@@ -1171,7 +1171,21 @@ svg{max-width:100%;height:auto}
           <option value="0">Off (raw ramp)</option>
         </select>
       </div>
+      <div class="nrv-ctl">
+        <label>Finance Credit</label>
+        <select id="fin-credit-on" onchange="onFinanceCreditChange()">
+          <option value="0" selected>Off (full credit)</option>
+          <option value="1">On</option>
+        </select>
+      </div>
+      <div class="nrv-ctl">
+        <label>Revenue credit %</label>
+        <input type="number" min="0" max="100" step="5" value="40" id="fin-credit-rate" style="width:54px" oninput="onFinanceCreditChange()">
+      </div>
     </div>
+  </div>
+  <div id="fin-credit-note" style="display:none;font-size:10px;line-height:1.5;color:var(--muted);margin:-6px 0 14px;padding:8px 12px;background:var(--gray-50);border-left:3px solid var(--brand-green)">
+    <strong>Finance Credit on.</strong> Revenue-recovery benefit types (revenue, working-capital, soft) are credited at <span id="fin-credit-note-rate">40</span>% of modeled value; hard labor/cost benefits at 100%. Rationale: benefit estimates are risk-adjusted downward by likelihood-of-realization and trackability (Forrester <em>Total Economic Impact</em> methodology), and RFID sales uplift — though real at 1.5–5.5% — is the hardest benefit to attribute (Beck/ECR, <em>Measuring the Impact of RFID in Retailing</em>, 2018). The credit rate is a deliberately conservative assumption, not a published constant — adjust it to your finance team's standard.
   </div>
 
   <div class="kpi-grid" id="kpi-grid"></div>
@@ -2216,6 +2230,47 @@ function nrvCfg(sc) {
   };
 }
 
+// ── FINANCE CREDIT ────────────────────────────────────────────────────────────
+// The fraction of a lever's modeled benefit a finance team will underwrite in the
+// business case. Revenue-recovery benefit types are credited below 100% because
+// they score worst on Forrester TEI's two risk criteria — likelihood of meeting
+// projections and trackability (Forrester, "Total Economic Impact" methodology) —
+// and because RFID sales uplift, while real (1.5–5.5%), is the hardest benefit to
+// attribute (Beck/ECR, "Measuring the Impact of RFID in Retailing," 2018). Hard
+// labor/cost benefits are directly measured and credited at 100%.
+//   IMPORTANT: the revenue credit RATE itself is a deliberately conservative
+//   ASSUMPTION, not a published constant — adjustable in the Step-5 toolbar.
+let financeCreditEnabled = false;            // global toggle (default off → full credit)
+let financeCreditRate    = 0.40;             // credit applied to revenue-recovery types
+const FINANCE_CREDIT_TYPES = { revenue:true, working_cap:true, soft:true }; // hard_*/strategic → full
+
+function financeCreditFactor(sc) {
+  if (!financeCreditEnabled) return 1;
+  return FINANCE_CREDIT_TYPES[sc.rampType] ? financeCreditRate : 1;
+}
+
+// Toolbar handler — sync globals from the controls, then re-cost.
+function onFinanceCreditChange() {
+  financeCreditEnabled = document.getElementById('fin-credit-on')?.value === '1';
+  const r = parseFloat(document.getElementById('fin-credit-rate')?.value);
+  financeCreditRate = (isFinite(r) ? Math.min(100, Math.max(0, r)) : 40) / 100;
+  renderROI();
+}
+
+// Keep the toolbar controls + citation note in sync with the globals.
+function updateFinanceCreditUI() {
+  const onSel = document.getElementById('fin-credit-on');
+  const rateIn = document.getElementById('fin-credit-rate');
+  const note = document.getElementById('fin-credit-note');
+  if (onSel) onSel.value = financeCreditEnabled ? '1' : '0';
+  if (rateIn) rateIn.value = +(financeCreditRate * 100).toFixed(2);
+  if (note) {
+    note.style.display = financeCreditEnabled ? 'block' : 'none';
+    const rl = document.getElementById('fin-credit-note-rate');
+    if (rl) rl.textContent = +(financeCreditRate * 100).toFixed(2);
+  }
+}
+
 // Core NRV calculation. Returns:
 //   { perDriver:[{sc, ann, byYear:[5], cfg}], grossByYear[5], decayAvoidedByYear[5],
 //     tcoByYear[5], ncf[6] (yr0..yr5), npv, mirr, bcr, roiPct, payback }
@@ -2372,20 +2427,18 @@ const SCENARIOS = [
       gm_recovery_pct:{label:"GM Recovery per Avoided Markdown",unit:"%",value:0.20,hint:"Accenture: 15–25 pts; use 20%"}
     }
   },
-  { id:"RET-05", name:"Receiving Accuracy & Vendor Compliance",
+  { id:"RET-05", name:"Receiving Accuracy & Labor",
     theme:"Labor & Human Capacity", verticalKey:"retail",
     facilityKeys:["Store / Branch","Warehouse / DC"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
     themeKeys:["Labor & Human Capacity"], evidence:"Medium-Strong", annualBenefit:96000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
     oneLiner:"Inbound accuracy 85% → 99%+ — eliminate manual scan-each and cut receiving labor 40%",
     evidenceIds:["EV-RET-RECV-01"],
-    challenge:"When receiving labor seems minor: this is hard labor hours at a real rate, plus vendor chargeback avoidance which is a direct P&L line. Both are independently verifiable from AP records.",
-    discoveryQuestions:["How many hours per year does your team spend on inbound receiving verification?","How many vendor disputes or chargebacks do you process annually?","What does it cost in labor and admin to resolve one vendor dispute?"],
+    challenge:"When receiving labor seems minor: this is hard labor hours at a real rate, independently verifiable from your receiving timesheets. (Vendor chargeback avoidance is modeled separately as its own lever.)",
+    discoveryQuestions:["How many hours per year does your team spend on inbound receiving verification?","What is the fully-loaded hourly rate for receiving associates?","What inbound accuracy do you achieve today vs. your target?"],
     inputs:{
       annual_receiving_labor_hours:{label:"Annual Receiving Labor Hours",unit:"hrs",value:8000,hint:"~5 hrs/event × 4 events/wk × 52 wks"},
       labor_reduction_pct:{label:"Receiving Labor Reduction",unit:"%",value:0.40,hint:"GS1 US: 40–60%; use 40%"},
-      loaded_rate:{label:"Loaded Labor Rate ($/hr)",unit:"$/hr",value:24,hint:"BLS retail median + 30%"},
-      annual_vendor_disputes:{label:"Annual Vendor Disputes",unit:"count",value:120,hint:"Estimate from AP team"},
-      avg_dispute_resolution_cost:{label:"Avg Dispute Resolution Cost ($)",unit:"$",value:250,hint:"$200–500 per case"}
+      loaded_rate:{label:"Loaded Labor Rate ($/hr)",unit:"$/hr",value:24,hint:"BLS retail median + 30%"}
     }
   },
   { id:"RET-06", name:"Associate Productivity — Recovered Hours",
@@ -3184,6 +3237,32 @@ const SCENARIOS = [
       data_quality_uplift_pct:{label:"Analytics Effectiveness Improvement",unit:"%",value:0.15,hint:"Conservative: 15% improvement in model accuracy"}
     }
   },
+  { id:"RET-10", name:"Vendor Chargeback & Compliance",
+    theme:"Direct Cost & Spend", verticalKey:"retail",
+    facilityKeys:["Store / Branch","Warehouse / DC"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
+    themeKeys:["Direct Cost & Spend"], evidence:"Medium-Strong", annualBenefit:90000, rampType:"hard_cost", accessibilityTier:"configured", haircut:0.10,
+    oneLiner:"Item-level chain of custody (inbound/outbound) resolves invoice disputes and recovers vendor chargeback exposure",
+    evidenceIds:["EV-RET-CHARGEBACK-01"],
+    challenge:"Chargeback exposure is already a P&L line your AP team tracks. Auburn's Project Zipper showed item-level RFID handoffs cut shipment-claim discrepancies materially — we model only the conservative end of that reduction against your own exposure.",
+    discoveryQuestions:["What is your annual vendor chargeback / invoice-dispute exposure?","What share of disputes trace to unverified inbound or outbound quantities?","Who owns chargeback resolution and how is it measured today?"],
+    inputs:{
+      annual_chargeback_exposure:{label:"Annual Chargeback / Dispute Exposure ($)",unit:"$",value:600000,hint:"From AP / merchandising records"},
+      chargeback_reduction_pct:{label:"Chargeback Reduction from RFID",unit:"%",value:0.25,hint:"Auburn Project Zipper: conservative 20–40%; use 25%"}
+    }
+  },
+  { id:"RET-11", name:"Asset Protection — Investigation Labor",
+    theme:"Labor & Human Capacity", verticalKey:"retail",
+    facilityKeys:["Store / Branch"], techKeys:["RFID Core","Fixed RFID Infrastructure"],
+    themeKeys:["Labor & Human Capacity","Direct Cost & Spend"], evidence:"Medium", annualBenefit:60000, rampType:"hard_labor", accessibilityTier:"configured", haircut:0.10,
+    oneLiner:"RFID exit events tied to video shrink investigation time — fewer manual case-building hours per incident",
+    evidenceIds:["EV-RET-AP-01"],
+    challenge:"This is recovered investigator hours, not headcount cuts: item-level exit events auto-flag the clip and the SKU, collapsing case-building time. Credit only the schedulable hours your AP team confirms.",
+    discoveryQuestions:["What does your asset-protection investigation labor cost annually?","How long does a typical shrink case take to build today?","Are exit events currently correlated to video manually?"],
+    inputs:{
+      annual_ap_investigation_cost:{label:"Annual AP Investigation Labor Pool ($)",unit:"$",value:300000,hint:"Investigator hours × loaded rate"},
+      reduction_pct:{label:"Investigation Labor Reduction",unit:"%",value:0.30,hint:"RFID + video integration: conservative 25–40%; use 30%"}
+    }
+  },
 
   // WAREHOUSE
   { id:"WH-07", name:"RFID Data Foundation for Warehouse AI & Automation",
@@ -3658,6 +3737,8 @@ const EVIDENCE = [
   {id:"EV-RET-OMNI-01",tier:"Tier 2",title:"RFID Enabling Omnichannel Fulfillment",publisher:"Kurt Salmon / Accenture",year:2022,claim:"RFID reduces BOPIS fulfillment errors 60–80% and cuts average pick time from 8 min to under 2 min per order."},
   {id:"EV-RET-SAFETY-01",tier:"Tier 2",title:"Inventory Safety Stock Optimization with RFID",publisher:"MIT Center for Transportation & Logistics",year:2021,claim:"Real-time RFID inventory accuracy enables safety stock reduction of 20–35% without increasing stockout risk."},
   {id:"EV-RET-AI-01",tier:"Tier 2",title:"RFID as a Data Foundation for Retail AI",publisher:"Gartner Retail Technology",year:2023,claim:"Retailers with RFID-quality inventory data see 2–4x improvement in demand forecast accuracy vs. POS-only data."},
+  {id:"EV-RET-CHARGEBACK-01",tier:"Tier 1",title:"Project Zipper — Item-Level Chain of Custody Between Brands & Retailers",publisher:"Auburn University RFID Lab",year:2020,claim:"Item-level RFID handoffs between trading partners reduced shipment claim/order discrepancies materially (order accuracy frequently <70% without RFID, approaching ~100% with it), shrinking invoice-dispute and chargeback exposure."},
+  {id:"EV-RET-AP-01",tier:"Tier 2",title:"RFID + Video Integration for Loss Prevention Investigations",publisher:"National Retail Federation / Asset Protection practice",year:2022,claim:"Correlating item-level RFID exit events with video evidence collapses manual case-building time per shrink incident; conservative investigation-labor reduction of 25–40%."},
   // ── WAREHOUSE / DC ──
   {id:"EV-WH-LABOR-01",tier:"Tier 2",title:"RFID Labor Productivity in DC Operations",publisher:"Zebra Technologies / VDC Research",year:2023,claim:"RFID reduces DC cycle-count labor 75–85%. Pick verification improves accuracy by 20–35%."},
   {id:"EV-WH-RECV-01",tier:"Tier 3",title:"Receiving Throughput with RFID",publisher:"GS1 US Warehousing Team",year:2022,claim:"RFID receiving: inbound throughput +30–50%, dock-to-stock time -40–60%."},
@@ -3812,7 +3893,7 @@ function defaultCostRows() {
     {label:"Professional services / impl.",     qty:s,                                 unitCost:psUnit,     yr0:s*psUnit,                      yr1:0,                              yr2:0,                              cadence:"one-time"},
     {label:"Training & enablement",             qty:s,                                 unitCost:trainUnit,  yr0:s*trainUnit,                   yr1:0,                              yr2:0,                              cadence:"one-time"},
     {label:"Internal FTE time (project)",       qty:480,                               unitCost:55,         yr0:480*55,                        yr1:0,                              yr2:0,                              cadence:"one-time"},
-    {label:"Contingency (7%)",                  qty:"",                                unitCost:"",         yr0:0,                             yr1:0,                              yr2:0,                              cadence:"one-time", contingency:true},
+    {label:"Contingency",                       qty:"",                                unitCost:"",         yr0:0,                             yr1:0,                              yr2:0,                              cadence:"one-time", contingency:true},
   ];
 }
 
@@ -3838,13 +3919,13 @@ SCENARIOS.forEach(sc => {
 // another example, append a new key here; no other code changes are required.
 //
 // "macys" — Macy's, Inc. RFID + Workcloud (Zebra Strategic Value one-pager).
-//   441 stores · $13.044B revenue · 39.7% GM. The 8 quantified value levers are
-//   mapped to the retail scenarios; discovery inputs are anchored to Macy's own
-//   numbers so Step 3 stays fully live/editable. Revenue-recovery levers carry the
-//   doc's 40% "Finance Credit" as an NRV haircut (h = 0.60 → 40% credited). The two
-//   levers with no native scenario (AP investigation labor; the 5 strategic
-//   enablers incl. Workcloud Sync) are surfaced in the discovery signal rather than
-//   the financial total — exactly how the one-pager treats them.
+//   441 stores · $13.044B revenue · 39.7% GM. All 8 quantified value levers map 1:1
+//   to retail scenarios (RET-01..05, 07, 10, 11); discovery inputs are anchored to
+//   Macy's own numbers so Step 3 stays fully live/editable. Revenue-recovery levers
+//   carry the doc's 40% "Finance Credit" via the first-class Finance Credit layer.
+//   The 5 strategic enablers (incl. Workcloud Sync) are carried as $0 strategic
+//   levers — operationally significant but excluded from the financial total, exactly
+//   as the one-pager treats them.
 const PRESETS = {
   macys: {
     engagement: {
@@ -3856,10 +3937,9 @@ const PRESETS = {
       pain:     "On-shelf availability gaps risking ~$258.9M in margin; $187.1M reported shrink; $2.1B markdown spend; ~$10.8M cycle-count labor pool; BOPIS cancellations ~6%. Strategic enablers (excluded from the financial total): Workcloud Sync comms + tasks, unified TC5x associate device, RFID Smart Exits, merchandising/planogram/NPI, real-time sales coaching."
     },
     verticals: ['retail'],
-    // 8 quantified levers → retail scenarios (RET-06 productivity & RET-08 safety
-    // stock are out of scope for Macy's; RET-05 captures BOTH receiving labor and
-    // vendor chargeback).
-    selectedIds: ['RET-01','RET-02','RET-03','RET-04','RET-05','RET-07'],
+    // All 8 quantified levers map 1:1 to retail scenarios (RET-06 productivity,
+    // RET-08 safety stock, RET-09 AI are out of scope for Macy's).
+    selectedIds: ['RET-01','RET-02','RET-03','RET-04','RET-05','RET-07','RET-10','RET-11'],
     inputs: {
       // Cycle-count labor — ~70% of a ~$10.8M count pool ≈ $7.6M
       'RET-01': { total_sku_locations:646000, hours_per_sku_manual:0.05, hours_per_sku_rfid:0.015, loaded_rate:28, annual_count_cycles:12 },
@@ -3869,18 +3949,19 @@ const PRESETS = {
       'RET-03': { annual_store_revenue:13044000000, shrink_pct_baseline:0.01434, shrink_reduction_pct:0.10 },
       // Markdown — 1.5% of $2.1B markdown spend ≈ $31.5M
       'RET-04': { annual_markdown_spend:2100000000, markdown_reduction_pct:0.15, gm_recovery_pct:0.10 },
-      // Receiving labor ($4.2M) + vendor chargeback ($3.8M) ≈ $8.0M
-      'RET-05': { annual_receiving_labor_hours:1000000, labor_reduction_pct:0.15, loaded_rate:28, annual_vendor_disputes:10133, avg_dispute_resolution_cost:625 },
+      // Receiving labor — 15% of a ~$28.2M receiving pool ≈ $4.2M
+      'RET-05': { annual_receiving_labor_hours:1007000, labor_reduction_pct:0.15, loaded_rate:28 },
       // BOPIS / omnichannel accuracy — 50% of $15.5M at risk ≈ $7.8M
-      'RET-07': { annual_omni_orders:6522000, cancellation_rate_baseline:0.06, cancellation_reduction_pct:0.50, avg_order_value:100, gm_pct:0.397 }
+      'RET-07': { annual_omni_orders:6522000, cancellation_rate_baseline:0.06, cancellation_reduction_pct:0.50, avg_order_value:100, gm_pct:0.397 },
+      // Vendor chargeback — 25% of $15.0M exposure ≈ $3.8M
+      'RET-10': { annual_chargeback_exposure:15000000, chargeback_reduction_pct:0.25 },
+      // AP investigation labor — 30% of $6.5M AP pool ≈ $2.0M
+      'RET-11': { annual_ap_investigation_cost:6500000, reduction_pct:0.30 }
     },
-    // Finance Credit: revenue-recovery levers taken to finance at 40% of modeled
-    // benefit → NRV haircut h = 0.60 (benefit multiplied by 1 − h = 0.40).
-    nrvOverrides: {
-      'RET-02': { h:0.60 },
-      'RET-04': { h:0.60 },
-      'RET-07': { h:0.60 }
-    },
+    // Finance Credit: the doc takes revenue-recovery levers to finance at 40% of
+    // modeled benefit. Handled by the first-class Finance Credit layer (applies to
+    // revenue / working_cap / soft benefit types) — RET-02, RET-04, RET-07.
+    financeCredit: { enabled:true, rate:0.40 },
     wacc: 0.10,
     // 5 strategic enablers: operationally significant but excluded from the financial
     // total. Carried as $0 "strategic" levers so they appear in the value case without
@@ -3903,7 +3984,7 @@ const PRESETS = {
       { label:'Workcloud SaaS platform license',                         qty:1,   unitCost:2000000, cadence:'annual',   yr0:0,        yr1:2000000, yr2:2000000 },
       { label:'Annual RFID tag replenishment',                           qty:1,   unitCost:6500000, cadence:'annual',   yr0:0,        yr1:6500000, yr2:6500000 },
       { label:'Support, managed services & optimization',                qty:1,   unitCost:2500000, cadence:'annual',   yr0:0,        yr1:2500000, yr2:2500000 },
-      { label:'Contingency (7%)', qty:'', unitCost:'', cadence:'one-time', yr0:0, yr1:0, yr2:0, contingency:true }
+      { label:'Contingency', qty:'', unitCost:'', cadence:'one-time', yr0:0, yr1:0, yr2:0, contingency:true }
     ]
   }
 };
@@ -3951,10 +4032,18 @@ function loadPreset(key) {
     state.customScenarios = p.customScenarios.map(sc => Object.assign({}, sc, { inputs: Object.assign({}, sc.inputs) }));
   }
 
+  // 5c) Finance Credit (first-class) — fraction of revenue-recovery benefit credited
+  if(p.financeCredit) {
+    financeCreditEnabled = !!p.financeCredit.enabled;
+    if(p.financeCredit.rate != null) financeCreditRate = p.financeCredit.rate;
+    updateFinanceCreditUI();
+  }
+
   // 6) WACC
   if(p.wacc != null) setVal('nrv-wacc', p.wacc);
 
   // 7) Cost model — explicit rows, flagged user-edited so sliders won't overwrite
+  if(p.contingencyRate != null) contingencyRate = p.contingencyRate;
   if(Array.isArray(p.costRows)) {
     costRows = p.costRows.map(r => Object.assign({}, r));
     costRowsEdited = true;
@@ -4300,6 +4389,16 @@ function syncCostFromProfile() {
 
 let costRowsEdited = false; // track if user has manually edited rows
 let costRowsPreset = false; // an example preset supplied an explicit cost model — don't merge in slider defaults
+let contingencyRate = 0.07; // editable buffer on Yr-0 capital (0–25%); set inline on the contingency row
+
+// Update the contingency buffer rate from the inline % input, then re-cost.
+function setContingencyRate(pct) {
+  let r = parseFloat(pct);
+  if(!isFinite(r)) r = 0;
+  contingencyRate = Math.min(0.25, Math.max(0, r/100));
+  rebuildCostState();
+  renderCost();
+}
 
 function syncCost() {
   const s = +sliderVal('sl-sites'), items = +sliderVal('sl-items');
@@ -4356,7 +4455,7 @@ function renderCost() {
 
   let yr0Sub=0, yr1Sub=0, yr2Sub=0;
   costRows.forEach(r=>{ if(!r.contingency){ yr0Sub+=r.yr0||0; yr1Sub+=r.yr1||0; yr2Sub+=r.yr2||0; }});
-  const cont = Math.round(yr0Sub*0.07);
+  const cont = Math.round(yr0Sub*contingencyRate);
   costRows.forEach(r=>{ if(r.contingency){ r.yr0=cont; }});
   const yr0t = yr0Sub+cont, yr1t = yr1Sub, yr2t = yr2Sub;
   state.costs = {yr0:yr0t, yr1:yr1t, yr2:yr2t};
@@ -4370,7 +4469,9 @@ function renderCost() {
     const cadenceLabels = {'one-time':'ONE-TIME','monthly':'MONTHLY','annual':'ANNUAL','per-site/yr':'PER SITE/YR','other':'OTHER'};
     if(r.contingency) return `
       <tr style="background:var(--gray-50)">
-        <td colspan="3" style="color:var(--muted);font-size:11px;font-style:italic">Contingency (7% of Yr 0 subtotal)</td>
+        <td colspan="3" style="color:var(--muted);font-size:11px;font-style:italic">Contingency
+          <input class="editable-input num-input" value="${+(contingencyRate*100).toFixed(2)}" style="width:46px;text-align:right;margin:0 2px"
+                 oninput="setContingencyRate(this.value)" title="Editable buffer on Yr-0 capital">% of Yr 0 subtotal</td>
         <td></td>
         <td class="r" style="color:var(--muted);font-family:var(--mono)">${fmt(cont)}</td>
         <td></td>
@@ -4446,7 +4547,7 @@ function recalcCostRow(i) {
 function rebuildCostState() {
   let yr0Sub=0, yr1Sub=0, yr2Sub=0;
   costRows.forEach(r=>{ if(!r.contingency){ yr0Sub+=r.yr0||0; yr1Sub+=r.yr1||0; yr2Sub+=r.yr2||0; }});
-  const cont = Math.round(yr0Sub*0.07);
+  const cont = Math.round(yr0Sub*contingencyRate);
   costRows.forEach(r=>{ if(r.contingency) r.yr0=cont; });
   state.costs = {yr0: yr0Sub+cont, yr1: yr1Sub, yr2: yr2Sub};
 }
@@ -4490,11 +4591,13 @@ function calcSc(sc) {
       case"RET-02": return p.annual_store_revenue*p.out_of_stock_baseline_pct*p.osa_improvement_pct*p.gross_margin_pct;
       case"RET-03": return p.annual_store_revenue*p.shrink_pct_baseline*p.shrink_reduction_pct;
       case"RET-04": return p.annual_markdown_spend*p.markdown_reduction_pct*p.gm_recovery_pct;
-      case"RET-05": return (p.annual_receiving_labor_hours*p.labor_reduction_pct*p.loaded_rate)+(p.annual_vendor_disputes*0.6*p.avg_dispute_resolution_cost);
+      case"RET-05": return p.annual_receiving_labor_hours*p.labor_reduction_pct*p.loaded_rate;
       case"RET-06": return p.num_stores*p.associates_per_store*p.hours_recovered_per_week*p.weeks_per_year*p.loaded_rate;
       case"RET-07": return p.annual_omni_orders*p.cancellation_rate_baseline*p.cancellation_reduction_pct*p.avg_order_value*p.gm_pct;
       case"RET-08": return p.total_inventory_value*p.safety_stock_reduction_pct*p.carrying_cost_pct;
       case"RET-09": return p.annual_analytics_budget*p.data_quality_uplift_pct;
+      case"RET-10": return p.annual_chargeback_exposure*p.chargeback_reduction_pct;
+      case"RET-11": return p.annual_ap_investigation_cost*p.reduction_pct;
 
       // ── WAREHOUSE / DC ───────────────────────────────────────────────────────
       case"WH-01":  return p.count_cycles_per_year*p.total_pallet_positions*((p.time_per_position_manual_min/60)-(p.time_per_position_rfid_sec/3600))*p.loaded_rate;
@@ -4635,7 +4738,7 @@ function calcNRV(activeScenarios, costs, wacc) {
       const ramp = RAMP[sc.rampType].y[t];
       const access = ACCESS_TIER[sc.accessibilityTier || 'configured'][t];
       const h = (sc.haircut !== undefined) ? sc.haircut : 0.10;
-      return sum + ann * ramp * access * (1 - h);
+      return sum + ann * ramp * access * (1 - h) * financeCreditFactor(sc);
     }, 0);
 
     const decayAvoided = B0 * (Math.pow(1.035, yr) - 1);
@@ -4693,7 +4796,7 @@ function calcDriverWalkdown(sc, result) {
     const h = (sc.haircut !== undefined) ? sc.haircut : 0.10;
     const afterRamp = ann * ramp;
     const afterAccess = afterRamp * access;
-    const afterHaircut = afterAccess * (1 - h);
+    const afterHaircut = afterAccess * (1 - h) * financeCreditFactor(sc);
     rows.push({ year: t + 1, gross: ann, afterRamp, afterAccess, afterHaircut });
   }
   return rows;
@@ -4712,7 +4815,7 @@ function renderWalkdownTable(activeScenarios, result) {
     const access = ACCESS_TIER[tier][peakT];
     const afterRamp = ann * ramp;
     const afterAccess = afterRamp * access;
-    const afterHaircut = afterAccess * (1 - h);
+    const afterHaircut = afterAccess * (1 - h) * financeCreditFactor(sc);
     const isCustom = sc.custom === true;
     return `<tr${isCustom ? ' style="font-style:italic;opacity:0.8"' : ''}>
       <td>${sc.id}${isCustom ? ' <span style="font-size:9px;color:var(--muted)">[user]</span>' : ''}</td>
@@ -5173,6 +5276,7 @@ function renderSCDecision(results, sqft, labor, asp, rev) {
 
 // ── STEP 5: ROI & VALUE CASE ──
 function renderROI() {
+  updateFinanceCreditUI();
   const active = SCENARIOS.filter(s => state.selectedIds.has(s.id))
     .concat((state.customScenarios || []).filter(s => s.active));
   if (!active.length) {
@@ -6464,7 +6568,7 @@ function exportFullPDF() {
       <thead><tr><th>Item</th><th class="r">Month</th><th class="r">Cost</th></tr></thead>
       <tbody>
         ${nrcRows}
-        ${contingency?`<tr style="font-style:italic;color:#757575"><td>Contingency (7%)</td><td class="r">0</td><td class="r">${F(contingency.yr0||0)}</td></tr>`:''}
+        ${contingency?`<tr style="font-style:italic;color:#757575"><td>Contingency (${+(contingencyRate*100).toFixed(2)}%)</td><td class="r">0</td><td class="r">${F(contingency.yr0||0)}</td></tr>`:''}
         <tr class="total-row"><td><b>Total non-recurring costs</b></td><td></td><td class="r"><b>${F(yr0)}</b></td></tr>
       </tbody>
     </table>
