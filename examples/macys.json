@@ -1,0 +1,46 @@
+{
+  "_type": "strategic-value-engagement",
+  "_version": 1,
+  "_label": "Macy's, Inc. — RFID + Workcloud (Zebra Strategic Value one-pager)",
+  "engagement": {
+    "company": "Zebra Technologies",
+    "customer": "Macy's, Inc.",
+    "title": "Macy's RFID + Workcloud — Strategic Value Analysis",
+    "sites": 441,
+    "seller": "Joshua Willis",
+    "email": "joshua.willis@zebra.com",
+    "partners": "Zebra / Workcloud",
+    "pain": "On-shelf availability gaps risking ~$258.9M in margin; $187.1M reported shrink; $2.1B markdown spend; ~$10.8M cycle-count labor pool; BOPIS cancellations ~6%. Strategic enablers (excluded from the financial total): Workcloud Sync comms + tasks, unified TC5x associate device, RFID Smart Exits, merchandising/planogram/NPI, real-time sales coaching."
+  },
+  "verticals": ["retail"],
+  "selectedIds": ["RET-01", "RET-02", "RET-03", "RET-04", "RET-05", "RET-07", "RET-10", "RET-11"],
+  "inputs": {
+    "RET-01": { "total_sku_locations": 646000, "hours_per_sku_manual": 0.05, "hours_per_sku_rfid": 0.015, "loaded_rate": 28, "annual_count_cycles": 12 },
+    "RET-02": { "annual_store_revenue": 13044000000, "out_of_stock_baseline_pct": 0.05, "osa_improvement_pct": 0.30, "gross_margin_pct": 0.397 },
+    "RET-03": { "annual_store_revenue": 13044000000, "shrink_pct_baseline": 0.01434, "shrink_reduction_pct": 0.10 },
+    "RET-04": { "annual_markdown_spend": 2100000000, "markdown_reduction_pct": 0.15, "gm_recovery_pct": 0.10 },
+    "RET-05": { "annual_receiving_labor_hours": 1007000, "labor_reduction_pct": 0.15, "loaded_rate": 28 },
+    "RET-07": { "annual_omni_orders": 6522000, "cancellation_rate_baseline": 0.06, "cancellation_reduction_pct": 0.50, "avg_order_value": 100, "gm_pct": 0.397 },
+    "RET-10": { "annual_chargeback_exposure": 15000000, "chargeback_reduction_pct": 0.25 },
+    "RET-11": { "annual_ap_investigation_cost": 6500000, "reduction_pct": 0.30 }
+  },
+  "customScenarios": [
+    { "id": "SE-1", "name": "Workcloud Sync — comms + tasks", "custom": true, "active": true, "mechanismId": "custom_formula", "rampType": "strategic", "accessibilityTier": "configured", "haircut": 0.10, "inputs": { "annual_value": 0 } },
+    { "id": "SE-2", "name": "Unified TC5x associate device", "custom": true, "active": true, "mechanismId": "custom_formula", "rampType": "strategic", "accessibilityTier": "configured", "haircut": 0.10, "inputs": { "annual_value": 0 } },
+    { "id": "SE-3", "name": "RFID-enabled Smart Exits", "custom": true, "active": true, "mechanismId": "custom_formula", "rampType": "strategic", "accessibilityTier": "configured", "haircut": 0.10, "inputs": { "annual_value": 0 } },
+    { "id": "SE-4", "name": "Merchandising + planogram + NPI", "custom": true, "active": true, "mechanismId": "custom_formula", "rampType": "strategic", "accessibilityTier": "configured", "haircut": 0.10, "inputs": { "annual_value": 0 } },
+    { "id": "SE-5", "name": "Real-time sales coaching via Sync", "custom": true, "active": true, "mechanismId": "custom_formula", "rampType": "strategic", "accessibilityTier": "configured", "haircut": 0.10, "inputs": { "annual_value": 0 } }
+  ],
+  "financeCredit": { "enabled": true, "rate": 0.40 },
+  "wacc": 0.10,
+  "contingencyRate": 0.07,
+  "costRows": [
+    { "label": "RFID readers, handhelds & install (TC5x / fixed portals)", "qty": 441, "unitCost": 80000, "cadence": "one-time", "yr0": 35280000, "yr1": 0, "yr2": 0 },
+    { "label": "Initial RFID tag deployment & fixtures", "qty": 441, "unitCost": 8000, "cadence": "one-time", "yr0": 3528000, "yr1": 0, "yr2": 0 },
+    { "label": "Professional services, training & program management", "qty": 441, "unitCost": 5500, "cadence": "one-time", "yr0": 2425500, "yr1": 0, "yr2": 0 },
+    { "label": "Workcloud SaaS platform license", "qty": 1, "unitCost": 2000000, "cadence": "annual", "yr0": 0, "yr1": 2000000, "yr2": 2000000 },
+    { "label": "Annual RFID tag replenishment", "qty": 1, "unitCost": 6500000, "cadence": "annual", "yr0": 0, "yr1": 6500000, "yr2": 6500000 },
+    { "label": "Support, managed services & optimization", "qty": 1, "unitCost": 2500000, "cadence": "annual", "yr0": 0, "yr1": 2500000, "yr2": 2500000 },
+    { "label": "Contingency", "qty": "", "unitCost": "", "cadence": "one-time", "yr0": 0, "yr1": 0, "yr2": 0, "contingency": true }
+  ]
+}
