@@ -928,8 +928,9 @@ svg{max-width:100%;height:auto}
   <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 14px">
     <button class="btn btn-outline" style="height:32px;padding:0 14px;font-size:12px;border-radius:16px" onclick="triggerImport()">📂 Load analysis</button>
     <button class="btn btn-outline" style="height:32px;padding:0 14px;font-size:12px;border-radius:16px" onclick="saveEngagementFile()">💾 Save analysis</button>
+    <button class="btn btn-outline" style="height:32px;padding:0 14px;font-size:12px;border-radius:16px" onclick="exportStandaloneHTML()">📦 Export standalone tool</button>
     <input type="file" id="import-file" accept="application/json,.json" style="display:none" onchange="importEngagementFile(this.files[0])">
-    <span style="font-size:11px;color:var(--muted)">Reload a saved engagement (JSON), or save this one to share. Try the bundled <a href="?example=macys" style="color:var(--blue)">Macy's example</a>.</span>
+    <span style="font-size:11px;color:var(--muted)">Reload a saved engagement (JSON), save this one, or export a self-contained offline HTML tool with this analysis baked in. Try the bundled <a href="?example=macys" style="color:var(--blue)">Macy's example</a>.</span>
   </div>
 
   <div class="card">
@@ -4058,6 +4059,78 @@ function importEngagementFile(file) {
   reader.readAsText(file);
 }
 function triggerImport() { document.getElementById('import-file')?.click(); }
+
+// If this file was produced by "Export standalone tool", an engagement is baked in
+// as a JSON script block (id "embedded-engagement") — read and apply it.
+function checkEmbeddedEngagement() {
+  try {
+    const el = document.getElementById('embedded-engagement');
+    if(!el || !el.textContent.trim()) return false;
+    applyEngagement(JSON.parse(el.textContent));
+    return true;
+  } catch(e) { console.warn('embedded engagement error:', e); return false; }
+}
+
+// Export the ENTIRE tool as one self-contained .html with the current analysis
+// baked in. The result opens straight from local disk, runs fully offline, makes
+// no network calls, and is fully editable by the recipient.
+async function exportStandaloneHTML() {
+  try {
+    ensureCosts();
+    const data = gatherEngagement();
+
+    // Get a pristine copy of the tool's own source. fetch() works on the hosted
+    // site; on file:// it's blocked, so fall back to serializing the live document.
+    let src;
+    try {
+      const r = await fetch(location.href);
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      src = await r.text();
+    } catch(e) {
+      src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    }
+
+    // Drop any embedded block from a previously-exported file (avoid stacking).
+    src = src.replace(/<script[^>]*id=["']embedded-engagement["'][\s\S]*?<\/script>\s*/i, '');
+
+    // Inline the CDN chart libraries so the file is fully self-contained and works
+    // offline (no phone-home on open). Needs network AT EXPORT time; if a fetch
+    // fails we leave the original CDN tag as a graceful fallback. (PptxGenJS stays a
+    // lazy CDN load — it only fires if the recipient clicks PPTX export.)
+    const CDN_LIBS = [
+      'https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js',
+      'https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js'
+    ];
+    for (const libUrl of CDN_LIBS) {
+      try {
+        const code = await fetch(libUrl).then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); });
+        const safe = code.replace(/<\/script>/gi, '<\\/script>');
+        const esc = libUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const tagRe = new RegExp('<script\\b[^>]*\\bsrc=["\']' + esc + '["\'][^>]*>\\s*<\\/script>', 'i');
+        src = src.replace(tagRe, '<script>/* inlined from ' + libUrl + ' */\n' + safe + '\n</' + 'script>');
+      } catch(e) { console.warn('Standalone: could not inline ' + libUrl + ' (left as CDN link):', e.message); }
+    }
+
+    // </ in the JSON would prematurely close the script tag — escape it. Build the
+    // tag non-contiguously ('scr'+'ipt') so this very source line isn't matched by
+    // the de-dup regex above.
+    const TAG = 'scr' + 'ipt';
+    const json = JSON.stringify(data, null, 2).replace(/<\//g, '<\\/');
+    const block = '<' + TAG + ' type="application/json" id="embedded-engagement">\n' + json + '\n</' + TAG + '>\n';
+
+    // Inject before the document's REAL closing body tag — the last one (earlier
+    // </body> strings are literals inside the print/export code).
+    const bodyIdx = src.toLowerCase().lastIndexOf('</body>');
+    src = bodyIdx !== -1 ? (src.slice(0, bodyIdx) + block + src.slice(bodyIdx)) : (src + '\n' + block);
+
+    const blob = new Blob([src], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const co = (data.engagement.customer || 'engagement').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '');
+    a.href = url; a.download = co + '-value-tool.html'; a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) { alert('Standalone export error: ' + e.message); }
+}
 
 // Fetch a bundled example engagement (examples/<key>.json) and apply it.
 // Works on the hosted site; file:// blocks fetch — fall back to the manual loader.
@@ -8399,7 +8472,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Init cost state from slider defaults (sliders have value= attrs so this works)
   costRows = defaultCostRows();
   rebuildCostState();
-  checkExampleParam(); // opt-in ?example=<key> — applied after defaults so it wins
+  checkEmbeddedEngagement();  // standalone export: engagement baked into the file
+  checkExampleParam();        // opt-in ?example=<key> — applied after defaults so it wins
   syncNav();
 });
 

@@ -21,6 +21,7 @@ A whole analysis is just data — there is **no hard-coded sample baked into the
 
 - **💾 Save analysis** (Step 1) downloads the current engagement as a portable `.json` file.
 - **📂 Load analysis** reads one back via the file picker (works from `file://` too).
+- **📦 Export standalone tool** packages the **entire app + the current analysis** into one self-contained `.html` file. Hand it to a customer or rep: they open it straight from local disk, it runs fully offline, makes no network calls on open, and every number stays editable. (The export inlines the chart libraries so nothing phones home; *PPTX export* still pulls its generator from a CDN, so that one action needs internet. The file is not encrypted or locked — it's meant to be edited.)
 - Bundled example engagements live as real files under [`examples/`](examples/) and load through the exact same path.
 
 **Worked example — Macy's RFID + Workcloud** (`examples/macys.json`, from the Zebra Strategic Value one-pager): 441 stores, $13.044B revenue, all 8 quantified value levers mapped 1:1, 5 strategic enablers, $44.1M Yr-0 / $11.0M-yr cost model, Finance Credit at 40%.
