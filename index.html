@@ -923,6 +923,13 @@ svg{max-width:100%;height:auto}
 
 <main class="main">
 
+<!-- Engagement notice banner — populated from a loaded engagement's _notice field -->
+<div id="engagement-notice" style="display:none;align-items:center;gap:10px;background:#fff7e6;border:1px solid #f0c36d;border-left:4px solid #e0a020;color:#7a5200;font-size:12px;padding:8px 14px;margin:0 0 14px;border-radius:5px">
+  <span style="font-size:14px">&#9432;</span>
+  <span id="engagement-notice-text" style="flex:1;line-height:1.5"></span>
+  <button onclick="document.getElementById('engagement-notice').style.display='none'" title="Dismiss" style="background:none;border:none;color:#7a5200;cursor:pointer;font-size:17px;line-height:1;padding:0 4px">&times;</button>
+</div>
+
 <!-- == STEP 1: ENGAGEMENT SETUP == -->
 <div class="panel active" id="panel-0">
   <div class="step-eyebrow">Step 1 of 6</div>
@@ -931,8 +938,9 @@ svg{max-width:100%;height:auto}
 
   <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 14px">
     <button class="btn btn-outline" style="height:32px;padding:0 14px;font-size:12px;border-radius:16px" onclick="triggerImport()">📂 Load analysis</button>
+    <button class="btn btn-outline" style="height:32px;padding:0 14px;font-size:12px;border-radius:16px" onclick="loadExample('sample_engagement')">✨ Load sample</button>
     <input type="file" id="import-file" accept="application/json,.json" style="display:none" onchange="importEngagementFile(this.files[0])">
-    <span style="font-size:11px;color:var(--muted)">Reload a saved engagement from a <code style="font-size:10px;background:#eee;padding:1px 4px;border-radius:3px;">.json</code> file. Save &amp; standalone export are on the Full Analysis page.</span>
+    <span style="font-size:11px;color:var(--muted)">Reload a saved engagement from a <code style="font-size:10px;background:#eee;padding:1px 4px;border-radius:3px;">.json</code> file, or load an illustrative sample. Save &amp; standalone export are on the Full Analysis page.</span>
   </div>
 
   <div class="card">
@@ -3948,6 +3956,14 @@ SCENARIOS.forEach(sc => {
 function applyEngagement(p) {
   if(!p || typeof p !== 'object') { console.warn('applyEngagement: nothing to load'); return false; }
   const setVal = (id,v) => { const el = document.getElementById(id); if(el && v!=null) el.value = v; };
+
+  // 0) Optional notice banner (e.g. illustrative-sample disclaimer)
+  const noticeEl = document.getElementById('engagement-notice');
+  if(noticeEl) {
+    const txt = document.getElementById('engagement-notice-text');
+    if(p._notice) { if(txt) txt.textContent = p._notice; noticeEl.style.display = 'flex'; }
+    else { noticeEl.style.display = 'none'; }
+  }
 
   // 1) Engagement fields
   if(p.engagement) {

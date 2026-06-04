@@ -1,0 +1,38 @@
+{
+  "_type": "strategic-value-engagement",
+  "_version": 1,
+  "_label": "Zebra Apparel Co. — illustrative sample (benchmark assumptions only)",
+  "_notice": "Illustrative engagement — all figures are published benchmark assumptions, not customer data.",
+  "engagement": {
+    "company": "Zebra Technologies",
+    "customer": "Zebra Apparel Co.",
+    "title": "RFID Strategic Value Analysis — Sample",
+    "sites": 200,
+    "seller": "Sales Engineer",
+    "email": "rep@example.com",
+    "partners": "Zebra",
+    "pain": "Inventory accuracy ~70%; weekly manual cycle counts; BOPIS cancellations ~8%; seasonal markdown pressure. (Illustrative apparel chain — benchmark assumptions only.)"
+  },
+  "verticals": ["retail"],
+  "selectedIds": ["RET-01", "RET-02", "RET-03", "RET-04", "RET-05", "RET-07"],
+  "inputs": {
+    "RET-01": { "total_sku_locations": 1000000, "hours_per_sku_manual": 0.05, "hours_per_sku_rfid": 0.0125, "loaded_rate": 24, "annual_count_cycles": 2 },
+    "RET-02": { "annual_store_revenue": 1000000000, "out_of_stock_baseline_pct": 0.05, "osa_improvement_pct": 0.50, "gross_margin_pct": 0.50 },
+    "RET-03": { "annual_store_revenue": 1000000000, "shrink_pct_baseline": 0.014, "shrink_reduction_pct": 0.20 },
+    "RET-04": { "annual_markdown_spend": 150000000, "markdown_reduction_pct": 0.10, "gm_recovery_pct": 0.20 },
+    "RET-05": { "annual_receiving_labor_hours": 208000, "labor_reduction_pct": 0.40, "loaded_rate": 24 },
+    "RET-07": { "annual_omni_orders": 625000, "cancellation_rate_baseline": 0.08, "cancellation_reduction_pct": 0.60, "avg_order_value": 80, "gm_pct": 0.50 }
+  },
+  "financeCredit": { "enabled": true, "rate": 0.40 },
+  "wacc": 0.10,
+  "contingencyRate": 0.07,
+  "costRows": [
+    { "label": "RFID readers, handhelds & install", "qty": 200, "unitCost": 70000, "cadence": "one-time", "yr0": 14000000, "yr1": 0, "yr2": 0 },
+    { "label": "Initial RFID tags & fixtures", "qty": 200, "unitCost": 6000, "cadence": "one-time", "yr0": 1200000, "yr1": 0, "yr2": 0 },
+    { "label": "Professional services & training", "qty": 200, "unitCost": 4000, "cadence": "one-time", "yr0": 800000, "yr1": 0, "yr2": 0 },
+    { "label": "SaaS / platform license", "qty": 200, "unitCost": 6000, "cadence": "annual", "yr0": 0, "yr1": 1200000, "yr2": 1200000 },
+    { "label": "Annual tag replenishment", "qty": 1, "unitCost": 1000000, "cadence": "annual", "yr0": 0, "yr1": 1000000, "yr2": 1000000 },
+    { "label": "Support & managed services", "qty": 1, "unitCost": 800000, "cadence": "annual", "yr0": 0, "yr1": 800000, "yr2": 800000 },
+    { "label": "Contingency", "qty": "", "unitCost": "", "cadence": "one-time", "yr0": 0, "yr1": 0, "yr2": 0, "contingency": true }
+  ]
+}
