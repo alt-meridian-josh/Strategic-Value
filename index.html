@@ -925,6 +925,13 @@ svg{max-width:100%;height:auto}
   <div class="step-title">Engagement Setup</div>
   <div class="step-desc">Capture the key engagement details. This drives the output branding and filters the scenario library. Revenue is collected in Discovery — where it belongs to each scenario.</div>
 
+  <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 14px">
+    <button class="btn btn-outline" style="height:32px;padding:0 14px;font-size:12px;border-radius:16px" onclick="triggerImport()">📂 Load analysis</button>
+    <button class="btn btn-outline" style="height:32px;padding:0 14px;font-size:12px;border-radius:16px" onclick="saveEngagementFile()">💾 Save analysis</button>
+    <input type="file" id="import-file" accept="application/json,.json" style="display:none" onchange="importEngagementFile(this.files[0])">
+    <span style="font-size:11px;color:var(--muted)">Reload a saved engagement (JSON), or save this one to share. Try the bundled <a href="?example=macys" style="color:var(--blue)">Macy's example</a>.</span>
+  </div>
+
   <div class="card">
     <div class="card-title">Organization</div>
     <div class="g2">
@@ -1174,8 +1181,8 @@ svg{max-width:100%;height:auto}
       <div class="nrv-ctl">
         <label>Finance Credit</label>
         <select id="fin-credit-on" onchange="onFinanceCreditChange()">
-          <option value="0" selected>Off (full credit)</option>
-          <option value="1">On</option>
+          <option value="0">Off (full credit)</option>
+          <option value="1" selected>On</option>
         </select>
       </div>
       <div class="nrv-ctl">
@@ -2240,7 +2247,7 @@ function nrvCfg(sc) {
 // labor/cost benefits are directly measured and credited at 100%.
 //   IMPORTANT: the revenue credit RATE itself is a deliberately conservative
 //   ASSUMPTION, not a published constant — adjustable in the Step-5 toolbar.
-let financeCreditEnabled = false;            // global toggle (default off → full credit)
+let financeCreditEnabled = true;             // global toggle (default on → conservative credit)
 let financeCreditRate    = 0.40;             // credit applied to revenue-recovery types
 const FINANCE_CREDIT_TYPES = { revenue:true, working_cap:true, soft:true }; // hard_*/strategic → full
 
@@ -3912,95 +3919,27 @@ SCENARIOS.forEach(sc => {
   Object.entries(sc.inputs).forEach(([k,v]) => { state.inputs[sc.id][k] = v.value; });
 });
 
-// ── EXAMPLE PRESETS ───────────────────────────────────────────────────────────
-// Real-world engagements expressed as pure data, mapped onto the existing scenario
-// library. These are loaded ON DEMAND via the ?example=<key> URL parameter — they
-// are never the default state and never hard-coded into the tool's defaults. To add
-// another example, append a new key here; no other code changes are required.
-//
-// "macys" — Macy's, Inc. RFID + Workcloud (Zebra Strategic Value one-pager).
-//   441 stores · $13.044B revenue · 39.7% GM. All 8 quantified value levers map 1:1
-//   to retail scenarios (RET-01..05, 07, 10, 11); discovery inputs are anchored to
-//   Macy's own numbers so Step 3 stays fully live/editable. Revenue-recovery levers
-//   carry the doc's 40% "Finance Credit" via the first-class Finance Credit layer.
-//   The 5 strategic enablers (incl. Workcloud Sync) are carried as $0 strategic
-//   levers — operationally significant but excluded from the financial total, exactly
-//   as the one-pager treats them.
-const PRESETS = {
-  macys: {
-    engagement: {
-      company:  'Zebra Technologies',
-      customer: "Macy's, Inc.",
-      title:    "Macy's RFID + Workcloud — Strategic Value Analysis",
-      sites:    441,
-      partners: 'Zebra / Workcloud',
-      pain:     "On-shelf availability gaps risking ~$258.9M in margin; $187.1M reported shrink; $2.1B markdown spend; ~$10.8M cycle-count labor pool; BOPIS cancellations ~6%. Strategic enablers (excluded from the financial total): Workcloud Sync comms + tasks, unified TC5x associate device, RFID Smart Exits, merchandising/planogram/NPI, real-time sales coaching."
-    },
-    verticals: ['retail'],
-    // All 8 quantified levers map 1:1 to retail scenarios (RET-06 productivity,
-    // RET-08 safety stock, RET-09 AI are out of scope for Macy's).
-    selectedIds: ['RET-01','RET-02','RET-03','RET-04','RET-05','RET-07','RET-10','RET-11'],
-    inputs: {
-      // Cycle-count labor — ~70% of a ~$10.8M count pool ≈ $7.6M
-      'RET-01': { total_sku_locations:646000, hours_per_sku_manual:0.05, hours_per_sku_rfid:0.015, loaded_rate:28, annual_count_cycles:12 },
-      // On-shelf availability — 30% of $258.9M margin at risk ≈ $77.7M
-      'RET-02': { annual_store_revenue:13044000000, out_of_stock_baseline_pct:0.05, osa_improvement_pct:0.30, gross_margin_pct:0.397 },
-      // Shrink — 10% of $187.1M reported shrink ≈ $18.7M
-      'RET-03': { annual_store_revenue:13044000000, shrink_pct_baseline:0.01434, shrink_reduction_pct:0.10 },
-      // Markdown — 1.5% of $2.1B markdown spend ≈ $31.5M
-      'RET-04': { annual_markdown_spend:2100000000, markdown_reduction_pct:0.15, gm_recovery_pct:0.10 },
-      // Receiving labor — 15% of a ~$28.2M receiving pool ≈ $4.2M
-      'RET-05': { annual_receiving_labor_hours:1007000, labor_reduction_pct:0.15, loaded_rate:28 },
-      // BOPIS / omnichannel accuracy — 50% of $15.5M at risk ≈ $7.8M
-      'RET-07': { annual_omni_orders:6522000, cancellation_rate_baseline:0.06, cancellation_reduction_pct:0.50, avg_order_value:100, gm_pct:0.397 },
-      // Vendor chargeback — 25% of $15.0M exposure ≈ $3.8M
-      'RET-10': { annual_chargeback_exposure:15000000, chargeback_reduction_pct:0.25 },
-      // AP investigation labor — 30% of $6.5M AP pool ≈ $2.0M
-      'RET-11': { annual_ap_investigation_cost:6500000, reduction_pct:0.30 }
-    },
-    // Finance Credit: the doc takes revenue-recovery levers to finance at 40% of
-    // modeled benefit. Handled by the first-class Finance Credit layer (applies to
-    // revenue / working_cap / soft benefit types) — RET-02, RET-04, RET-07.
-    financeCredit: { enabled:true, rate:0.40 },
-    wacc: 0.10,
-    // 5 strategic enablers: operationally significant but excluded from the financial
-    // total. Carried as $0 "strategic" levers so they appear in the value case without
-    // inflating the numbers.
-    customScenarios: [
-      { id:'SE-1', name:'Workcloud Sync — comms + tasks',          custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
-      { id:'SE-2', name:'Unified TC5x associate device',           custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
-      { id:'SE-3', name:'RFID-enabled Smart Exits',                custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
-      { id:'SE-4', name:'Merchandising + planogram + NPI',         custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } },
-      { id:'SE-5', name:'Real-time sales coaching via Sync',       custom:true, active:true, mechanismId:'custom_formula', rampType:'strategic', accessibilityTier:'configured', haircut:0.10, inputs:{ annual_value:0 } }
-    ],
-    // Company-wide cost model — $100K/store all-in. Hardware + install is the doc's
-    // $80K/store; tags + services bring the Yr-0 subtotal to ~$41.2M, and the tool's
-    // automatic 7% contingency lands the all-in Yr-0 at ≈ $44.1M. Recurring ≈ $11.0M/yr
-    // (Workcloud SaaS $2.0M + tags + support).
-    costRows: [
-      { label:'RFID readers, handhelds & install (TC5x / fixed portals)', qty:441, unitCost:80000,   cadence:'one-time', yr0:35280000, yr1:0,       yr2:0       },
-      { label:'Initial RFID tag deployment & fixtures',                   qty:441, unitCost:8000,    cadence:'one-time', yr0:3528000,  yr1:0,       yr2:0       },
-      { label:'Professional services, training & program management',     qty:441, unitCost:5500,    cadence:'one-time', yr0:2425500,  yr1:0,       yr2:0       },
-      { label:'Workcloud SaaS platform license',                         qty:1,   unitCost:2000000, cadence:'annual',   yr0:0,        yr1:2000000, yr2:2000000 },
-      { label:'Annual RFID tag replenishment',                           qty:1,   unitCost:6500000, cadence:'annual',   yr0:0,        yr1:6500000, yr2:6500000 },
-      { label:'Support, managed services & optimization',                qty:1,   unitCost:2500000, cadence:'annual',   yr0:0,        yr1:2500000, yr2:2500000 },
-      { label:'Contingency', qty:'', unitCost:'', cadence:'one-time', yr0:0, yr1:0, yr2:0, contingency:true }
-    ]
-  }
-};
 
-// Apply a preset onto live state + DOM, then re-render. Inverse of exportJSON().
-function loadPreset(key) {
-  const p = PRESETS[key];
-  if(!p) { console.warn('Unknown example preset:', key); return false; }
+// ── SAVED ENGAGEMENTS (Save / Load / Import) ──────────────────────────────────
+// A whole analysis is just data. gatherEngagement() serializes the live state into
+// a portable JSON blob; applyEngagement() rehydrates it. saveEngagementFile()
+// downloads one; importEngagementFile() reads one back via the file picker (works
+// from file:// too). Example engagements live as real .json files under examples/
+// and load through the exact same path — nothing is hard-coded into the app.
+
+// Rehydrate the full live state + DOM from an engagement object, then re-render.
+function applyEngagement(p) {
+  if(!p || typeof p !== 'object') { console.warn('applyEngagement: nothing to load'); return false; }
+  const setVal = (id,v) => { const el = document.getElementById(id); if(el && v!=null) el.value = v; };
 
   // 1) Engagement fields
-  const setVal = (id,v) => { const el = document.getElementById(id); if(el && v!=null) el.value = v; };
   if(p.engagement) {
     setVal('i-company',  p.engagement.company);
     setVal('i-customer', p.engagement.customer);
     setVal('i-title',    p.engagement.title);
     setVal('i-sites',    p.engagement.sites);
+    setVal('i-seller',   p.engagement.seller);
+    setVal('i-email',    p.engagement.email);
     setVal('i-partners', p.engagement.partners);
     setVal('i-pain',     p.engagement.pain);
   }
@@ -4016,23 +3955,23 @@ function loadPreset(key) {
   // 3) Selected levers
   if(Array.isArray(p.selectedIds)) state.selectedIds = new Set(p.selectedIds);
 
-  // 4) Discovery inputs — merge overrides onto the benchmark defaults
+  // 4) Discovery inputs — merge onto the benchmark defaults
   if(p.inputs) Object.entries(p.inputs).forEach(([scId, vals]) => {
     if(!state.inputs[scId]) state.inputs[scId] = {};
     Object.assign(state.inputs[scId], vals);
   });
 
-  // 5) Per-lever NRV overrides (e.g. Finance Credit haircut)
+  // 5) Per-lever NRV overrides (profile / access / haircut)
   if(p.nrvOverrides) Object.entries(p.nrvOverrides).forEach(([scId, o]) => {
     nrvOverrides[scId] = Object.assign(nrvOverrides[scId]||{}, o);
   });
 
-  // 5b) Strategic enablers / custom levers (deep-copied so the preset stays pristine)
+  // 5b) Custom levers / strategic enablers (deep-copied)
   if(Array.isArray(p.customScenarios)) {
     state.customScenarios = p.customScenarios.map(sc => Object.assign({}, sc, { inputs: Object.assign({}, sc.inputs) }));
   }
 
-  // 5c) Finance Credit (first-class) — fraction of revenue-recovery benefit credited
+  // 5c) Finance Credit
   if(p.financeCredit) {
     financeCreditEnabled = !!p.financeCredit.enabled;
     if(p.financeCredit.rate != null) financeCreditRate = p.financeCredit.rate;
@@ -4042,7 +3981,7 @@ function loadPreset(key) {
   // 6) WACC
   if(p.wacc != null) setVal('nrv-wacc', p.wacc);
 
-  // 7) Cost model — explicit rows, flagged user-edited so sliders won't overwrite
+  // 7) Cost model — explicit rows own the model verbatim (sliders won't overwrite)
   if(p.contingencyRate != null) contingencyRate = p.contingencyRate;
   if(Array.isArray(p.costRows)) {
     costRows = p.costRows.map(r => Object.assign({}, r));
@@ -4051,21 +3990,96 @@ function loadPreset(key) {
     rebuildCostState();
   }
 
-  // 8) Re-render whatever may already be on screen
+  // 8) Re-render anything already on screen
   if(p.engagement && p.engagement.sites != null) { setVal('sl-sites', p.engagement.sites); setVal('sv-sites', p.engagement.sites); }
   try { renderLeverGrid(); } catch(e){}
   if(document.getElementById('panel-2')?.classList.contains('active')) { try { renderDisc(); renderCustomScenarios(); } catch(e){} }
   if(document.getElementById('panel-3')?.classList.contains('active')) { try { renderCost(); } catch(e){} }
   if(document.getElementById('panel-4')?.classList.contains('active')) { try { ensureCosts(); renderROI(); } catch(e){} }
-  console.log('Loaded example preset:', key);
+  console.log('Applied engagement:', p._label || p.engagement?.customer || '(unnamed)');
   return true;
 }
 
-// Opt-in: load an example from ?example=<key> on first paint. Never the default.
+// Serialize the current live state into a portable engagement object.
+function gatherEngagement() {
+  const val = id => document.getElementById(id)?.value;
+  const sel = [...state.selectedIds];
+  const inputs = {};
+  sel.forEach(id => { if(state.inputs[id]) inputs[id] = Object.assign({}, state.inputs[id]); });
+  const eng = {
+    company: val('i-company'), customer: val('i-customer'), title: val('i-title'),
+    sites: +val('i-sites') || undefined, seller: val('i-seller'), email: val('i-email'),
+    partners: val('i-partners'), pain: val('i-pain')
+  };
+  return {
+    _type: 'strategic-value-engagement', _version: 1,
+    _label: (eng.customer || 'Engagement') + ' — saved ' + new Date().toISOString().slice(0,10),
+    engagement: eng,
+    verticals: [...activeIndustries],
+    selectedIds: sel,
+    inputs,
+    customScenarios: (state.customScenarios || []).map(s => Object.assign({}, s, { inputs: Object.assign({}, s.inputs) })),
+    financeCredit: { enabled: financeCreditEnabled, rate: financeCreditRate },
+    wacc: +val('nrv-wacc') || 0.10,
+    contingencyRate: contingencyRate,
+    costRows: (costRows || []).map(r => Object.assign({}, r))
+  };
+}
+
+// Download the current analysis as a .json file.
+function saveEngagementFile() {
+  try {
+    ensureCosts();
+    const data = gatherEngagement();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const co = (data.engagement.customer || 'engagement').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '');
+    a.href = url; a.download = co + '-strategic-value.json'; a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) { alert('Save error: ' + e.message); }
+}
+
+// Read a saved analysis from a user-picked file (FileReader → no CORS, works on file://).
+function importEngagementFile(file) {
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const obj = JSON.parse(e.target.result);
+      if(obj && obj._type && obj._type !== 'strategic-value-engagement') {
+        if(!confirm('This file may not be a saved Strategic Value analysis. Load it anyway?')) return;
+      }
+      applyEngagement(obj);
+      go(0);
+      const fi = document.getElementById('import-file'); if(fi) fi.value = '';
+    } catch(err) { alert('Could not read that file: ' + err.message); }
+  };
+  reader.readAsText(file);
+}
+function triggerImport() { document.getElementById('import-file')?.click(); }
+
+// Fetch a bundled example engagement (examples/<key>.json) and apply it.
+// Works on the hosted site; file:// blocks fetch — fall back to the manual loader.
+function loadExample(key) {
+  return fetch('examples/' + key + '.json')
+    .then(r => { if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(obj => applyEngagement(obj))
+    .catch(err => {
+      console.warn('Could not fetch example "' + key + '":', err.message);
+      if(location.protocol === 'file:') {
+        alert('To auto-load the "' + key + '" example you need the hosted version (fetch is blocked on file://).\n\n' +
+              'Or click "Load analysis" and pick examples/' + key + '.json.');
+      }
+      return false;
+    });
+}
+
+// Opt-in: ?example=<key> on first paint loads a bundled example. Never the default.
 function checkExampleParam() {
   try {
     const key = new URLSearchParams(window.location.search).get('example');
-    if(key) loadPreset(key.trim().toLowerCase());
+    if(key) loadExample(key.trim().toLowerCase());
   } catch(e) { console.warn('example param error:', e); }
 }
 
