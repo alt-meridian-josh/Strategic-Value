@@ -5743,8 +5743,11 @@ function renderROI() {
     } else sensHost.innerHTML = '';
   }
 
-  // Detail table — expandable rows with mini analytics panel
-  const _totAnnForPct = totAnnual || 1;
+  // Detail table — expandable rows with mini analytics panel.
+  // "% of pool" = this lever's share of the gross benefit pool (sum of all rows'
+  // gross annual values), so shares sum to 100% and no single lever exceeds it.
+  // (state.benefits.totAnnual is the NRV-adjusted peak — a different scale.)
+  const _totAnnForPct = rows.reduce((a,r)=>a+(r.ann||0),0) || 1;
   document.getElementById('vtbl-body').innerHTML = rows.map(r=>{
     const rInfo = RAMP[r.sc.rampType];
     const pct = Math.round((r.ann / _totAnnForPct) * 100);
